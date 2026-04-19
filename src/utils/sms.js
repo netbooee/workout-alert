@@ -4,8 +4,14 @@ export function formatDuration(seconds) {
   return h > 0 ? `${h}h ${m}m` : `${m} min`
 }
 
-export function formatDistance(meters) {
-  if (!meters) return null
+// workout.distanceUnit comes from the Shortcut (mi, km, or null)
+// If unit is present use as-is; otherwise assume meters and convert
+export function formatDistance(distance, unit) {
+  if (distance == null || distance === 0) return null
+  if (unit === 'mi') return `${Number(distance).toFixed(2)} mi`
+  if (unit === 'km') return `${Number(distance).toFixed(2)} km`
+  // legacy / no unit: assume meters
+  const meters = Number(distance)
   const miles = meters / 1609.344
   return miles >= 0.1 ? `${miles.toFixed(2)} mi` : `${Math.round(meters)} m`
 }

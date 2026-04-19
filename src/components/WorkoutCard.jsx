@@ -7,10 +7,12 @@ function fmt(seconds) {
   return h > 0 ? `${h}h ${m}m` : `${m} min`
 }
 
-function fmtDist(meters) {
-  if (!meters) return null
-  const miles = meters / 1609.344
-  return miles >= 0.1 ? `${miles.toFixed(2)} mi` : `${Math.round(meters)} m`
+function fmtDist(distance, unit) {
+  if (distance == null || distance === 0) return null
+  if (unit === 'mi') return `${Number(distance).toFixed(2)} mi`
+  if (unit === 'km') return `${Number(distance).toFixed(2)} km`
+  const miles = Number(distance) / 1609.344
+  return miles >= 0.1 ? `${miles.toFixed(2)} mi` : `${Math.round(distance)} m`
 }
 
 function fmtTime(iso) {
@@ -20,7 +22,7 @@ function fmtTime(iso) {
 
 export default function WorkoutCard({ workout, onSend }) {
   const navigate = useNavigate()
-  const dist = fmtDist(workout.distance)
+  const dist = fmtDist(workout.distance, workout.distanceUnit)
 
   const stats = [
     fmt(workout.duration),

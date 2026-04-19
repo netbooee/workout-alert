@@ -10,15 +10,22 @@ function fmt(seconds) {
   return h > 0 ? `${h}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}` : `${m}:${String(s).padStart(2, '0')}`
 }
 
-function fmtDistance(meters) {
-  if (!meters) return null
-  const miles = meters / 1609.344
-  return { value: miles.toFixed(2), unit: 'mi', raw: miles }
+function fmtDistance(distance, unit) {
+  if (distance == null || distance === 0) return null
+  if (unit === 'mi') return { value: Number(distance).toFixed(2), unit: 'mi', miles: Number(distance) }
+  if (unit === 'km') return { value: Number(distance).toFixed(2), unit: 'km', miles: Number(distance) * 0.621371 }
+  // legacy meters
+  const miles = Number(distance) / 1609.344
+  return { value: miles.toFixed(2), unit: 'mi', miles }
 }
 
-function fmtPace(meters, seconds) {
-  if (!meters || !seconds) return null
-  const miles = meters / 1609.344
+function fmtPace(distance, distanceUnit, seconds) {
+  if (!distance || !seconds) return null
+  let miles
+  if (distanceUnit === 'mi') miles = Number(distance)
+  else if (distanceUnit === 'km') miles = Number(distance) * 0.621371
+  else miles = Number(distance) / 1609.344
+  if (miles < 0.05) return null
   const minPerMile = seconds / 60 / miles
   const m = Math.floor(minPerMile)
   const s = Math.round((minPerMile - m) * 60)
@@ -159,8 +166,8 @@ export default function WorkoutDetail() {
     )
   }
 
-  const dist = fmtDistance(workout.distance)
-  const pace = fmtPace(workout.distance, workout.duration)
+  const dist = fmtDistance(workout.distance, workout.distanceUnit)
+  const pace = fmtPace(workout.distance, workout.distanceUnit, workout.duration)
   const isCardio = dist !== null
 
   return (

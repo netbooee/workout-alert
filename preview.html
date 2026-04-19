@@ -31,6 +31,8 @@ body{background:#000;color:#fff;-webkit-font-smoothing:antialiased;font-family:-
 .page{animation:fade-up .3s ease both}
 @keyframes slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .sheet{animation:slide-up .32s cubic-bezier(.34,1.2,.64,1) both}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-10px)}40%{transform:translateX(10px)}60%{transform:translateX(-8px)}80%{transform:translateX(8px)}}
+.shake{animation:shake .5s ease}
 .card{background:#2C2C2E;border-radius:13px;overflow:hidden}
 .btn-primary{background:#0A84FF;color:#fff;font-weight:600;border-radius:9999px;cursor:pointer;transition:opacity .15s}
 .btn-primary:active{opacity:.75}
@@ -47,6 +49,42 @@ body{background:#000;color:#fff;-webkit-font-smoothing:antialiased;font-family:-
 </style>
 </head>
 <body class="min-h-screen">
+
+<!-- ═══════════════════════ LOCK SCREEN ═══════════════════════ -->
+<div id="lock-screen" class="fixed inset-0 bg-black flex flex-col items-center justify-center z-[60] select-none">
+  <div class="w-16 h-16 rounded-[20px] bg-gradient-to-br from-blue-500 to-blue-700 flex items-center justify-center text-3xl shadow-xl mb-8">🏃</div>
+  <h1 class="text-2xl font-bold text-white mb-1">Fitness</h1>
+  <p class="text-[#98989E] text-sm mb-10">Enter your passcode</p>
+
+  <!-- Dots -->
+  <div id="dots" class="flex gap-5 mb-10">
+    <div class="dot w-4 h-4 rounded-full border-2 border-[#787880] transition-all duration-150"></div>
+    <div class="dot w-4 h-4 rounded-full border-2 border-[#787880] transition-all duration-150"></div>
+    <div class="dot w-4 h-4 rounded-full border-2 border-[#787880] transition-all duration-150"></div>
+    <div class="dot w-4 h-4 rounded-full border-2 border-[#787880] transition-all duration-150"></div>
+    <div class="dot w-4 h-4 rounded-full border-2 border-[#787880] transition-all duration-150"></div>
+    <div class="dot w-4 h-4 rounded-full border-2 border-[#787880] transition-all duration-150"></div>
+  </div>
+
+  <p id="pin-hint" class="text-red-400 text-sm mb-2 h-5"></p>
+
+  <!-- Keypad -->
+  <div class="grid grid-cols-3 gap-3 w-72 mt-2">
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('1')">1</button>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('2')">2</button>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('3')">3</button>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('4')">4</button>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('5')">5</button>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('6')">6</button>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('7')">7</button>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('8')">8</button>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('9')">9</button>
+    <div></div>
+    <button class="h-16 rounded-full bg-[#3A3A3C] text-white text-xl font-medium active:opacity-50" onclick="pinKey('0')">0</button>
+    <button class="h-16 rounded-full text-[#98989E] text-xl active:opacity-50" onclick="pinDelete()">⌫</button>
+  </div>
+  <p class="text-[#636366] text-xs mt-10 px-8 text-center">Demo PIN: <strong class="text-[#98989E]">1 2 3 4 5 6</strong></p>
+</div>
 
 <!-- ═══════════════════════ SUMMARY PAGE ═══════════════════════ -->
 <div id="summary-page" class="page pb-32">
@@ -353,7 +391,44 @@ body{background:#000;color:#fff;-webkit-font-smoothing:antialiased;font-family:-
 </div>
 
 <script>
-// Date header
+// ── PIN logic ──────────────────────────────────────────────────────────────────
+const CORRECT_PIN = '123456'
+let pinDigits = []
+
+function renderDots() {
+  document.querySelectorAll('#dots .dot').forEach((d,i) => {
+    if(i < pinDigits.length) {
+      d.style.background='#fff'; d.style.borderColor='#fff'; d.style.transform='scale(1.1)'
+    } else {
+      d.style.background=''; d.style.borderColor='#787880'; d.style.transform=''
+    }
+  })
+}
+
+function pinKey(d) {
+  if(pinDigits.length >= 6) return
+  pinDigits.push(d); renderDots()
+  if(pinDigits.length === 6) {
+    if(pinDigits.join('') === CORRECT_PIN) {
+      setTimeout(()=>{ document.getElementById('lock-screen').style.display='none' }, 200)
+    } else {
+      document.getElementById('dots').classList.add('shake')
+      document.getElementById('pin-hint').textContent = 'Incorrect passcode'
+      setTimeout(()=>{
+        document.getElementById('dots').classList.remove('shake')
+        document.getElementById('pin-hint').textContent = ''
+        pinDigits = []; renderDots()
+      }, 600)
+    }
+  }
+}
+
+function pinDelete() {
+  pinDigits = pinDigits.slice(0,-1); renderDots()
+  document.getElementById('pin-hint').textContent = ''
+}
+
+// ── Date header ────────────────────────────────────────────────────────────────
 document.getElementById('today-date').textContent = new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})
 
 let currentModal = 'summary'

@@ -77,13 +77,30 @@ function fromManual(payload) {
     maxHeartRate: Number(w.maxHeartRate) || null,
   }))
 
-  const toNum   = (v) => (v == null ? null : typeof v === 'object' ? Number(v.value ?? v.qty ?? v.count) : Number(v))
+  const toNum = (v) => (v == null ? null : typeof v === 'object' ? Number(v.value ?? v.qty ?? v.count) : Number(v))
   const weightV = toNum(payload.weight)
   const stepsV  = toNum(payload.steps ?? payload.stepCount)
   const hrV     = toNum(payload.restingHeartRate ?? payload.restingHR)
 
+  // Flat ring fields from Shortcuts (no nested object needed in JSON body)
+  const moveV     = toNum(payload.moveCalories     ?? payload.activeEnergy)
+  const exerciseV = toNum(payload.exerciseMinutes  ?? payload.exerciseTime)
+  const standV    = toNum(payload.standHours       ?? payload.standCount)
+  const moveGoal  = toNum(payload.moveGoal)  ?? 600
+  const exGoal    = toNum(payload.exerciseGoal)    ?? 30
+  const standGoal = toNum(payload.standGoal)       ?? 12
+
+  const rings = (moveV != null || exerciseV != null || standV != null)
+    ? {
+        move:     { current: moveV     ?? 0, goal: moveGoal },
+        exercise: { current: exerciseV ?? 0, goal: exGoal   },
+        stand:    { current: standV    ?? 0, goal: standGoal },
+      }
+    : payload.rings || null
+
   return {
     workouts,
+    rings,
     weight:           weightV != null ? { value: weightV, unit: typeof payload.weight === 'object' ? (payload.weight.unit || 'lbs') : 'lbs' } : null,
     steps:            stepsV  != null ? { count: stepsV } : null,
     restingHeartRate: hrV     != null ? { value: hrV }    : null,
@@ -120,7 +137,7 @@ export const handler = async (event) => {
       steps:            normalised.steps,
       restingHeartRate: normalised.restingHeartRate,
     },
-    rings: payload.rings || null,
+    rings: normalised.rings || payload.rings || null,
     lastSynced: new Date().toISOString(),
   }
 

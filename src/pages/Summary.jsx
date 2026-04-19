@@ -208,10 +208,10 @@ export default function Summary() {
           data={data}
           singleWorkout={modal === 'summary' ? null : modal}
           onClose={() => { setModal(null); setSendError(null); setSent(false) }}
-          onSend={handleSend}
-          sending={sending}
-          sent={sent}
-          error={sendError}
+          onTwilioSend={handleSend}
+          twilioSending={sending}
+          twilioSent={sent}
+          twilioError={sendError}
         />
       )}
     </div>

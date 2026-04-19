@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<title>Fitness – Preview</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      colors: {
+        move:'#FA3A4B', exercise:'#A3E635', stand:'#00C2FF',
+        'apple-blue':'#0A84FF', 'apple-bg':'#000', 'apple-surface':'#1C1C1E',
+        'apple-card':'#2C2C2E', 'apple-elevated':'#3A3A3C',
+        'apple-separator':'#38383A', 'apple-secondary':'#98989E',
+        'apple-tertiary':'#636366', 'apple-fill':'#787880',
+      },
+      borderRadius:{ apple:'13px','apple-lg':'20px','apple-xl':'28px' },
+      fontFamily:{ sans:['-apple-system','BlinkMacSystemFont','Helvetica Neue','Arial','sans-serif'] },
+    }
+  }
+}
+</script>
+<style>
+*{-webkit-tap-highlight-color:transparent}
+body{background:#000;color:#fff;-webkit-font-smoothing:antialiased;font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',Arial,sans-serif}
+@keyframes ring-fill{from{stroke-dashoffset:var(--circ)}}
+.ring-arc{animation:ring-fill 1.1s cubic-bezier(.34,1.56,.64,1) both}
+@keyframes fade-up{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.page{animation:fade-up .3s ease both}
+@keyframes slide-up{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.sheet{animation:slide-up .32s cubic-bezier(.34,1.2,.64,1) both}
+.card{background:#2C2C2E;border-radius:13px;overflow:hidden}
+.btn-primary{background:#0A84FF;color:#fff;font-weight:600;border-radius:9999px;cursor:pointer;transition:opacity .15s}
+.btn-primary:active{opacity:.75}
+.label-sec{color:#98989E;font-size:.72rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase}
+/* nav tabs */
+.tab{display:flex;flex-direction:column;align-items:center;gap:2px;flex:1;cursor:pointer;padding:8px 0;color:#98989E;font-size:.65rem;font-weight:500;transition:color .15s}
+.tab.active{color:#0A84FF}
+.tab svg{width:22px;height:22px}
+/* send modal */
+#modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.65);backdrop-filter:blur(5px);z-index:50;display:none;align-items:flex-end;justify-content:center}
+#modal-bg.open{display:flex}
+#detail-bg{position:fixed;inset:0;background:#000;z-index:40;display:none;overflow-y:auto}
+#detail-bg.open{display:block}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- ═══════════════════════ SUMMARY PAGE ═══════════════════════ -->
+<div id="summary-page" class="page pb-32">
+
+  <!-- Header -->
+  <div class="px-5 pt-14 pb-4 flex items-start justify-between">
+    <div>
+      <h1 class="text-3xl font-bold tracking-tight">Fitness</h1>
+      <p class="text-apple-secondary text-sm mt-0.5" id="today-date"></p>
+    </div>
+    <span class="text-xs bg-apple-elevated text-apple-secondary px-2 py-0.5 rounded-full self-start mt-1">Demo data</span>
+  </div>
+
+  <div class="px-5 space-y-3">
+
+    <!-- Activity Rings card -->
+    <div class="card p-5">
+      <p class="label-sec mb-4">Activity</p>
+      <div class="flex items-center gap-6">
+        <svg width="130" height="130" viewBox="0 0 130 130">
+          <!-- Track circles -->
+          <circle cx="65" cy="65" r="54" fill="none" stroke="#3D0B0E" stroke-width="10"/>
+          <circle cx="65" cy="65" r="40" fill="none" stroke="#1A2E0A" stroke-width="10"/>
+          <circle cx="65" cy="65" r="26" fill="none" stroke="#00233B" stroke-width="10"/>
+          <!-- Move ring (420/600 = 70%) -->
+          <circle id="r-move" cx="65" cy="65" r="54" fill="none" stroke="#FA3A4B" stroke-width="10"
+            stroke-dasharray="339.3" stroke-dashoffset="101.8"
+            stroke-linecap="round" transform="rotate(-90 65 65)"
+            style="filter:drop-shadow(0 0 4px #FA3A4B88)"
+            class="ring-arc" style="--circ:339.3"/>
+          <!-- Exercise ring (87/60 = 100%+ capped) -->
+          <circle id="r-exercise" cx="65" cy="65" r="40" fill="none" stroke="#A3E635" stroke-width="10"
+            stroke-dasharray="251.3" stroke-dashoffset="0"
+            stroke-linecap="round" transform="rotate(-90 65 65)"
+            style="filter:drop-shadow(0 0 4px #A3E63588);animation-delay:.1s"
+            class="ring-arc" style="--circ:251.3"/>
+          <!-- Stand ring (10/12 = 83%) -->
+          <circle id="r-stand" cx="65" cy="65" r="26" fill="none" stroke="#00C2FF" stroke-width="10"
+            stroke-dasharray="163.4" stroke-dashoffset="27.8"
+            stroke-linecap="round" transform="rotate(-90 65 65)"
+            style="filter:drop-shadow(0 0 4px #00C2FF88);animation-delay:.2s"
+            class="ring-arc" style="--circ:163.4"/>
+        </svg>
+        <div class="flex flex-col gap-3">
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-move flex-shrink-0"></div>
+            <div><span class="text-apple-secondary text-xs font-semibold tracking-wider">MOVE </span><span class="text-white font-bold">487</span><span class="text-apple-secondary text-xs"> / 600 CAL</span></div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-exercise flex-shrink-0"></div>
+            <div><span class="text-apple-secondary text-xs font-semibold tracking-wider">EXERCISE </span><span class="text-white font-bold">87</span><span class="text-apple-secondary text-xs"> / 60 MIN</span></div>
+          </div>
+          <div class="flex items-center gap-2">
+            <div class="w-2.5 h-2.5 rounded-full bg-stand flex-shrink-0"></div>
+            <div><span class="text-apple-secondary text-xs font-semibold tracking-wider">STAND </span><span class="text-white font-bold">10</span><span class="text-apple-secondary text-xs"> / 12 HRS</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Workouts -->
+    <div>
+      <div class="flex items-center justify-between mb-2 px-1">
+        <p class="label-sec">Workouts</p>
+        <span class="text-apple-secondary text-sm">2 today</span>
+      </div>
+
+      <!-- Workout card 1: Running -->
+      <div class="card mb-2 active:opacity-90 transition-opacity cursor-pointer" onclick="openDetail('run')">
+        <div class="p-4 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-apple bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-2xl shadow-lg flex-shrink-0">🏃</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-0.5">
+              <h3 class="font-semibold text-white text-base">Running</h3>
+              <span class="text-apple-secondary text-sm ml-2">7:30 AM</span>
+            </div>
+            <p class="text-apple-secondary text-sm">32 min · 3.63 mi · 487 cal</p>
+            <p class="text-apple-tertiary text-xs mt-0.5">❤️ 152 avg / 174 max</p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button class="bg-apple-blue text-white text-sm font-semibold px-3 py-1.5 rounded-full" onclick="event.stopPropagation();openModal('run')">Send</button>
+            <svg class="text-apple-tertiary w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Workout card 2: Strength -->
+      <div class="card active:opacity-90 transition-opacity cursor-pointer" onclick="openDetail('strength')">
+        <div class="p-4 flex items-center gap-4">
+          <div class="w-12 h-12 rounded-apple bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center text-2xl shadow-lg flex-shrink-0">🏋️</div>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-0.5">
+              <h3 class="font-semibold text-white text-base">Strength Training</h3>
+              <span class="text-apple-secondary text-sm ml-2">5:00 PM</span>
+            </div>
+            <p class="text-apple-secondary text-sm">58 min · 312 cal</p>
+            <p class="text-apple-tertiary text-xs mt-0.5">❤️ 131 avg / 158 max</p>
+          </div>
+          <div class="flex items-center gap-2 flex-shrink-0">
+            <button class="bg-apple-blue text-white text-sm font-semibold px-3 py-1.5 rounded-full" onclick="event.stopPropagation();openModal('strength')">Send</button>
+            <svg class="text-apple-tertiary w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Health Stats -->
+    <div>
+      <p class="label-sec mb-2 px-1">Health Stats</p>
+      <div class="grid grid-cols-2 gap-2">
+        <div class="card p-4">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">⚖️</span><span class="label-sec">Weight</span></div>
+          <div class="flex items-baseline gap-1"><span class="text-white text-3xl font-bold tracking-tight">183.4</span><span class="text-apple-secondary text-sm font-medium">lbs</span></div>
+        </div>
+        <div class="card p-4">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">👟</span><span class="label-sec">Steps</span></div>
+          <div class="flex items-baseline gap-1"><span class="text-white text-3xl font-bold tracking-tight">9,217</span><span class="text-apple-secondary text-sm font-medium">steps</span></div>
+        </div>
+        <div class="card p-4">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">❤️</span><span class="label-sec">Resting HR</span></div>
+          <div class="flex items-baseline gap-1"><span class="text-white text-3xl font-bold tracking-tight">56</span><span class="text-apple-secondary text-sm font-medium">bpm</span></div>
+        </div>
+        <div class="card p-4 flex flex-col justify-between">
+          <div class="flex items-center gap-2 mb-1"><span class="text-xl">📊</span><span class="label-sec">Workouts</span></div>
+          <p class="text-white text-3xl font-bold tracking-tight">2</p>
+          <p class="text-apple-secondary text-xs">Today</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- end px-5 -->
+
+  <!-- Sticky Send button -->
+  <div class="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4" style="background:linear-gradient(to top,#000 60%,transparent)">
+    <button class="btn-primary w-full text-center text-base py-4 shadow-xl" onclick="openModal('summary')">
+      📲 Send Update to Wife
+    </button>
+  </div>
+
+</div><!-- end summary-page -->
+
+
+<!-- ═══════════════════════ DETAIL PAGE ═══════════════════════ -->
+<div id="detail-bg">
+  <div id="detail-run" class="page pb-36 hidden">
+    <!-- Nav -->
+    <div class="px-4 pt-14 pb-2 flex items-center">
+      <button class="flex items-center gap-1 text-apple-blue font-medium" onclick="closeDetail()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+        Summary
+      </button>
+    </div>
+    <!-- Hero -->
+    <div class="px-5 pt-2 pb-6 flex items-center gap-4">
+      <div class="w-16 h-16 rounded-apple bg-gradient-to-br from-orange-500 to-red-500 flex items-center justify-center text-3xl shadow-lg">🏃</div>
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">Running</h1>
+        <p class="text-apple-secondary text-sm mt-0.5">Today at 7:30 AM</p>
+      </div>
+    </div>
+    <div class="px-5 space-y-3">
+      <!-- Stats grid -->
+      <div class="grid grid-cols-2 gap-2">
+        <div class="card p-4"><p class="label-sec mb-1">Duration</p><span class="text-white text-2xl font-bold">32:04</span></div>
+        <div class="card p-4"><p class="label-sec mb-1">Calories</p><div class="flex items-baseline gap-1"><span class="text-white text-2xl font-bold">487</span><span class="text-apple-secondary text-sm">kcal</span></div></div>
+        <div class="card p-4"><p class="label-sec mb-1">Distance</p><div class="flex items-baseline gap-1"><span class="text-white text-2xl font-bold">3.63</span><span class="text-apple-secondary text-sm">mi</span></div></div>
+        <div class="card p-4"><p class="label-sec mb-1">Pace</p><span class="text-white text-2xl font-bold">8:50/mi</span></div>
+      </div>
+      <!-- Heart rate -->
+      <div class="card p-4">
+        <p class="label-sec mb-3">Heart Rate</p>
+        <div class="flex items-end gap-4 mb-3">
+          <div><p class="text-apple-secondary text-xs mb-0.5">Average</p><div class="flex items-baseline gap-1"><span class="text-white text-3xl font-bold">152</span><span class="text-apple-secondary text-sm">bpm</span></div></div>
+          <div><p class="text-apple-secondary text-xs mb-0.5">Max</p><div class="flex items-baseline gap-1"><span class="text-move text-2xl font-bold">174</span><span class="text-apple-secondary text-sm">bpm</span></div></div>
+          <div class="ml-auto"><span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="color:#FA3A4B;background:#FA3A4B22">Anaerobic</span></div>
+        </div>
+        <div class="h-2 bg-apple-elevated rounded-full overflow-hidden">
+          <div class="h-full rounded-full" style="width:69%;background:#FA3A4B"></div>
+        </div>
+      </div>
+      <!-- Details -->
+      <div class="card p-4 space-y-3">
+        <p class="label-sec">Details</p>
+        <div class="flex justify-between"><span class="text-apple-secondary text-sm">Type</span><span class="text-white text-sm font-medium">Running</span></div>
+        <div class="flex justify-between"><span class="text-apple-secondary text-sm">Started</span><span class="text-white text-sm font-medium">7:30 AM</span></div>
+        <div class="flex justify-between"><span class="text-apple-secondary text-sm">Ended</span><span class="text-white text-sm font-medium">8:02 AM</span></div>
+        <div class="flex justify-between"><span class="text-apple-secondary text-sm">Distance</span><span class="text-white text-sm font-medium">3.63 mi</span></div>
+        <div class="flex justify-between"><span class="text-apple-secondary text-sm">Pace</span><span class="text-white text-sm font-medium">8:50 / mi</span></div>
+      </div>
+    </div>
+    <div class="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4" style="background:linear-gradient(to top,#000 60%,transparent)">
+      <button class="btn-primary w-full text-base py-4 shadow-xl" onclick="openModal('run')">📲 Send This Workout</button>
+    </div>
+  </div>
+
+  <div id="detail-strength" class="page pb-36 hidden">
+    <div class="px-4 pt-14 pb-2 flex items-center">
+      <button class="flex items-center gap-1 text-apple-blue font-medium" onclick="closeDetail()">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+        Summary
+      </button>
+    </div>
+    <div class="px-5 pt-2 pb-6 flex items-center gap-4">
+      <div class="w-16 h-16 rounded-apple bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center text-3xl shadow-lg">🏋️</div>
+      <div>
+        <h1 class="text-3xl font-bold tracking-tight">Strength Training</h1>
+        <p class="text-apple-secondary text-sm mt-0.5">Today at 5:00 PM</p>
+      </div>
+    </div>
+    <div class="px-5 space-y-3">
+      <div class="grid grid-cols-2 gap-2">
+        <div class="card p-4"><p class="label-sec mb-1">Duration</p><span class="text-white text-2xl font-bold">58:00</span></div>
+        <div class="card p-4"><p class="label-sec mb-1">Calories</p><div class="flex items-baseline gap-1"><span class="text-white text-2xl font-bold">312</span><span class="text-apple-secondary text-sm">kcal</span></div></div>
+        <div class="card p-4"><p class="label-sec mb-1">Active Time</p><span class="text-white text-2xl font-bold">58:00</span></div>
+      </div>
+      <div class="card p-4">
+        <p class="label-sec mb-3">Heart Rate</p>
+        <div class="flex items-end gap-4 mb-3">
+          <div><p class="text-apple-secondary text-xs mb-0.5">Average</p><div class="flex items-baseline gap-1"><span class="text-white text-3xl font-bold">131</span><span class="text-apple-secondary text-sm">bpm</span></div></div>
+          <div><p class="text-apple-secondary text-xs mb-0.5">Max</p><div class="flex items-baseline gap-1"><span class="text-move text-2xl font-bold">158</span><span class="text-apple-secondary text-sm">bpm</span></div></div>
+          <div class="ml-auto"><span class="text-xs font-semibold px-2 py-0.5 rounded-full" style="color:#A3E635;background:#A3E63522">Cardio</span></div>
+        </div>
+        <div class="h-2 bg-apple-elevated rounded-full overflow-hidden">
+          <div class="h-full rounded-full" style="width:60%;background:#A3E635"></div>
+        </div>
+      </div>
+      <div class="card p-4 space-y-3">
+        <p class="label-sec">Details</p>
+        <div class="flex justify-between"><span class="text-apple-secondary text-sm">Type</span><span class="text-white text-sm font-medium">Strength Training</span></div>
+        <div class="flex justify-between"><span class="text-apple-secondary text-sm">Started</span><span class="text-white text-sm font-medium">5:00 PM</span></div>
+        <div class="flex justify-between"><span class="text-apple-secondary text-sm">Ended</span><span class="text-white text-sm font-medium">5:58 PM</span></div>
+      </div>
+    </div>
+    <div class="fixed bottom-0 left-0 right-0 px-5 pb-8 pt-4" style="background:linear-gradient(to top,#000 60%,transparent)">
+      <button class="btn-primary w-full text-base py-4 shadow-xl" onclick="openModal('strength')">📲 Send This Workout</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════════════ SEND MODAL ═══════════════════════ -->
+<div id="modal-bg" onclick="if(event.target===this)closeModal()">
+  <div class="sheet w-full max-w-lg bg-apple-surface rounded-t-apple-xl" style="padding-bottom:env(safe-area-inset-bottom,16px)">
+    <div class="flex justify-center pt-3 pb-1"><div class="w-10 h-1 bg-apple-fill rounded-full"></div></div>
+
+    <div class="px-5 pt-3 pb-2">
+      <h2 class="text-xl font-bold" id="modal-title">Send Update</h2>
+      <p class="text-apple-secondary text-sm mt-0.5" id="modal-sub">Choose what to include in the text message.</p>
+    </div>
+
+    <!-- Checkboxes (summary only) -->
+    <div id="modal-checks" class="px-5 mt-2">
+      <div class="card px-4">
+        <!-- Workouts -->
+        <label class="flex items-center justify-between py-3.5 border-b border-apple-separator cursor-pointer" onclick="toggleCheck('chk-workouts')">
+          <div><p class="text-white font-medium">Today's Workouts</p><p class="text-apple-secondary text-sm">2 workouts recorded</p></div>
+          <div id="chk-workouts" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors bg-apple-blue border-apple-blue">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </div>
+        </label>
+        <!-- Weight -->
+        <label class="flex items-center justify-between py-3.5 border-b border-apple-separator cursor-pointer" onclick="toggleCheck('chk-weight')">
+          <div><p class="text-white font-medium">Weight</p><p class="text-apple-secondary text-sm">183.4 lbs</p></div>
+          <div id="chk-weight" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors bg-apple-blue border-apple-blue">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </div>
+        </label>
+        <!-- Steps -->
+        <label class="flex items-center justify-between py-3.5 border-b border-apple-separator cursor-pointer" onclick="toggleCheck('chk-steps')">
+          <div><p class="text-white font-medium">Step Count</p><p class="text-apple-secondary text-sm">9,217 steps</p></div>
+          <div id="chk-steps" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors bg-apple-blue border-apple-blue">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </div>
+        </label>
+        <!-- HR -->
+        <label class="flex items-center justify-between py-3.5 cursor-pointer" onclick="toggleCheck('chk-hr')">
+          <div><p class="text-white font-medium">Resting Heart Rate</p><p class="text-apple-secondary text-sm">56 bpm</p></div>
+          <div id="chk-hr" class="w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors bg-apple-blue border-apple-blue">
+            <svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+          </div>
+        </label>
+      </div>
+    </div>
+
+    <!-- Preview toggle -->
+    <div class="px-5 mt-3">
+      <button class="text-apple-blue text-sm font-medium" onclick="togglePreview()">Preview message ↓</button>
+      <div id="msg-preview" class="hidden mt-2 bg-apple-card rounded-apple p-3">
+        <pre id="preview-text" class="text-apple-secondary text-xs whitespace-pre-wrap leading-relaxed" style="font-family:inherit"></pre>
+      </div>
+    </div>
+
+    <div class="px-5 mt-4 pb-6 flex flex-col gap-3">
+      <button class="btn-primary w-full text-base py-4 shadow-xl" onclick="simulateSend()">💬 Open in Messages</button>
+      <button class="w-full text-center text-apple-secondary text-sm py-2 rounded-full border border-apple-separator">📡 Send via Twilio (background)</button>
+      <button class="w-full text-center text-apple-secondary py-2 font-medium" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Sent toast -->
+<div id="toast" class="fixed top-6 left-1/2 -translate-x-1/2 bg-apple-card px-5 py-3 rounded-full text-white font-semibold text-sm shadow-xl z-[60] hidden" style="transition:opacity .3s">
+  ✓ Message sent!
+</div>
+
+<script>
+// Date header
+document.getElementById('today-date').textContent = new Date().toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'})
+
+let currentModal = 'summary'
+let previewOpen = false
+const checks = { workouts: true, weight: true, steps: true, hr: true }
+
+const MESSAGES = {
+  summary: () => {
+    const parts = ['💪 Workout Update\n']
+    if(checks.workouts) parts.push('Workouts (2):\n🏃 Running — 32 min · 3.63 mi · 487 cal\n🏋️ Strength Training — 58 min · 312 cal')
+    const extras = []
+    if(checks.weight) extras.push('⚖️ 183.4 lbs')
+    if(checks.steps) extras.push('👟 9,217 steps')
+    if(checks.hr) extras.push('❤️ 56 bpm resting')
+    if(extras.length) parts.push('\n'+extras.join('\n'))
+    parts.push('\nhttps://your-app.netlify.app')
+    return parts.join('\n')
+  },
+  run: () => `🏃 Running\nDuration: 32 min\nDistance: 3.63 mi\nCalories: 487 kcal\nAvg HR: 152 bpm\n\nView: https://your-app.netlify.app/workout/demo-1`,
+  strength: () => `🏋️ Strength Training\nDuration: 58 min\nCalories: 312 kcal\nAvg HR: 131 bpm\n\nView: https://your-app.netlify.app/workout/demo-2`,
+}
+
+function openModal(which) {
+  currentModal = which
+  const isSingle = which !== 'summary'
+  document.getElementById('modal-title').textContent = isSingle ? (which==='run'?'Send Running':'Send Strength Training') : 'Send Update'
+  document.getElementById('modal-sub').textContent = isSingle ? 'Opens Messages with this workout pre-filled.' : 'Choose what to include, then open Messages.'
+  document.getElementById('modal-checks').style.display = isSingle ? 'none' : 'block'
+  document.getElementById('msg-preview').classList.add('hidden')
+  document.querySelector('#modal-bg .sheet button:first-of-type').textContent = 'Preview message ↓'
+  previewOpen = false
+  updatePreview()
+  document.getElementById('modal-bg').classList.add('open')
+}
+
+function closeModal() {
+  document.getElementById('modal-bg').classList.remove('open')
+}
+
+function openDetail(which) {
+  document.getElementById('detail-bg').classList.add('open')
+  document.getElementById('detail-run').classList.add('hidden')
+  document.getElementById('detail-strength').classList.add('hidden')
+  document.getElementById('detail-' + which).classList.remove('hidden')
+  window.scrollTo(0,0)
+}
+
+function closeDetail() {
+  document.getElementById('detail-bg').classList.remove('open')
+}
+
+function toggleCheck(id) {
+  const el = document.getElementById(id)
+  const key = id.replace('chk-','')
+  checks[key] = !checks[key]
+  if(checks[key]) {
+    el.className = 'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors bg-apple-blue border-apple-blue'
+    el.innerHTML = '<svg class="w-3.5 h-3.5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>'
+  } else {
+    el.className = 'w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors border-apple-fill bg-transparent'
+    el.innerHTML = ''
+  }
+  updatePreview()
+}
+
+function updatePreview() {
+  document.getElementById('preview-text').textContent = MESSAGES[currentModal]()
+}
+
+function togglePreview() {
+  previewOpen = !previewOpen
+  updatePreview()
+  document.getElementById('msg-preview').classList.toggle('hidden', !previewOpen)
+  const btn = document.querySelector('#modal-bg .sheet button[onclick="togglePreview()"]')
+  if(btn) btn.textContent = previewOpen ? 'Hide preview ↑' : 'Preview message ↓'
+}
+
+function simulateSend() {
+  closeModal()
+  const t = document.getElementById('toast')
+  t.classList.remove('hidden')
+  t.style.opacity = '1'
+  setTimeout(()=>{ t.style.opacity='0'; setTimeout(()=>t.classList.add('hidden'),300) }, 2200)
+}
+</script>
+</body>
+</html>

@@ -1,4 +1,8 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
+import { buildSmsMessage, openNativeSms } from '../utils/sms'
+
+const RECIPIENT = import.meta.env.VITE_RECIPIENT_PHONE || ''
+const APP_URL = import.meta.env.VITE_APP_URL || window.location.origin
 
 function CheckRow({ checked, onChange, label, detail, disabled }) {
   return (
@@ -23,17 +27,31 @@ function CheckRow({ checked, onChange, label, detail, disabled }) {
   )
 }
 
-export default function SendModal({ data, singleWorkout, onClose, onSend, sending, sent, error }) {
+export default function SendModal({ data, singleWorkout, onClose, onTwilioSend, twilioSending, twilioSent, twilioError }) {
   const [include, setInclude] = useState({
     workouts: true,
     weight: !!data.healthStats?.weight,
     steps: !!data.healthStats?.steps,
     restingHR: !!data.healthStats?.restingHeartRate,
   })
+  const [showPreview, setShowPreview] = useState(false)
 
   const toggle = (key) => setInclude((prev) => ({ ...prev, [key]: !prev[key] }))
-
   const { healthStats } = data
+
+  const message = useMemo(() => buildSmsMessage({
+    workouts: data.workouts || [],
+    healthStats: data.healthStats || {},
+    include,
+    workoutId: singleWorkout?.id || null,
+    appUrl: APP_URL,
+  }), [include, data, singleWorkout])
+
+  function handleNativeSms() {
+    openNativeSms(RECIPIENT, message)
+  }
+
+  const nothingSelected = !singleWorkout && !Object.values(include).some(Boolean)
 
   return (
     <div
@@ -52,17 +70,20 @@ export default function SendModal({ data, singleWorkout, onClose, onSend, sendin
             {singleWorkout ? `Send ${singleWorkout.type}` : 'Send Update'}
           </h2>
           <p className="text-apple-secondary text-sm mt-0.5">
-            {singleWorkout ? 'Send a link to this workout via text.' : 'Choose what to include in the text message.'}
+            {singleWorkout
+              ? 'Opens Messages with this workout pre-filled.'
+              : 'Choose what to include, then open Messages.'}
           </p>
         </div>
 
+        {/* Checkboxes — only for summary sends */}
         {!singleWorkout && (
           <div className="px-5 mt-2">
             <div className="card px-4">
               <CheckRow
                 checked={include.workouts}
                 onChange={() => toggle('workouts')}
-                label={`Today's Workouts`}
+                label="Today's Workouts"
                 detail={`${data.workouts?.length || 0} workout${data.workouts?.length !== 1 ? 's' : ''} recorded`}
                 disabled={!data.workouts?.length}
               />
@@ -91,25 +112,48 @@ export default function SendModal({ data, singleWorkout, onClose, onSend, sendin
           </div>
         )}
 
-        <div className="px-5 mt-5 pb-6 flex flex-col gap-3">
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/40 rounded-apple px-4 py-3">
-              <p className="text-red-400 text-sm">{error}</p>
+        {/* Message preview toggle */}
+        <div className="px-5 mt-3">
+          <button
+            className="text-apple-blue text-sm font-medium"
+            onClick={() => setShowPreview((p) => !p)}
+          >
+            {showPreview ? 'Hide preview ↑' : 'Preview message ↓'}
+          </button>
+          {showPreview && (
+            <div className="mt-2 bg-apple-card rounded-apple p-3">
+              <pre className="text-apple-secondary text-xs whitespace-pre-wrap font-sans leading-relaxed">{message}</pre>
             </div>
           )}
+        </div>
 
-          {sent ? (
+        <div className="px-5 mt-4 pb-6 flex flex-col gap-3">
+          {/* Primary — native Messages */}
+          <button
+            className="btn-primary w-full text-center text-base py-4 shadow-xl disabled:opacity-50"
+            disabled={nothingSelected}
+            onClick={handleNativeSms}
+          >
+            💬 Open in Messages
+          </button>
+
+          {/* Secondary — Twilio (server-side, optional) */}
+          {twilioSent ? (
             <div className="bg-exercise/20 border border-exercise/40 rounded-apple px-4 py-3 text-center">
-              <p className="text-exercise font-semibold">✓ Message sent!</p>
+              <p className="text-exercise font-semibold">✓ Sent via Twilio!</p>
             </div>
           ) : (
             <button
-              className="btn-primary w-full text-center disabled:opacity-50"
-              disabled={sending || (!singleWorkout && !Object.values(include).some(Boolean))}
-              onClick={() => onSend({ include, singleWorkout })}
+              className="w-full text-center text-apple-secondary text-sm py-2 rounded-full border border-apple-separator active:opacity-60 transition-opacity disabled:opacity-40"
+              disabled={twilioSending || nothingSelected}
+              onClick={() => onTwilioSend({ include, singleWorkout })}
             >
-              {sending ? 'Sending…' : '📲 Send Text Message'}
+              {twilioSending ? 'Sending…' : '📡 Send via Twilio (background)'}
             </button>
+          )}
+
+          {twilioError && (
+            <p className="text-red-400 text-sm text-center">{twilioError}</p>
           )}
 
           <button className="btn-ghost w-full text-center text-apple-secondary" onClick={onClose}>

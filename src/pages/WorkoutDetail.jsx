@@ -236,10 +236,10 @@ export default function WorkoutDetail() {
           data={allData || { workouts: [workout], healthStats: {} }}
           singleWorkout={workout}
           onClose={() => { setModal(false); setSendError(null); setSent(false) }}
-          onSend={handleSend}
-          sending={sending}
-          sent={sent}
-          error={sendError}
+          onTwilioSend={handleSend}
+          twilioSending={sending}
+          twilioSent={sent}
+          twilioError={sendError}
         />
       )}
     </div>

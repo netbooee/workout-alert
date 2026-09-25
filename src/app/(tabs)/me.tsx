@@ -1,0 +1,122 @@
+import * as Haptics from 'expo-haptics';
+import { useState } from 'react';
+import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { StreakHistory } from '@/components/streak-history';
+import { AppText, Button, Card } from '@/components/ui';
+import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
+import { useProfile, useUpdateProfile } from '@/lib/auth';
+import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
+import { supabase } from '@/lib/supabase';
+
+export default function MeScreen() {
+  const profile = useProfile();
+  const updateProfile = useUpdateProfile();
+  const { data: home, refetch } = useHomeData();
+  const { data: history } = useStreakHistory();
+  const [resyncing, setResyncing] = useState(false);
+
+  const setGoal = async (goal: number) => {
+    if (goal < 1 || goal > 7 || goal === profile.weekly_goal) return;
+    Haptics.selectionAsync();
+    try {
+      await updateProfile({ weekly_goal: goal });
+    } catch (e) {
+      Alert.alert('Could not update goal', e instanceof Error ? e.message : String(e));
+    }
+  };
+
+  const resync = async () => {
+    setResyncing(true);
+    try {
+      await resetHealthSync(profile.id);
+      await syncHealthData(profile.id);
+      await refetch();
+    } catch (e) {
+      Alert.alert('Sync failed', e instanceof Error ? e.message : String(e));
+    } finally {
+      setResyncing(false);
+    }
+  };
+
+  return (
+    <SafeAreaView edges={['top']} style={styles.container}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <AppText variant="title">{profile.display_name ?? 'You'}</AppText>
+
+        <View style={styles.stats}>
+          <Stat label="Current" value={home?.streak?.current_weeks ?? 0} unit="wks" color={Colors.flame} />
+          <Stat label="Longest" value={home?.streak?.longest_weeks ?? 0} unit="wks" />
+          <Stat label="Freezes" value={home?.streak?.freezes_banked ?? 0} color={Colors.freeze} />
+        </View>
+
+        <StreakHistory weeks={history ?? []} />
+
+        <Card>
+          <AppText variant="label">Weekly goal</AppText>
+          <View style={styles.stepper}>
+            <StepButton label="−" onPress={() => setGoal(profile.weekly_goal - 1)} />
+            <AppText variant="title">
+              {profile.weekly_goal}
+              <AppText variant="caption"> days / week</AppText>
+            </AppText>
+            <StepButton label="+" onPress={() => setGoal(profile.weekly_goal + 1)} />
+          </View>
+          <AppText variant="caption">
+            Changes apply to this week right away. Past weeks keep the goal they had.
+          </AppText>
+        </Card>
+
+        <Card>
+          <AppText variant="label">Apple Health</AppText>
+          <AppText variant="caption">
+            Workouts sync automatically when you open the app. If something looks missing, re-sync
+            the last 12 weeks.
+          </AppText>
+          <Button title="Re-sync health data" variant="secondary" loading={resyncing} onPress={resync} />
+        </Card>
+
+        <Button title="Sign out" variant="secondary" onPress={() => supabase.auth.signOut()} />
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+function Stat({ label, value, unit, color }: { label: string; value: number; unit?: string; color?: string }) {
+  return (
+    <Card style={styles.stat}>
+      <AppText variant="label">{label}</AppText>
+      <AppText variant="title" color={color}>
+        {value}
+        {unit ? <AppText variant="caption"> {unit}</AppText> : null}
+      </AppText>
+    </Card>
+  );
+}
+
+function StepButton({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.stepButton, pressed && { opacity: 0.7 }]}>
+      <AppText variant="title">{label}</AppText>
+    </Pressable>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: { flex: 1, backgroundColor: Colors.background },
+  content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
+  stats: { flexDirection: 'row', gap: Spacing.sm },
+  stat: { flex: 1, gap: Spacing.xs },
+  stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  stepButton: {
+    width: 48,
+    height: 48,
+    borderRadius: Radius.md,
+    borderCurve: 'continuous',
+    backgroundColor: Colors.cardRaised,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+});

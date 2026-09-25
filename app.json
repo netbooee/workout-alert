@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Streaks",
+    "slug": "streaks",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "streaks",
+    "userInterfaceStyle": "dark",
+    "ios": {
+      "bundleIdentifier": "com.netbooee.streaks",
+      "supportsTablet": false,
+      "usesAppleSignIn": true
+    },
+    "plugins": [
+      "expo-router",
+      "expo-apple-authentication",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "Streaks reads your workouts, steps, and heart rate to keep your weekly streak up to date and share progress with your crew.",
+          "NSHealthUpdateUsageDescription": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#0B0B0F",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    }
+  }
+}

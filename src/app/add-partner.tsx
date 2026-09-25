@@ -75,7 +75,7 @@ export default function AddPartnerScreen() {
       </Card>
 
       <AppText variant="caption" style={{ textAlign: 'center' }}>
-        Partners see each other’s workouts, streaks, and evidence photos. You can remove a partner
+        Partners see each other’s workouts, streaks, and check-in photos. You can remove a partner
         any time by long-pressing their card.
       </AppText>
     </KeyboardAvoidingView>

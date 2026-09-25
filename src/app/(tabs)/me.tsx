@@ -1,10 +1,11 @@
 import * as Haptics from 'expo-haptics';
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LevelBar } from '@/components/level-bar';
+import { PushPrompt } from '@/components/push-prompt';
 import { StreakHistory } from '@/components/streak-history';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -51,7 +52,7 @@ export default function MeScreen() {
         <Card>
           <LevelBar xp={xp ?? 0} />
           <AppText variant="caption">
-            {xp ?? 0} XP total · Earn XP for every workout, photo evidence, and each week you hit
+            {xp ?? 0} XP total · Earn XP for every workout, check-in photo, and each week you hit
             your goal.
           </AppText>
         </Card>
@@ -92,6 +93,21 @@ export default function MeScreen() {
         </Card>
 
         <Card>
+          <AppText variant="label">Notifications</AppText>
+          <Toggle
+            label="Nudges from partners"
+            value={profile.notify_nudges}
+            onChange={(v) => updateProfile({ notify_nudges: v })}
+          />
+          <Toggle
+            label="When a partner works out"
+            value={profile.notify_partner_workouts}
+            onChange={(v) => updateProfile({ notify_partner_workouts: v })}
+          />
+        </Card>
+        <PushPrompt />
+
+        <Card>
           <AppText variant="label">Apple Health</AppText>
           <AppText variant="caption">
             Workouts sync automatically when you open the app. If something looks missing, re-sync
@@ -118,6 +134,23 @@ function Stat({ label, value, unit, color }: { label: string; value: number; uni
   );
 }
 
+function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => Promise<unknown> }) {
+  return (
+    <View style={styles.toggle}>
+      <AppText variant="body" style={{ flex: 1 }}>
+        {label}
+      </AppText>
+      <Switch
+        value={value}
+        trackColor={{ true: Colors.flame }}
+        onValueChange={(v) => {
+          onChange(v).catch((e) => Alert.alert('Could not save', e instanceof Error ? e.message : String(e)));
+        }}
+      />
+    </View>
+  );
+}
+
 function StepButton({ label, onPress }: { label: string; onPress: () => void }) {
   return (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.stepButton, pressed && { opacity: 0.7 }]}>
@@ -132,6 +165,7 @@ const styles = StyleSheet.create({
   stats: { flexDirection: 'row', gap: Spacing.sm },
   stat: { flex: 1, gap: Spacing.xs },
   stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  toggle: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: 4 },
   inviteRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   stepButton: {
     width: 48,

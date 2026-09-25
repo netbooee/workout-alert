@@ -18,11 +18,12 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Streaks uses your photos so you can add workout evidence for your accountability partners.",
-          "cameraPermission": "Streaks uses the camera so you can snap workout evidence for your accountability partners.",
+          "photosPermission": "Streaks uses your photos so you can share workout check-ins with your accountability partners.",
+          "cameraPermission": "Streaks uses the camera so you can snap workout check-ins for your accountability partners.",
           "microphonePermission": false
         }
       ],
+      "expo-notifications",
       [
         "@kingstinct/react-native-healthkit",
         {

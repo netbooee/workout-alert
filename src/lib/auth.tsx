@@ -4,6 +4,7 @@ import { createContext, useContext, useEffect, useState, type PropsWithChildren 
 
 import type { Profile } from '@/lib/database.types';
 import { signOutOfGoogle } from '@/lib/google-auth';
+import { unregisterDevice } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 
 interface AuthState {
@@ -66,7 +67,14 @@ export function useProfile(): Profile {
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   const { session } = useAuth();
-  return async (patch: Partial<Pick<Profile, 'display_name' | 'weekly_goal' | 'timezone' | 'onboarded_at'>>) => {
+  return async (
+    patch: Partial<
+      Pick<
+        Profile,
+        'display_name' | 'weekly_goal' | 'timezone' | 'onboarded_at' | 'notify_nudges' | 'notify_partner_workouts'
+      >
+    >,
+  ) => {
     const userId = session?.user.id;
     if (!userId) throw new Error('Not signed in');
     const { data, error } = await supabase
@@ -84,6 +92,8 @@ export function useUpdateProfile() {
 }
 
 export async function signOut() {
+  // Best effort: a failure here shouldn't block signing out.
+  await unregisterDevice().catch(() => {});
   await signOutOfGoogle();
   await supabase.auth.signOut();
 }

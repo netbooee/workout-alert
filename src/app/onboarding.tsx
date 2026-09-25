@@ -8,6 +8,7 @@ import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAuth, useUpdateProfile } from '@/lib/auth';
 import { healthAvailable, requestHealthPermissions } from '@/lib/health/healthkit';
+import { enablePush } from '@/lib/push';
 
 const GOAL_HINTS: Record<number, string> = {
   1: 'Easing in',
@@ -22,14 +23,24 @@ const GOAL_HINTS: Record<number, string> = {
 export default function OnboardingScreen() {
   const { profile } = useAuth();
   const updateProfile = useUpdateProfile();
-  const [step, setStep] = useState<'goal' | 'health'>('goal');
+  const [step, setStep] = useState<'goal' | 'health' | 'notify'>('goal');
   const [goal, setGoal] = useState(profile?.weekly_goal ?? 3);
   const [saving, setSaving] = useState(false);
 
-  const finish = async () => {
-    setSaving(true);
+  const connectHealth = async () => {
     try {
       if (healthAvailable()) await requestHealthPermissions();
+    } catch (e) {
+      Alert.alert('Could not connect Apple Health', e instanceof Error ? e.message : String(e));
+    }
+    setStep('notify');
+  };
+
+  const finish = async (withNotifications: boolean) => {
+    setSaving(true);
+    try {
+      // Notifications are optional; never block onboarding on them.
+      if (withNotifications) await enablePush().catch(() => {});
       await updateProfile({
         weekly_goal: goal,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
@@ -47,7 +58,7 @@ export default function OnboardingScreen() {
       {step === 'goal' ? (
         <>
           <View style={styles.body}>
-            <AppText variant="label">Step 1 of 2</AppText>
+            <AppText variant="label">Step 1 of 3</AppText>
             <AppText variant="title">How many days a week do you want to work out?</AppText>
             <AppText variant="body" color={Colors.textSecondary}>
               Your streak grows every week you hit this. Rest days are built in. You can change it
@@ -77,10 +88,10 @@ export default function OnboardingScreen() {
           </View>
           <Button title="Continue" onPress={() => setStep('health')} />
         </>
-      ) : (
+      ) : step === 'health' ? (
         <>
           <View style={styles.body}>
-            <AppText variant="label">Step 2 of 2</AppText>
+            <AppText variant="label">Step 2 of 3</AppText>
             <View style={styles.healthIcon}>
               <SymbolView name="heart.fill" size={48} tintColor={Colors.ringMove} />
             </View>
@@ -94,8 +105,26 @@ export default function OnboardingScreen() {
             </AppText>
           </View>
           <View style={{ gap: Spacing.sm }}>
-            <Button title="Connect Apple Health" loading={saving} onPress={finish} />
-            <Button title="Back" variant="secondary" disabled={saving} onPress={() => setStep('goal')} />
+            <Button title="Connect Apple Health" onPress={connectHealth} />
+            <Button title="Back" variant="secondary" onPress={() => setStep('goal')} />
+          </View>
+        </>
+      ) : (
+        <>
+          <View style={styles.body}>
+            <AppText variant="label">Step 3 of 3</AppText>
+            <View style={styles.healthIcon}>
+              <SymbolView name="bell.badge.fill" size={44} tintColor={Colors.flame} />
+            </View>
+            <AppText variant="title">Stay in the loop</AppText>
+            <AppText variant="body" color={Colors.textSecondary}>
+              Get a ping when an accountability partner works out or nudges you. You can
+              fine-tune this any time on the Me tab.
+            </AppText>
+          </View>
+          <View style={{ gap: Spacing.sm }}>
+            <Button title="Turn on notifications" loading={saving} onPress={() => finish(true)} />
+            <Button title="Not now" variant="secondary" disabled={saving} onPress={() => finish(false)} />
           </View>
         </>
       )}

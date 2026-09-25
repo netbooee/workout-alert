@@ -16,5 +16,12 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ]);
   }
 
-  return { ...config, name: config.name ?? 'Streaks', slug: config.slug ?? 'streaks', plugins };
+  // Push tokens are tied to your EAS project. `npx eas-cli@latest init` prints
+  // the ID; set EAS_PROJECT_ID in .env.local (or add it to app.json yourself).
+  const easProjectId = process.env.EAS_PROJECT_ID ?? config.extra?.eas?.projectId;
+  const extra = easProjectId
+    ? { ...config.extra, eas: { ...config.extra?.eas, projectId: easProjectId } }
+    : config.extra;
+
+  return { ...config, name: config.name ?? 'Streaks', slug: config.slug ?? 'streaks', plugins, extra };
 };

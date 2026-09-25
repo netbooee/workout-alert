@@ -17,10 +17,14 @@ export type Database = {
           min_workout_minutes: number;
           onboarded_at: string | null;
           invite_code: string;
+          notify_nudges: boolean;
+          notify_partner_workouts: boolean;
           created_at: string;
         };
         Insert: never;
         Update: {
+          notify_nudges?: boolean;
+          notify_partner_workouts?: boolean;
           display_name?: string | null;
           avatar_url?: string | null;
           timezone?: string;
@@ -167,6 +171,26 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      push_tokens: {
+        Row: { token: string; user_id: string; updated_at: string };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      notifications: {
+        Row: {
+          id: string;
+          user_id: string;
+          kind: 'nudge' | 'partner_workout';
+          title: string;
+          body: string;
+          url: string | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
     };
     Views: { [_ in never]: never };
     Functions: {
@@ -180,6 +204,14 @@ export type Database = {
       };
       respond_to_partner: {
         Args: { p_id: string; p_accept: boolean };
+        Returns: undefined;
+      };
+      register_push_token: {
+        Args: { p_token: string };
+        Returns: undefined;
+      };
+      unregister_push_token: {
+        Args: { p_token: string };
         Returns: undefined;
       };
       nudge_partner: {

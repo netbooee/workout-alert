@@ -18,9 +18,9 @@ they're consistent across devices and can't be edited by the client.
 
 - Everyone has a 6-character **invite code** (Me tab, or Partners → add). Share it as a link
   (`streaks://invite/CODE`) or have your partner type it in. Once they accept, it's mutual.
-- Partners see each other's **workouts, streaks, weekly progress, and evidence photos**, and
+- Partners see each other's **workouts, streaks, weekly progress, and check-in photos**, and
   nobody else can (enforced by row-level security and storage policies).
-- **Evidence**: workouts from Apple Health show where they came from ("Heart rate from Sam's
+- **Check-ins**: workouts from Apple Health show where they came from ("Heart rate from Sam's
   Apple Watch"). Add up to 4 photos and a note to any workout, or **log a workout by hand**
   with photos (the + on Home) for sessions without a watch. Hand-logged workouts without a
   photo are labelled *self-reported*.
@@ -28,12 +28,21 @@ they're consistent across devices and can't be edited by the client.
 - **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
 - Long-press a partner card to remove them.
 
+## Push notifications
+
+- **Nudges**: "Alex nudged you 👋 · You're at 2 of 4 days this week. Time to move!"
+- **Partner workouts**: "Sam just worked out 🔥 · 42-min run. Tap to cheer or verify ✅"
+  (only for workouts that finished in the last day, so the first 12-week sync doesn't spam anyone).
+- Tapping opens the relevant screen. Each person can switch either kind off on the Me tab.
+- How it works: database triggers write to `notifications` and send to the recipient's
+  devices through Expo's push service using `pg_net`. No separate server is needed.
+
 ## XP, levels, and the league (Duolingo-style)
 
 | Earn | XP |
 | --- | --- |
 | Workout (5+ min) | 10 + 1 per 2 min, up to 40 |
-| Photo evidence on a workout | +5 |
+| Check-in photo on a workout | +5 |
 | Hitting your weekly goal | +50 |
 
 - **Levels** get progressively longer: L2 at 100 XP, L3 at 300, L5 at 1,000, L10 at 4,500.
@@ -60,8 +69,8 @@ src/app/                 Screens (Expo Router)
   (tabs)/index.tsx       Home: streak, week dots, rings, recent workouts
   (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
   (tabs)/me.tsx          Level, stats, 12-week history, goal, invite code, sign out
-  workout/[id].tsx       Workout detail: evidence photos, note, reactions
-  log.tsx                Log a workout by hand with photo evidence
+  workout/[id].tsx       Workout detail: check-in photos, note, reactions
+  log.tsx                Log a workout by hand with a check-in photo
   add-partner.tsx        Share your code / enter someone else's
   invite/[code].tsx      Deep link handler for invites
   celebrate.tsx          "+XP" celebration
@@ -108,7 +117,14 @@ Apple both require one), and a Supabase project.
      so the body includes `{{ .Token }}` (see `supabase/templates/magic_link.html`).
      The app asks for the 6-digit code rather than handling links.
 
-4. **Run on your iPhone.** HealthKit doesn't work in Expo Go, so this needs a development build:
+4. **Push notifications** (optional, but that's how nudges reach people):
+   - Run `npx eas-cli@latest init` once and put the printed project ID in `.env.local`
+     as `EAS_PROJECT_ID`.
+   - Let EAS set up Apple push credentials: `npx eas-cli@latest credentials` (or just run an
+     `eas build`, which offers to create them). Push only works on a real iPhone.
+   - `pg_net` is enabled by the migration; nothing else to configure in Supabase.
+
+5. **Run on your iPhone.** HealthKit doesn't work in Expo Go, so this needs a development build:
    ```sh
    npx expo run:ios --device
    ```
@@ -130,8 +146,9 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~
 3. ~~Weekly streak engine + Home screen~~
-4. ~~Accountability partners, evidence photos, reactions, nudges~~
+4. ~~Accountability partners, check-in photos, reactions, nudges~~
 5. ~~XP, levels, weekly league, friend streaks, celebrations~~
-6. Push notifications (nudges, partner workouts, streak at risk)
-7. Achievements/badges, self-set rewards, challenges
-8. Background HealthKit delivery
+6. ~~Push notifications for nudges and partner workouts~~
+7. More pushes: partner requests, "verified", streak-at-risk reminders
+8. Achievements/badges, self-set rewards, challenges
+9. Background HealthKit delivery

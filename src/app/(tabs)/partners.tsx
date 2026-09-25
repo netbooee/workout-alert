@@ -7,6 +7,7 @@ import { Avatar } from '@/components/avatar';
 import { FeedCard } from '@/components/feed-card';
 import { LeagueCard } from '@/components/league-card';
 import { PartnerCard } from '@/components/partner-card';
+import { PushPrompt } from '@/components/push-prompt';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useLeague, useNames, usePartnerFeed, usePartners, useRespondToPartner } from '@/hooks/use-social';
@@ -58,14 +59,16 @@ export default function PartnersScreen() {
               Better together 🤝
             </AppText>
             <AppText variant="body" color={Colors.textSecondary} style={{ textAlign: 'center' }}>
-              Add an accountability partner. You’ll see each other’s workouts and streaks, verify
-              each other’s evidence, and compete in a weekly league.
+              Add an accountability partner. You’ll see each other’s workouts and streaks, cheer on
+              each other’s check-ins, and compete in a weekly league.
             </AppText>
             <Link href="/add-partner" asChild>
               <Button title="Add a partner" />
             </Link>
           </Card>
         )}
+
+        {accepted.length > 0 && <PushPrompt />}
 
         {accepted.length > 0 && league.data && <LeagueCard rows={league.data} />}
 

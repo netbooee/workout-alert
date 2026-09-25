@@ -34,7 +34,7 @@ export default function CelebrateScreen() {
       ? `${workouts} workouts logged!`
       : workouts === 1
         ? 'Workout logged!'
-        : 'Evidence added!';
+        : 'Check-in added!';
 
   return (
     <SafeAreaView style={styles.container}>

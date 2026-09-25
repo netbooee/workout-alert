@@ -1,12 +1,16 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 import { Colors } from '@/constants/theme';
+import { usePushLifecycle } from '@/hooks/use-push';
 import { useAuth } from '@/lib/auth';
 
 export default function TabsLayout() {
+  const { profile } = useAuth();
+  usePushLifecycle();
+
   // Screens below assume a loaded profile; during sign-out it disappears a
   // frame before the root navigator switches away.
-  if (!useAuth().profile) return null;
+  if (!profile) return null;
 
   return (
     <NativeTabs tintColor={Colors.flame}>

@@ -115,14 +115,14 @@ export default function LogWorkoutScreen() {
 
         <Card>
           <View style={styles.evidenceHeader}>
-            <AppText variant="label">Evidence</AppText>
+            <AppText variant="label">Check-in</AppText>
             <AppText variant="caption" color={Colors.xp}>
               +5 XP with a photo
             </AppText>
           </View>
           <AppText variant="caption">
-            Hand-logged workouts show as self-reported unless you add a photo: the gym, your
-            screen, a sweaty selfie.
+            Add a check-in photo so your partners can cheer you on: the gym, your screen, a
+            sweaty selfie. Without one, it shows as self-reported.
           </AppText>
           <View style={styles.photos}>
             {photos.map((uri) => (

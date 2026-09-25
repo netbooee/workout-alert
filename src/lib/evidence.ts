@@ -1,4 +1,4 @@
-// Photo evidence: pick or take a photo, shrink it, and store it in the
+// Photo evidence (shown to people as "check-ins"): pick or take a photo, shrink it, and store it in the
 // private `evidence` bucket under <user id>/<workout id>/. Partners read it
 // through short-lived signed URLs.
 

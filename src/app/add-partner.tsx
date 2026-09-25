@@ -57,7 +57,7 @@ export default function AddPartnerScreen() {
         <AppText variant="label">Have someone’s code?</AppText>
         <TextInput
           style={styles.input}
-          placeholder="ABC123"
+          placeholder="ABCD23"
           placeholderTextColor={Colors.textMuted}
           autoCapitalize="characters"
           autoCorrect={false}

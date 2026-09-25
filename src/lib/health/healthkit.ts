@@ -71,6 +71,7 @@ export async function fetchWorkoutChanges(since: Date, anchor?: string): Promise
       totalDistance: w.totalDistance,
       avgHeartRate,
       maxHeartRate,
+      sourceName: w.sourceRevision?.source?.name,
     });
     w.dispose();
   }

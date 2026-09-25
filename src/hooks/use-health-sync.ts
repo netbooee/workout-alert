@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef } from 'react';
 import { AppState } from 'react-native';
 
 import { useAuth } from '@/lib/auth';
+import { showCelebrationIfEarned } from '@/lib/celebrate';
 import { healthAvailable } from '@/lib/health/healthkit';
 import { syncHealthData } from '@/lib/health/sync';
 
@@ -21,7 +22,8 @@ export function useHealthSync() {
 
   const { mutate, isPending, error } = useMutation({
     mutationFn: (uid: string) => syncHealthData(uid),
-    onSettled: () => queryClient.invalidateQueries({ queryKey: ['home'] }),
+    onSuccess: (_result, uid) => showCelebrationIfEarned(uid),
+    onSettled: () => queryClient.invalidateQueries(),
   });
 
   const sync = useCallback(

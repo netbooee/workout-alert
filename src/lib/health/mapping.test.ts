@@ -27,6 +27,7 @@ describe('toWorkoutRow', () => {
       totalDistance: { unit: 'km', quantity: 7.21 },
       avgHeartRate: 151.4,
       maxHeartRate: 178,
+      sourceName: "Jordan's Apple Watch",
     });
     expect(row).toEqual({
       source: 'healthkit',
@@ -39,6 +40,7 @@ describe('toWorkoutRow', () => {
       distance_m: 7210,
       avg_hr: 151,
       max_hr: 178,
+      source_name: "Jordan's Apple Watch",
     });
   });
 

@@ -14,6 +14,34 @@ from Apple Health, and a **weekly streak** grows every week you hit your goal.
 Streaks are computed in Postgres (`supabase/migrations`) whenever workouts change, so
 they're consistent across devices and can't be edited by the client.
 
+## Accountability partners
+
+- Everyone has a 6-character **invite code** (Me tab, or Partners → add). Share it as a link
+  (`streaks://invite/CODE`) or have your partner type it in. Once they accept, it's mutual.
+- Partners see each other's **workouts, streaks, weekly progress, and evidence photos**, and
+  nobody else can (enforced by row-level security and storage policies).
+- **Evidence**: workouts from Apple Health show where they came from ("Heart rate from Sam's
+  Apple Watch"). Add up to 4 photos and a note to any workout, or **log a workout by hand**
+  with photos (the + on Home) for sessions without a watch. Hand-logged workouts without a
+  photo are labelled *self-reported*.
+- Partners react 🔥 💪 👏 or ✅ **Verify** (you can't verify your own).
+- **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
+- Long-press a partner card to remove them.
+
+## XP, levels, and the league (Duolingo-style)
+
+| Earn | XP |
+| --- | --- |
+| Workout (5+ min) | 10 + 1 per 2 min, up to 40 |
+| Photo evidence on a workout | +5 |
+| Hitting your weekly goal | +50 |
+
+- **Levels** get progressively longer: L2 at 100 XP, L3 at 300, L5 at 1,000, L10 at 4,500.
+- **Weekly league**: you and your partners ranked by XP earned this week (Mon–Sun).
+- **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
+  your goals since becoming partners.
+- A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo).
+
 ## Stack
 
 | Piece | Choice |
@@ -30,12 +58,18 @@ src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
   onboarding.tsx         Weekly goal + Apple Health permission
   (tabs)/index.tsx       Home: streak, week dots, rings, recent workouts
-  (tabs)/me.tsx          Stats, 12-week history, goal, re-sync, sign out
+  (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
+  (tabs)/me.tsx          Level, stats, 12-week history, goal, invite code, sign out
+  workout/[id].tsx       Workout detail: evidence photos, note, reactions
+  log.tsx                Log a workout by hand with photo evidence
+  add-partner.tsx        Share your code / enter someone else's
+  invite/[code].tsx      Deep link handler for invites
+  celebrate.tsx          "+XP" celebration
 src/components/          UI pieces
 src/lib/health/          HealthKit queries, mapping to rows, sync to Supabase
 src/lib/week.ts          Week math shared by the UI
 supabase/migrations/     Schema, streak engine, RLS
-supabase/tests/          pgTAP tests for the streak engine and RLS
+supabase/tests/          pgTAP tests: streak engine, partners, XP, RLS
 ```
 
 ## Setup
@@ -96,6 +130,8 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~
 3. ~~Weekly streak engine + Home screen~~
-4. Crews: invite links, shared feed, reactions, nudges, crew streak, push notifications
-5. Badges, XP, self-set rewards
-6. Challenges, leaderboards, background HealthKit delivery
+4. ~~Accountability partners, evidence photos, reactions, nudges~~
+5. ~~XP, levels, weekly league, friend streaks, celebrations~~
+6. Push notifications (nudges, partner workouts, streak at risk)
+7. Achievements/badges, self-set rewards, challenges
+8. Background HealthKit delivery

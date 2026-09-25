@@ -1,12 +1,15 @@
 import * as Haptics from 'expo-haptics';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { LevelBar } from '@/components/level-bar';
 import { StreakHistory } from '@/components/streak-history';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
+import { useXpTotal } from '@/hooks/use-social';
 import { signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 
@@ -15,6 +18,7 @@ export default function MeScreen() {
   const updateProfile = useUpdateProfile();
   const { data: home, refetch } = useHomeData();
   const { data: history } = useStreakHistory();
+  const { data: xp } = useXpTotal();
   const [resyncing, setResyncing] = useState(false);
 
   const setGoal = async (goal: number) => {
@@ -44,6 +48,13 @@ export default function MeScreen() {
     <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
         <AppText variant="title">{profile.display_name ?? 'You'}</AppText>
+        <Card>
+          <LevelBar xp={xp ?? 0} />
+          <AppText variant="caption">
+            {xp ?? 0} XP total · Earn XP for every workout, photo evidence, and each week you hit
+            your goal.
+          </AppText>
+        </Card>
 
         <View style={styles.stats}>
           <Stat label="Current" value={home?.streak?.current_weeks ?? 0} unit="wks" color={Colors.flame} />
@@ -66,6 +77,18 @@ export default function MeScreen() {
           <AppText variant="caption">
             Changes apply to this week right away. Past weeks keep the goal they had.
           </AppText>
+        </Card>
+
+        <Card>
+          <AppText variant="label">Your invite code</AppText>
+          <View style={styles.inviteRow}>
+            <AppText variant="title" color={Colors.flame} style={{ letterSpacing: 4 }} selectable>
+              {profile.invite_code}
+            </AppText>
+            <Link href="/add-partner" asChild>
+              <Button title="Share" variant="secondary" style={{ height: 40 }} />
+            </Link>
+          </View>
         </Card>
 
         <Card>
@@ -109,6 +132,7 @@ const styles = StyleSheet.create({
   stats: { flexDirection: 'row', gap: Spacing.sm },
   stat: { flex: 1, gap: Spacing.xs },
   stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  inviteRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   stepButton: {
     width: 48,
     height: 48,

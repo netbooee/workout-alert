@@ -16,6 +16,14 @@
       "expo-router",
       "expo-apple-authentication",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": "Streaks uses your photos so you can add workout evidence for your accountability partners.",
+          "cameraPermission": "Streaks uses the camera so you can snap workout evidence for your accountability partners.",
+          "microphonePermission": false
+        }
+      ],
+      [
         "@kingstinct/react-native-healthkit",
         {
           "NSHealthShareUsageDescription": "Streaks reads your workouts, steps, and heart rate to keep your weekly streak up to date and share progress with your crew.",

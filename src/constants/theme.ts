@@ -14,6 +14,8 @@ export const Colors = {
   freeze: '#7DD3FC',
   freezeSoft: 'rgba(125, 211, 252, 0.16)',
   success: '#34D399',
+  xp: '#FFD60A',
+  xpSoft: 'rgba(255, 214, 10, 0.16)',
   danger: '#F87171',
 
   ringMove: '#FF375F',

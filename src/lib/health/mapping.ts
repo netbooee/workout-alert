@@ -58,6 +58,8 @@ export interface HealthWorkoutInput {
   totalDistance?: HealthQuantity;
   avgHeartRate?: number;
   maxHeartRate?: number;
+  /** The app or device that recorded it, e.g. "Jordan's Apple Watch". */
+  sourceName?: string;
 }
 
 export interface WorkoutRow {
@@ -71,6 +73,7 @@ export interface WorkoutRow {
   distance_m: number | null;
   avg_hr: number | null;
   max_hr: number | null;
+  source_name: string | null;
 }
 
 export function toWorkoutRow(w: HealthWorkoutInput): WorkoutRow {
@@ -85,6 +88,7 @@ export function toWorkoutRow(w: HealthWorkoutInput): WorkoutRow {
     distance_m: round(toMeters(w.totalDistance)),
     avg_hr: round(w.avgHeartRate ?? null),
     max_hr: round(w.maxHeartRate ?? null),
+    source_name: w.sourceName ?? null,
   };
 }
 

@@ -60,6 +60,17 @@ function RootNavigator() {
       </Stack.Protected>
       <Stack.Protected guard={signedIn && onboarded}>
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen
+          name="workout/[id]"
+          options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerTransparent: true }}
+        />
+        <Stack.Screen name="log" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="add-partner" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="invite/[code]" options={{ presentation: 'modal' }} />
+        <Stack.Screen
+          name="celebrate"
+          options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+        />
       </Stack.Protected>
     </Stack>
   );

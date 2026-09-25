@@ -3,6 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
 import type { Profile } from '@/lib/database.types';
+import { signOutOfGoogle } from '@/lib/google-auth';
 import { supabase } from '@/lib/supabase';
 
 interface AuthState {
@@ -80,4 +81,9 @@ export function useUpdateProfile() {
     await queryClient.invalidateQueries({ queryKey: ['home'] });
     return data;
   };
+}
+
+export async function signOut() {
+  await signOutOfGoogle();
+  await supabase.auth.signOut();
 }

@@ -21,13 +21,13 @@ they're consistent across devices and can't be edited by the client.
 | App | Expo SDK 57, Expo Router, TypeScript, React Query |
 | Health data | [`@kingstinct/react-native-healthkit`](https://github.com/kingstinct/react-native-healthkit) |
 | Backend | Supabase (Postgres + Auth + RLS) |
-| Auth | Sign in with Apple, plus email one-time codes |
+| Auth | Sign in with Apple, Google, or email one-time codes |
 
 ## Project layout
 
 ```
 src/app/                 Screens (Expo Router)
-  sign-in.tsx            Apple / email-code sign in
+  sign-in.tsx            Apple / Google / email-code sign in
   onboarding.tsx         Weekly goal + Apple Health permission
   (tabs)/index.tsx       Home: streak, week dots, rings, recent workouts
   (tabs)/me.tsx          Stats, 12-week history, goal, re-sync, sign out
@@ -60,6 +60,16 @@ Apple both require one), and a Supabase project.
    - **Sign in with Apple**: enable the Apple provider and add `com.netbooee.streaks`
      (or your own bundle ID from `app.json`) under *Client IDs*. Native sign-in doesn't
      need the secret key.
+   - **Google** (optional):
+     1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create an
+        OAuth client ID of type **iOS** with bundle ID `com.netbooee.streaks`. Also create a
+        **Web application** client if you don't have one; Supabase's form asks for it.
+     2. In Supabase, enable the Google provider. Put the web client ID and secret in the form,
+        add the **iOS client ID** under *Authorized Client IDs*, and turn on
+        **Skip nonce checks** (required for native iOS sign-in).
+     3. Set `EXPO_PUBLIC_GOOGLE_IOS_CLIENT_ID` in `.env.local` and rebuild the dev client
+        (`npx expo run:ios`); `app.config.ts` registers the URL scheme from it. Without it the
+        Google button is simply hidden.
    - **Email codes**: in *Email Templates*, edit **Magic Link** and **Confirm signup**
      so the body includes `{{ .Token }}` (see `supabase/templates/magic_link.html`).
      The app asks for the 6-digit code rather than handling links.

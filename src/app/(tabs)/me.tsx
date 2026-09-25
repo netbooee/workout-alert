@@ -7,9 +7,8 @@ import { StreakHistory } from '@/components/streak-history';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
-import { useProfile, useUpdateProfile } from '@/lib/auth';
+import { signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
-import { supabase } from '@/lib/supabase';
 
 export default function MeScreen() {
   const profile = useProfile();
@@ -78,7 +77,7 @@ export default function MeScreen() {
           <Button title="Re-sync health data" variant="secondary" loading={resyncing} onPress={resync} />
         </Card>
 
-        <Button title="Sign out" variant="secondary" onPress={() => supabase.auth.signOut()} />
+        <Button title="Sign out" variant="secondary" onPress={signOut} />
       </ScrollView>
     </SafeAreaView>
   );

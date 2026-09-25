@@ -4,8 +4,10 @@ import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, StyleSheet, TextInput, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { GoogleButton } from '@/components/google-button';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { googleEnabled, signInWithGoogle } from '@/lib/google-auth';
 import { supabase } from '@/lib/supabase';
 
 export default function SignInScreen() {
@@ -21,6 +23,7 @@ export default function SignInScreen() {
         </View>
         <View style={styles.actions}>
           <AppleSignIn />
+          {googleEnabled && <GoogleSignIn />}
           <AppText variant="caption" style={{ textAlign: 'center' }}>
             or
           </AppText>
@@ -70,6 +73,21 @@ function AppleSignIn() {
       onPress={signIn}
     />
   );
+}
+
+function GoogleSignIn() {
+  const [loading, setLoading] = useState(false);
+  const signIn = async () => {
+    setLoading(true);
+    try {
+      await signInWithGoogle();
+    } catch (e) {
+      Alert.alert('Sign in failed', e instanceof Error ? e.message : String(e));
+    } finally {
+      setLoading(false);
+    }
+  };
+  return <GoogleButton onPress={signIn} disabled={loading} />;
 }
 
 function EmailSignIn() {

@@ -30,6 +30,7 @@ export async function takeCelebration(userId: string): Promise<Celebration | nul
   const { data, error } = await supabase
     .from('xp_events')
     .select('kind, amount, awarded_at')
+    .eq('user_id', userId)
     .gt('awarded_at', lastSeen)
     .gte('created_at', new Date(Date.now() - RECENT_MS).toISOString());
   if (error) throw error;

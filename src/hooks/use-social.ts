@@ -129,7 +129,7 @@ export function useXpTotal() {
     queryKey: ['social', 'xp', userId],
     enabled: !!userId,
     queryFn: async () => {
-      const rows = unwrap(await supabase.from('xp_events').select('amount'));
+      const rows = unwrap(await supabase.from('xp_events').select('amount').eq('user_id', userId!));
       return rows.reduce((sum, r) => sum + r.amount, 0);
     },
   });

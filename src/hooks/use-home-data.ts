@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { dayKey, startOfWeek } from '@/lib/week';
 
 // Everything under the ['home'] key is invalidated after each health sync.
+// Partners can read each other's workouts and streak weeks, so every query
+// here filters to the signed-in user explicitly rather than relying on RLS.
 
 export function useHomeData() {
   const userId = useAuth().session?.user.id;
@@ -19,10 +21,21 @@ export function useHomeData() {
         supabase
           .from('workouts')
           .select('*')
+          .eq('user_id', userId!)
           .gte('started_at', startOfWeek(now).toISOString())
           .order('started_at', { ascending: false }),
-        supabase.from('workouts').select('*').order('started_at', { ascending: false }).limit(10),
-        supabase.from('daily_activity').select('*').eq('day', dayKey(now)).maybeSingle(),
+        supabase
+          .from('workouts')
+          .select('*')
+          .eq('user_id', userId!)
+          .order('started_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('daily_activity')
+          .select('*')
+          .eq('user_id', userId!)
+          .eq('day', dayKey(now))
+          .maybeSingle(),
       ]);
       for (const r of [streak, weekWorkouts, recent, today]) {
         if (r.error) throw r.error;
@@ -46,6 +59,7 @@ export function useStreakHistory(weeks = 12) {
       const { data, error } = await supabase
         .from('streak_weeks')
         .select('*')
+        .eq('user_id', userId!)
         .order('week_start', { ascending: false })
         .limit(weeks);
       if (error) throw error;

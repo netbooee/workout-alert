@@ -71,7 +71,14 @@ export function useUpdateProfile() {
     patch: Partial<
       Pick<
         Profile,
-        'display_name' | 'weekly_goal' | 'timezone' | 'onboarded_at' | 'notify_nudges' | 'notify_partner_workouts'
+        | 'display_name'
+        | 'weekly_goal'
+        | 'timezone'
+        | 'onboarded_at'
+        | 'notify_nudges'
+        | 'notify_partner_workouts'
+        | 'notify_partner_requests'
+        | 'notify_verifications'
       >
     >,
   ) => {

@@ -28,7 +28,7 @@ export function PushPrompt() {
         <View style={{ flex: 1 }}>
           <AppText variant="heading">Know when partners move</AppText>
           <AppText variant="caption">
-            Get a ping when a partner works out or nudges you.
+            Get a ping when a partner works out, verifies your workout, or nudges you.
           </AppText>
         </View>
       </View>

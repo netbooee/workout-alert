@@ -104,6 +104,16 @@ export default function MeScreen() {
             value={profile.notify_partner_workouts}
             onChange={(v) => updateProfile({ notify_partner_workouts: v })}
           />
+          <Toggle
+            label="When a partner verifies your workout"
+            value={profile.notify_verifications}
+            onChange={(v) => updateProfile({ notify_verifications: v })}
+          />
+          <Toggle
+            label="Partner requests"
+            value={profile.notify_partner_requests}
+            onChange={(v) => updateProfile({ notify_partner_requests: v })}
+          />
         </Card>
         <PushPrompt />
 

@@ -33,7 +33,11 @@ they're consistent across devices and can't be edited by the client.
 - **Nudges**: "Alex nudged you 👋 · You're at 2 of 4 days this week. Time to move!"
 - **Partner workouts**: "Sam just worked out 🔥 · 42-min run. Tap to cheer or verify ✅"
   (only for workouts that finished in the last day, so the first 12-week sync doesn't spam anyone).
-- Tapping opens the relevant screen. Each person can switch either kind off on the Me tab.
+- **Partner requests**: "Blair wants to be your accountability partner 🤝", and when it's
+  accepted, "Alex accepted your partner request 🤝".
+- **Verified**: "Blair verified your run ✅ · Your 42-min run is verified. Nice work!"
+  (once per partner per workout, even if they toggle Verify off and on).
+- Tapping opens the relevant screen. Each kind can be switched off on the Me tab.
 - How it works: database triggers write to `notifications` and send to the recipient's
   devices through Expo's push service using `pg_net`. No separate server is needed.
 
@@ -149,6 +153,6 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 4. ~~Accountability partners, check-in photos, reactions, nudges~~
 5. ~~XP, levels, weekly league, friend streaks, celebrations~~
 6. ~~Push notifications for nudges and partner workouts~~
-7. More pushes: partner requests, "verified", streak-at-risk reminders
+7. ~~Pushes for partner requests and verified workouts~~; streak-at-risk reminders next
 8. Achievements/badges, self-set rewards, challenges
 9. Background HealthKit delivery

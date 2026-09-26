@@ -19,12 +19,16 @@ export type Database = {
           invite_code: string;
           notify_nudges: boolean;
           notify_partner_workouts: boolean;
+          notify_partner_requests: boolean;
+          notify_verifications: boolean;
           created_at: string;
         };
         Insert: never;
         Update: {
           notify_nudges?: boolean;
           notify_partner_workouts?: boolean;
+          notify_partner_requests?: boolean;
+          notify_verifications?: boolean;
           display_name?: string | null;
           avatar_url?: string | null;
           timezone?: string;
@@ -181,10 +185,11 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          kind: 'nudge' | 'partner_workout';
+          kind: 'nudge' | 'partner_workout' | 'partner_request' | 'partner_accepted' | 'verified';
           title: string;
           body: string;
           url: string | null;
+          dedupe_key: string | null;
           created_at: string;
         };
         Insert: never;

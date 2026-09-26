@@ -95,6 +95,11 @@ export default function MeScreen() {
         <Card>
           <AppText variant="label">Notifications</AppText>
           <Toggle
+            label="Streak at risk reminders"
+            value={profile.notify_streak_reminders}
+            onChange={(v) => updateProfile({ notify_streak_reminders: v })}
+          />
+          <Toggle
             label="Nudges from partners"
             value={profile.notify_nudges}
             onChange={(v) => updateProfile({ notify_nudges: v })}

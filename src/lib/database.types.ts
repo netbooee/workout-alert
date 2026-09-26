@@ -21,6 +21,7 @@ export type Database = {
           notify_partner_workouts: boolean;
           notify_partner_requests: boolean;
           notify_verifications: boolean;
+          notify_streak_reminders: boolean;
           created_at: string;
         };
         Insert: never;
@@ -29,6 +30,7 @@ export type Database = {
           notify_partner_workouts?: boolean;
           notify_partner_requests?: boolean;
           notify_verifications?: boolean;
+          notify_streak_reminders?: boolean;
           display_name?: string | null;
           avatar_url?: string | null;
           timezone?: string;
@@ -185,7 +187,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          kind: 'nudge' | 'partner_workout' | 'partner_request' | 'partner_accepted' | 'verified';
+          kind: 'nudge' | 'partner_workout' | 'partner_request' | 'partner_accepted' | 'verified' | 'streak_risk';
           title: string;
           body: string;
           url: string | null;

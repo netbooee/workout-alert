@@ -37,6 +37,10 @@ they're consistent across devices and can't be edited by the client.
   accepted, "Alex accepted your partner request 🤝".
 - **Verified**: "Blair verified your run ✅ · Your 42-min run is verified. Nice work!"
   (once per partner per workout, even if they toggle Verify off and on).
+- **Streak at risk**: at 6pm local time, if your streak needs a workout on (almost) every
+  remaining day this week: "Your 2-week streak is on the line 🔥 · You need a workout every day
+  left this week: 3 to go." On Sunday: "Last chance to keep your 5-week streak 🔥". At most once a
+  day, only if you have a streak, and never once the week is already out of reach.
 - Tapping opens the relevant screen. Each kind can be switched off on the Me tab.
 - How it works: database triggers write to `notifications` and send to the recipient's
   devices through Expo's push service using `pg_net`. No separate server is needed.
@@ -126,7 +130,8 @@ Apple both require one), and a Supabase project.
      as `EAS_PROJECT_ID`.
    - Let EAS set up Apple push credentials: `npx eas-cli@latest credentials` (or just run an
      `eas build`, which offers to create them). Push only works on a real iPhone.
-   - `pg_net` is enabled by the migration; nothing else to configure in Supabase.
+   - `pg_net` and `pg_cron` are enabled by the migrations (the hourly reminder job is scheduled
+     automatically); nothing else to configure in Supabase.
 
 5. **Run on your iPhone.** HealthKit doesn't work in Expo Go, so this needs a development build:
    ```sh
@@ -153,6 +158,6 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 4. ~~Accountability partners, check-in photos, reactions, nudges~~
 5. ~~XP, levels, weekly league, friend streaks, celebrations~~
 6. ~~Push notifications for nudges and partner workouts~~
-7. ~~Pushes for partner requests and verified workouts~~; streak-at-risk reminders next
+7. ~~Pushes for partner requests, verified workouts, and streak-at-risk reminders~~
 8. Achievements/badges, self-set rewards, challenges
 9. Background HealthKit delivery

@@ -9,6 +9,7 @@ const STATUS_COLOR: Record<StreakWeek['status'], string> = {
   frozen: Colors.freeze,
   missed: Colors.cardRaised,
   in_progress: Colors.textMuted,
+  rest: Colors.rest,
 };
 
 export function StreakHistory({ weeks }: { weeks: StreakWeek[] }) {
@@ -38,6 +39,7 @@ export function StreakHistory({ weeks }: { weeks: StreakWeek[] }) {
             <Legend color={Colors.flame} label="Hit" />
             <Legend color={Colors.freeze} label="Frozen" />
             <Legend color={Colors.cardRaised} label="Missed" />
+            <Legend color={Colors.rest} label="Rest" />
             <Legend color={Colors.textMuted} label="This week" />
           </View>
         </>

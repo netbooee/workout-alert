@@ -28,6 +28,25 @@ they're consistent across devices and can't be edited by the client.
 - **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
 - Long-press a partner card to remove them.
 
+## Ember, the streak mascot
+
+- A little flame whose mood reflects how your week is going: **blazing** (goal hit),
+  **happy** (on track), **ready** (fresh week), **worried** (streak at risk), **fired up**
+  (4+ idle days, or the week is lost with no freeze), and **sleepy** (rest mode).
+- The first time you open the app each day, Ember greets you full-screen with one headline,
+  up to three facts (streak, nudges, verifications, partners, league) and one action.
+  After that it lives in the Home header; tap it to see the greeting again.
+- Playful, never shaming: never angry when a freeze covers the week, and "fired up" only on
+  the daily greeting (the header calms down to worried).
+- Mood rules and copy live in `src/lib/ember.ts` (unit-tested); the drawing is
+  `src/components/ember.tsx`. The mood → color/scale table is shared so a widget can match.
+
+## Rest mode
+
+Sick, injured, or traveling? Turn on Rest mode (Me tab). Weeks you don't hit are marked
+*rest*: they don't break your streak, don't spend a freeze, and hold friend streaks. Streak
+reminders pause. Workouts during rest still count.
+
 ## Push notifications
 
 - **Nudges**: "Alex nudged you 👋 · You're at 2 of 4 days this week. Time to move!"
@@ -161,3 +180,6 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 7. ~~Pushes for partner requests, verified workouts, and streak-at-risk reminders~~
 8. Achievements/badges, self-set rewards, challenges
 9. Background HealthKit delivery
+10. ~~Ember mascot, daily greeting, rest mode~~
+11. **Home-screen widget with Ember** (same faces and moods; needs a native WidgetKit
+    extension, and the mood data is already shared in `EMBER_LOOKS` / `emberMood`)

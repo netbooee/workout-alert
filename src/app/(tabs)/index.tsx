@@ -4,6 +4,7 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, V
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityRings } from '@/components/activity-rings';
+import { Ember } from '@/components/ember';
 import { LevelBar } from '@/components/level-bar';
 import { NudgeBanner } from '@/components/nudge-banner';
 import { StreakHero } from '@/components/streak-hero';
@@ -12,6 +13,7 @@ import { WeekDots } from '@/components/week-dots';
 import { WorkoutRow } from '@/components/workout-row';
 import { Colors, Spacing } from '@/constants/theme';
 import { useHealthSync } from '@/hooks/use-health-sync';
+import { useEmber } from '@/hooks/use-ember';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
@@ -22,6 +24,7 @@ export default function HomeScreen() {
   const { sync, syncing, error: syncError } = useHealthSync();
   const { data, isPending, error } = useHomeData();
   const { data: xp } = useXpTotal();
+  const ember = useEmber();
 
   const days = buildWeek(data?.weekWorkouts ?? [], profile.min_workout_minutes);
   const activeDays = days.filter((d) => d.active).length;
@@ -36,7 +39,19 @@ export default function HomeScreen() {
           <RefreshControl refreshing={syncing} onRefresh={sync} tintColor={Colors.flame} />
         }>
         <View style={styles.titleRow}>
-          <AppText variant="title">{firstName ? `Hey, ${firstName}` : 'Hey there'}</AppText>
+          <Link href="/greeting" asChild>
+            <Pressable accessibilityLabel="Talk to Ember" hitSlop={8}>
+              <Ember mood={ember?.mood ?? 'ready'} size={52} />
+            </Pressable>
+          </Link>
+          <View style={{ flex: 1 }}>
+            <AppText variant="title">{firstName ? `Hey, ${firstName}` : 'Hey there'}</AppText>
+            {ember && (
+              <AppText variant="caption" numberOfLines={2}>
+                {ember.headline}
+              </AppText>
+            )}
+          </View>
           <Link href="/log" asChild>
             <Pressable hitSlop={12} accessibilityLabel="Log a workout">
               <SymbolView name="plus.circle.fill" size={30} tintColor={Colors.flame} />
@@ -58,7 +73,7 @@ export default function HomeScreen() {
           <ActivityIndicator color={Colors.flame} style={{ marginTop: Spacing.xl }} />
         ) : (
           <>
-            <StreakHero streak={data?.streak ?? null} state={state} />
+            <StreakHero streak={data?.streak ?? null} state={state} resting={!!profile.resting_since} />
             <WeekDots days={days} goal={profile.weekly_goal} />
             <ActivityRings today={data?.today ?? null} />
 
@@ -93,5 +108,5 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
-  titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
 });

@@ -1,6 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 import { Colors } from '@/constants/theme';
+import { useDailyGreeting } from '@/hooks/use-ember';
 import { usePushLifecycle } from '@/hooks/use-push';
 import { useAuth } from '@/lib/auth';
 
@@ -11,6 +12,11 @@ export default function TabsLayout() {
   // Screens below assume a loaded profile; during sign-out it disappears a
   // frame before the root navigator switches away.
   if (!profile) return null;
+  return <Tabs />;
+}
+
+function Tabs() {
+  useDailyGreeting();
 
   return (
     <NativeTabs tintColor={Colors.flame}>

@@ -1,9 +1,11 @@
 import * as Haptics from 'expo-haptics';
+import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Ember } from '@/components/ember';
 import { LevelBar } from '@/components/level-bar';
 import { PushPrompt } from '@/components/push-prompt';
 import { StreakHistory } from '@/components/streak-history';
@@ -13,6 +15,7 @@ import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
 import { signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
+import { supabase } from '@/lib/supabase';
 
 export default function MeScreen() {
   const profile = useProfile();
@@ -79,6 +82,8 @@ export default function MeScreen() {
             Changes apply to this week right away. Past weeks keep the goal they had.
           </AppText>
         </Card>
+
+        <RestModeCard resting={!!profile.resting_since} />
 
         <Card>
           <AppText variant="label">Your invite code</AppText>
@@ -149,6 +154,35 @@ function Stat({ label, value, unit, color }: { label: string; value: number; uni
   );
 }
 
+function RestModeCard({ resting }: { resting: boolean }) {
+  const queryClient = useQueryClient();
+  const [saving, setSaving] = useState(false);
+
+  const setRest = async (on: boolean) => {
+    setSaving(true);
+    const { error } = await supabase.rpc('set_rest_mode', { p_on: on });
+    setSaving(false);
+    if (error) Alert.alert('Could not change rest mode', error.message);
+    await queryClient.invalidateQueries();
+  };
+
+  return (
+    <Card>
+      <View style={styles.restRow}>
+        <Ember mood={resting ? 'sleepy' : 'ready'} size={40} />
+        <View style={{ flex: 1 }}>
+          <AppText variant="heading">Rest mode</AppText>
+          <AppText variant="caption">
+            Sick, injured, or traveling? Missed weeks won’t break your streak (or use a freeze),
+            and reminders pause. Workouts still count.
+          </AppText>
+        </View>
+        <Switch value={resting} disabled={saving} trackColor={{ true: Colors.rest }} onValueChange={setRest} />
+      </View>
+    </Card>
+  );
+}
+
 function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => Promise<unknown> }) {
   return (
     <View style={styles.toggle}>
@@ -180,6 +214,7 @@ const styles = StyleSheet.create({
   stats: { flexDirection: 'row', gap: Spacing.sm },
   stat: { flex: 1, gap: Spacing.xs },
   stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  restRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   toggle: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: 4 },
   inviteRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
   stepButton: {

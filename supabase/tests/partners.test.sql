@@ -36,7 +36,10 @@ grant select on codes to authenticated;
 select ok((select bool_and(invite_code ~ '^[A-HJKMNP-Z2-9]{6}$') from codes),
   'every profile gets a 6-character invite code');
 
--- Blair already has a workout before Alex connects.
+-- Blair (goal 1/week) already has a workout before Alex connects. The goal is
+-- set first: past weeks keep the goal they had, so raising it later wouldn't
+-- count once that week is over.
+update public.profiles set weekly_goal = 1 where id = '00000000-0000-0000-0000-00000000000b';
 create temp table b_workout as
   select pg_temp.add_workout('00000000-0000-0000-0000-00000000000b', '2026-09-22 07:00Z', 30) as id;
 grant select on b_workout to authenticated;
@@ -129,7 +132,6 @@ update public.workouts set photo_paths = '{"b/x/1.jpg"}' where id = (select id f
 select is(pg_temp.xp('00000000-0000-0000-0000-00000000000b', 'evidence'), 5::bigint,
   'adding photo evidence earns 5 XP');
 
-update public.profiles set weekly_goal = 1 where id = '00000000-0000-0000-0000-00000000000b';
 select is(pg_temp.xp('00000000-0000-0000-0000-00000000000b', 'week_goal'), 50::bigint,
   'hitting the weekly goal earns 50 XP');
 

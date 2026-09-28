@@ -22,6 +22,7 @@ export type Database = {
           notify_partner_requests: boolean;
           notify_verifications: boolean;
           notify_streak_reminders: boolean;
+          resting_since: string | null;
           created_at: string;
         };
         Insert: never;
@@ -122,7 +123,7 @@ export type Database = {
           week_start: string;
           active_days: number;
           goal: number;
-          status: 'hit' | 'frozen' | 'missed' | 'in_progress';
+          status: 'hit' | 'frozen' | 'missed' | 'in_progress' | 'rest';
         };
         Insert: never;
         Update: never;
@@ -211,6 +212,10 @@ export type Database = {
       };
       respond_to_partner: {
         Args: { p_id: string; p_accept: boolean };
+        Returns: undefined;
+      };
+      set_rest_mode: {
+        Args: { p_on: boolean };
         Returns: undefined;
       };
       register_push_token: {

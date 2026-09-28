@@ -187,3 +187,23 @@ export function useToggleReaction() {
           ),
   );
 }
+
+/** Who verified one of your recent workouts in the last two days. */
+export function useRecentVerifications(workoutIds: string[]) {
+  const userId = useAuth().session?.user.id;
+  return useQuery({
+    queryKey: ['social', 'verifications', userId, ...workoutIds],
+    enabled: !!userId && workoutIds.length > 0,
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from('reactions')
+          .select('user_id, created_at')
+          .eq('kind', 'verified')
+          .neq('user_id', userId!)
+          .in('workout_id', workoutIds)
+          .gte('created_at', new Date(Date.now() - 48 * 3600 * 1000).toISOString())
+          .order('created_at', { ascending: false }),
+      ),
+  });
+}

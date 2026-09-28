@@ -6,7 +6,15 @@ import { Colors, Radius, Spacing } from '@/constants/theme';
 import type { Streak } from '@/lib/database.types';
 import type { WeekState } from '@/lib/week';
 
-export function StreakHero({ streak, state }: { streak: Streak | null; state: WeekState }) {
+export function StreakHero({
+  streak,
+  state,
+  resting = false,
+}: {
+  streak: Streak | null;
+  state: WeekState;
+  resting?: boolean;
+}) {
   const weeks = streak?.current_weeks ?? 0;
   const lit = weeks > 0 || state.kind === 'done';
 
@@ -27,8 +35,8 @@ export function StreakHero({ streak, state }: { streak: Streak | null; state: We
         </View>
         <FreezeChips count={streak?.freezes_banked ?? 0} />
       </View>
-      <AppText variant="body" color={messageColor(state)}>
-        {message(state, weeks)}
+      <AppText variant="body" color={resting ? Colors.rest : messageColor(state)}>
+        {resting ? 'Rest mode is on. Your streak is protected 😴' : message(state, weeks)}
       </AppText>
     </Card>
   );

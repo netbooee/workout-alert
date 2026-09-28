@@ -15,6 +15,7 @@ export const Colors = {
   freezeSoft: 'rgba(125, 211, 252, 0.16)',
   success: '#34D399',
   xp: '#FFD60A',
+  rest: '#8B96E9',
   xpSoft: 'rgba(255, 214, 10, 0.16)',
   danger: '#F87171',
 

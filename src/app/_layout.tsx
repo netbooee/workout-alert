@@ -68,6 +68,10 @@ function RootNavigator() {
         <Stack.Screen name="add-partner" options={{ presentation: 'modal' }} />
         <Stack.Screen name="invite/[code]" options={{ presentation: 'modal' }} />
         <Stack.Screen
+          name="greeting"
+          options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+        />
+        <Stack.Screen
           name="celebrate"
           options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
         />

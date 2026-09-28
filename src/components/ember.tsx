@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useId } from 'react';
 import { View } from 'react-native';
 import Animated, {
   Easing,
@@ -23,6 +23,8 @@ const VIEW_H = 120;
  */
 export function Ember({ mood, size = 120 }: { mood: EmberMood; size?: number }) {
   const look = EMBER_LOOKS[mood];
+  // Gradient ids must be unique per instance (several Embers can be mounted).
+  const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const breathe = useSharedValue(0);
   const shake = useSharedValue(0);
 
@@ -62,21 +64,21 @@ export function Ember({ mood, size = 120 }: { mood: EmberMood; size?: number }) 
       <Animated.View style={[{ flex: 1 }, animated]}>
         <Svg width="100%" height="100%" viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}>
           <Defs>
-            <LinearGradient id="outer" x1="0" y1="0" x2="0" y2="1">
+            <LinearGradient id={`outer${uid}`} x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0" stopColor={look.inner} />
               <Stop offset="1" stopColor={look.outer} />
             </LinearGradient>
-            <LinearGradient id="inner" x1="0" y1="0" x2="0" y2="1">
+            <LinearGradient id={`inner${uid}`} x1="0" y1="0" x2="0" y2="1">
               <Stop offset="0" stopColor="#FFF3C4" />
               <Stop offset="1" stopColor={look.inner} />
             </LinearGradient>
           </Defs>
           <Path
-            fill="url(#outer)"
+            fill={`url(#outer${uid})`}
             d="M50 4 C58 22 84 36 85 66 C86 94 70 115 50 115 C30 115 14 94 15 68 C16 48 30 40 35 24 C40 32 43 36 46 40 C45 26 47 15 50 4 Z"
           />
           <Path
-            fill="url(#inner)"
+            fill={`url(#inner${uid})`}
             opacity={0.85}
             d="M50 42 C58 55 71 63 71 82 C71 99 62 109 50 109 C38 109 29 99 29 83 C29 69 42 60 50 42 Z"
           />

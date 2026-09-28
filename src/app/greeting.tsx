@@ -5,16 +5,16 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Ember } from '@/components/ember';
+import { Lotl } from '@/components/lotl';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { useEmber } from '@/hooks/use-ember';
-import { EMBER_LOOKS } from '@/lib/ember';
+import { useLotl } from '@/hooks/use-lotl';
+import { LOTL_LOOKS } from '@/lib/lotl';
 
-/** Ember's once-a-day greeting: mood, one headline, up to three facts, one action. */
+/** Lotl's once-a-day greeting: mood, one headline, up to three facts, one action. */
 export default function GreetingScreen() {
-  // The greeting is the one place Ember may be properly fired up.
-  const message = useEmber({ calm: false });
+  // The greeting is the one place Lotl may be properly fired up.
+  const message = useLotl({ calm: false });
 
   useEffect(() => {
     if (!message) return;
@@ -35,7 +35,7 @@ export default function GreetingScreen() {
     );
   }
 
-  const look = EMBER_LOOKS[message.mood];
+  const look = LOTL_LOOKS[message.mood];
   const act = () => {
     router.back();
     if (message.action.href) router.push(message.action.href);
@@ -46,7 +46,7 @@ export default function GreetingScreen() {
       <View style={styles.body}>
         <Animated.View entering={ZoomIn.springify().damping(10)} style={styles.stage}>
           <View style={[styles.glow, { backgroundColor: look.accent }]} />
-          <Ember mood={message.mood} size={170} />
+          <Lotl mood={message.mood} size={170} />
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200)} style={[styles.bubble, { borderColor: look.accent }]}>

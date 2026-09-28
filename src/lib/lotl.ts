@@ -1,23 +1,23 @@
-// Ember, the streak mascot (an axolotl): decides its mood, what it says, and
+// Lotl, the streak mascot (an axolotl): decides its mood, what it says, and
 // what it suggests you do. Pure (no React Native imports) so it's unit-testable and so
 // a future home-screen widget can reuse the same rules and look.
 
 import { dayKey, weekState } from '@/lib/week';
 
-export type EmberMood = 'blazing' | 'happy' | 'ready' | 'worried' | 'fired_up' | 'sleepy';
+export type LotlMood = 'blazing' | 'happy' | 'ready' | 'worried' | 'fired_up' | 'sleepy';
 
 /**
  * How each mood looks: an axolotl whose color and gills show how it feels
  * (gills flare up when happy or fired up, droop when worried or sleepy).
  * Shared by the in-app character and a future home-screen widget.
  */
-export const EMBER_LOOKS: Record<
-  EmberMood,
+export const LOTL_LOOKS: Record<
+  LotlMood,
   {
     body: string;
     belly: string;
     gills: string;
-    /** Glow and speech-bubble color around Ember. */
+    /** Glow and speech-bubble color around Lotl. */
     accent: string;
     /** Degrees the gills tilt up (+) or droop (−). */
     gillLift: number;
@@ -33,7 +33,7 @@ export const EMBER_LOOKS: Record<
   sleepy: { body: '#BDB8F2', belly: '#E6E3FF', gills: '#8C86E2', accent: '#8B96E9', gillLift: -30, scale: 0.94, label: 'Resting' },
 };
 
-export interface EmberInput {
+export interface LotlInput {
   now: Date;
   firstName?: string | null;
   streakWeeks: number;
@@ -51,22 +51,22 @@ export interface EmberInput {
   calm?: boolean;
 }
 
-export interface EmberFact {
+export interface LotlFact {
   emoji: string;
   text: string;
 }
 
-export interface EmberMessage {
-  mood: EmberMood;
+export interface LotlMessage {
+  mood: LotlMood;
   headline: string;
-  facts: EmberFact[];
+  facts: LotlFact[];
   action: { label: string; href: '/log' | '/partners' | null };
 }
 
-/** Days without a workout before Ember gets fired up. */
+/** Days without a workout before Lotl gets fired up. */
 export const IDLE_DAYS = 4;
 
-export function emberMood(i: EmberInput): EmberMood {
+export function lotlMood(i: LotlInput): LotlMood {
   if (i.resting) return 'sleepy';
   if (i.weekDays >= i.weekGoal) return 'blazing';
 
@@ -76,7 +76,7 @@ export function emberMood(i: EmberInput): EmberMood {
   // freeze it's covered, so never get angry about it.
   const doomed = state.kind === 'out-of-reach' && i.streakWeeks > 0 && i.freezes === 0;
 
-  let mood: EmberMood;
+  let mood: LotlMood;
   if (idle || doomed) mood = 'fired_up';
   else if (state.kind === 'at-risk' || state.kind === 'out-of-reach') mood = 'worried';
   else if (i.weekDays === 0) mood = 'ready';
@@ -94,7 +94,7 @@ type Line = (v: Vars) => string;
 const days = (n: number) => `${n} day${n === 1 ? '' : 's'}`;
 const workouts = (n: number) => `${n} workout${n === 1 ? '' : 's'}`;
 
-const LINES: Record<EmberMood, Line[]> = {
+const LINES: Record<LotlMood, Line[]> = {
   blazing: [
     (v) => `${v.goal} for ${v.goal}. You're unstoppable, ${v.name}. 🔥`,
     () => 'Week goal: crushed. My gills are doing a happy dance.',
@@ -141,8 +141,8 @@ function pick<T>(items: T[], seed: string): T {
 
 const ORDINAL = ['1st', '2nd', '3rd'];
 
-export function emberMessage(i: EmberInput): EmberMessage {
-  const mood = emberMood(i);
+export function lotlMessage(i: LotlInput): LotlMessage {
+  const mood = lotlMood(i);
   const state = weekState(i.weekDays, i.weekGoal, i.now);
   const vars: Vars = {
     name: i.firstName?.trim() || 'friend',
@@ -154,7 +154,7 @@ export function emberMessage(i: EmberInput): EmberMessage {
   };
   const headline = pick(LINES[mood], `${dayKey(i.now)}:${mood}`)(vars);
 
-  const facts: EmberFact[] = [];
+  const facts: LotlFact[] = [];
   facts.push(
     i.resting
       ? { emoji: '😴', text: `Rest mode on · ${i.streakWeeks}-week streak protected` }
@@ -180,7 +180,7 @@ export function emberMessage(i: EmberInput): EmberMessage {
     );
   }
 
-  let action: EmberMessage['action'];
+  let action: LotlMessage['action'];
   if (mood === 'blazing') action = { label: 'See the league', href: '/partners' };
   else if (mood === 'sleepy') action = { label: 'Rest easy', href: null };
   else if (i.nudgedBy) action = { label: 'Log a workout', href: '/log' };

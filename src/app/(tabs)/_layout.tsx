@@ -1,7 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 import { Colors } from '@/constants/theme';
-import { useDailyGreeting } from '@/hooks/use-ember';
+import { useDailyGreeting } from '@/hooks/use-lotl';
 import { usePushLifecycle } from '@/hooks/use-push';
 import { useAuth } from '@/lib/auth';
 

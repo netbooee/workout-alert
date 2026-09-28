@@ -20,7 +20,7 @@ import Svg, {
   Text as SvgText,
 } from 'react-native-svg';
 
-import { EMBER_LOOKS, type EmberMood } from '@/lib/ember';
+import { LOTL_LOOKS, type LotlMood } from '@/lib/lotl';
 
 const FACE = '#3B1E2B';
 const VIEW_W = 100;
@@ -38,13 +38,13 @@ const GILLS: { x: number; y: number; angle: number }[] = [
 const GILL_LENGTH = 18;
 
 /**
- * Ember, the streak axolotl. Drawn in code so every mood is crisp at any size;
+ * Lotl, the streak axolotl. Drawn in code so every mood is crisp at any size;
  * a Rive version can later replace this component without touching the mood
- * logic in lib/ember.ts.
+ * logic in lib/lotl.ts.
  */
-export function Ember({ mood, size = 120 }: { mood: EmberMood; size?: number }) {
-  const look = EMBER_LOOKS[mood];
-  // Gradient ids must be unique per instance (several Embers can be mounted).
+export function Lotl({ mood, size = 120 }: { mood: LotlMood; size?: number }) {
+  const look = LOTL_LOOKS[mood];
+  // Gradient ids must be unique per instance (several Lotls can be mounted).
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
   const breathe = useSharedValue(0);
   const shake = useSharedValue(0);
@@ -154,7 +154,7 @@ function Gills({ color, lift }: { color: string; lift: number }) {
   );
 }
 
-function Face({ mood }: { mood: EmberMood }) {
+function Face({ mood }: { mood: LotlMood }) {
   const stroke = { stroke: FACE, strokeWidth: 3, strokeLinecap: 'round' as const, fill: 'none' };
   // Axolotl eyes sit wide apart.
   const roundEyes = (

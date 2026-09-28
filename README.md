@@ -28,19 +28,19 @@ they're consistent across devices and can't be edited by the client.
 - **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
 - Long-press a partner card to remove them.
 
-## Ember, the streak mascot
+## Lotl, the streak mascot
 
 - A pink axolotl whose face, color, and gills reflect how your week is going (gills
   flare up when things are good, droop when they're not): **blazing** (goal hit),
   **happy** (on track), **ready** (fresh week), **worried** (streak at risk), **fired up**
   (4+ idle days, or the week is lost with no freeze), and **sleepy** (rest mode).
-- The first time you open the app each day, Ember greets you full-screen with one headline,
+- The first time you open the app each day, Lotl greets you full-screen with one headline,
   up to three facts (streak, nudges, verifications, partners, league) and one action.
   After that it lives in the Home header; tap it to see the greeting again.
 - Playful, never shaming: never angry when a freeze covers the week, and "fired up" only on
   the daily greeting (the header calms down to worried).
-- Mood rules and copy live in `src/lib/ember.ts` (unit-tested); the drawing is
-  `src/components/ember.tsx`. The mood → color/scale table is shared so a widget can match.
+- Mood rules and copy live in `src/lib/lotl.ts` (unit-tested); the drawing is
+  `src/components/lotl.tsx`. The mood → color/scale table is shared so a widget can match.
 
 ## Rest mode
 
@@ -181,6 +181,6 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 7. ~~Pushes for partner requests, verified workouts, and streak-at-risk reminders~~
 8. Achievements/badges, self-set rewards, challenges
 9. Background HealthKit delivery
-10. ~~Ember mascot, daily greeting, rest mode~~
-11. **Home-screen widget with Ember** (same faces and moods; needs a native WidgetKit
-    extension, and the mood data is already shared in `EMBER_LOOKS` / `emberMood`)
+10. ~~Lotl mascot, daily greeting, rest mode~~
+11. **Home-screen widget with Lotl** (same faces and moods; needs a native WidgetKit
+    extension, and the mood data is already shared in `LOTL_LOOKS` / `lotlMood`)

@@ -4,7 +4,7 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, V
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityRings } from '@/components/activity-rings';
-import { Ember } from '@/components/ember';
+import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
 import { NudgeBanner } from '@/components/nudge-banner';
 import { StreakHero } from '@/components/streak-hero';
@@ -13,7 +13,7 @@ import { WeekDots } from '@/components/week-dots';
 import { WorkoutRow } from '@/components/workout-row';
 import { Colors, Spacing } from '@/constants/theme';
 import { useHealthSync } from '@/hooks/use-health-sync';
-import { useEmber } from '@/hooks/use-ember';
+import { useLotl } from '@/hooks/use-lotl';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
@@ -24,7 +24,7 @@ export default function HomeScreen() {
   const { sync, syncing, error: syncError } = useHealthSync();
   const { data, isPending, error } = useHomeData();
   const { data: xp } = useXpTotal();
-  const ember = useEmber();
+  const lotl = useLotl();
 
   const days = buildWeek(data?.weekWorkouts ?? [], profile.min_workout_minutes);
   const activeDays = days.filter((d) => d.active).length;
@@ -40,15 +40,15 @@ export default function HomeScreen() {
         }>
         <View style={styles.titleRow}>
           <Link href="/greeting" asChild>
-            <Pressable accessibilityLabel="Talk to Ember" hitSlop={8}>
-              <Ember mood={ember?.mood ?? 'ready'} size={52} />
+            <Pressable accessibilityLabel="Talk to Lotl" hitSlop={8}>
+              <Lotl mood={lotl?.mood ?? 'ready'} size={52} />
             </Pressable>
           </Link>
           <View style={{ flex: 1 }}>
             <AppText variant="title">{firstName ? `Hey, ${firstName}` : 'Hey there'}</AppText>
-            {ember && (
+            {lotl && (
               <AppText variant="caption" numberOfLines={2}>
-                {ember.headline}
+                {lotl.headline}
               </AppText>
             )}
           </View>

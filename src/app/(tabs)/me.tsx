@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Ember } from '@/components/ember';
+import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
 import { PushPrompt } from '@/components/push-prompt';
 import { StreakHistory } from '@/components/streak-history';
@@ -169,7 +169,7 @@ function RestModeCard({ resting }: { resting: boolean }) {
   return (
     <Card>
       <View style={styles.restRow}>
-        <Ember mood={resting ? 'sleepy' : 'ready'} size={40} />
+        <Lotl mood={resting ? 'sleepy' : 'ready'} size={40} />
         <View style={{ flex: 1 }}>
           <AppText variant="heading">Rest mode</AppText>
           <AppText variant="caption">

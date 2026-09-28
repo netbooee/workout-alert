@@ -11,16 +11,16 @@ import {
   useUnseenNudges,
 } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
-import { emberMessage, type EmberMessage } from '@/lib/ember';
+import { lotlMessage, type LotlMessage } from '@/lib/lotl';
 import { buildWeek, dayKey, startOfDay } from '@/lib/week';
 
 const firstName = (name: string) => name.split(' ')[0] ?? name;
 
 /**
- * Everything Ember needs to know, gathered from data the app already loads.
+ * Everything Lotl needs to know, gathered from data the app already loads.
  * `calm` softens "fired up" to "worried" (it's only allowed on the daily greeting).
  */
-export function useEmber({ calm = true }: { calm?: boolean } = {}): EmberMessage | null {
+export function useLotl({ calm = true }: { calm?: boolean } = {}): LotlMessage | null {
   const profile = useProfile();
   const { data: home } = useHomeData();
   const { data: nudges } = useUnseenNudges();
@@ -46,7 +46,7 @@ export function useEmber({ calm = true }: { calm?: boolean } = {}): EmberMessage
   const meIndex = league?.findIndex((r) => r.is_me) ?? -1;
   const ahead = meIndex > 0 ? league![meIndex - 1] : null;
 
-  return emberMessage({
+  return lotlMessage({
     now,
     firstName: profile.display_name ? firstName(profile.display_name) : null,
     streakWeeks: home.streak?.current_weeks ?? 0,
@@ -71,9 +71,9 @@ export function useEmber({ calm = true }: { calm?: boolean } = {}): EmberMessage
   });
 }
 
-const greetedKey = (userId: string) => `ember:greeted:${userId}`;
+const greetedKey = (userId: string) => `lotl:greeted:${userId}`;
 
-/** Opens Ember's greeting the first time the app is opened each day. */
+/** Opens Lotl's greeting the first time the app is opened each day. */
 export function useDailyGreeting() {
   const profile = useProfile();
   const { isSuccess } = useHomeData();

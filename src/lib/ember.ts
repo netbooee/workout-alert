@@ -1,22 +1,36 @@
-// Ember, the streak mascot: decides its mood, what it says, and what it
-// suggests you do. Pure (no React Native imports) so it's unit-testable and so
+// Ember, the streak mascot (an axolotl): decides its mood, what it says, and
+// what it suggests you do. Pure (no React Native imports) so it's unit-testable and so
 // a future home-screen widget can reuse the same rules and look.
 
 import { dayKey, weekState } from '@/lib/week';
 
 export type EmberMood = 'blazing' | 'happy' | 'ready' | 'worried' | 'fired_up' | 'sleepy';
 
-/** How each mood looks. Shared by the in-app character and a future widget. */
+/**
+ * How each mood looks: an axolotl whose color and gills show how it feels
+ * (gills flare up when happy or fired up, droop when worried or sleepy).
+ * Shared by the in-app character and a future home-screen widget.
+ */
 export const EMBER_LOOKS: Record<
   EmberMood,
-  { outer: string; inner: string; scale: number; label: string }
+  {
+    body: string;
+    belly: string;
+    gills: string;
+    /** Glow and speech-bubble color around Ember. */
+    accent: string;
+    /** Degrees the gills tilt up (+) or droop (−). */
+    gillLift: number;
+    scale: number;
+    label: string;
+  }
 > = {
-  blazing: { outer: '#FF8A1F', inner: '#FFD60A', scale: 1.12, label: 'Blazing' },
-  happy: { outer: '#FF6B1A', inner: '#FFB02E', scale: 1, label: 'Happy' },
-  ready: { outer: '#FF6B1A', inner: '#FFA23A', scale: 0.96, label: 'Ready' },
-  worried: { outer: '#E4572E', inner: '#F7A35C', scale: 0.86, label: 'Worried' },
-  fired_up: { outer: '#D62828', inner: '#FF6B1A', scale: 0.76, label: 'Fired up' },
-  sleepy: { outer: '#6C7BD9', inner: '#AFC2FF', scale: 0.9, label: 'Resting' },
+  blazing: { body: '#FF8FB1', belly: '#FFD6E3', gills: '#FF4D7E', accent: '#FF6B9A', gillLift: 24, scale: 1.06, label: 'Blazing' },
+  happy: { body: '#FFA3C2', belly: '#FFE2EC', gills: '#FF6F9B', accent: '#FF8FB1', gillLift: 10, scale: 1, label: 'Happy' },
+  ready: { body: '#FFB3CB', belly: '#FFE8F0', gills: '#FF85A8', accent: '#FF9CBB', gillLift: 0, scale: 0.98, label: 'Ready' },
+  worried: { body: '#F2B8C9', belly: '#FBE5EC', gills: '#DE8CA5', accent: '#E58AA6', gillLift: -20, scale: 0.94, label: 'Worried' },
+  fired_up: { body: '#FF7F7F', belly: '#FFCFC7', gills: '#E03131', accent: '#E03131', gillLift: 32, scale: 0.97, label: 'Fired up' },
+  sleepy: { body: '#BDB8F2', belly: '#E6E3FF', gills: '#8C86E2', accent: '#8B96E9', gillLift: -30, scale: 0.94, label: 'Resting' },
 };
 
 export interface EmberInput {
@@ -83,17 +97,17 @@ const workouts = (n: number) => `${n} workout${n === 1 ? '' : 's'}`;
 const LINES: Record<EmberMood, Line[]> = {
   blazing: [
     (v) => `${v.goal} for ${v.goal}. You're unstoppable, ${v.name}. 🔥`,
-    () => 'Week goal: crushed. I have never burned this bright.',
-    (v) => (v.streak > 1 ? `${v.streak} weeks strong. Rest up, champ.` : 'Goal hit! Look at me glow.'),
+    () => 'Week goal: crushed. My gills are doing a happy dance.',
+    (v) => (v.streak > 1 ? `${v.streak} weeks strong. Rest up, champ.` : 'Goal hit! Look at me wiggle.'),
   ],
   happy: [
     (v) => `${v.needed} to go and ${days(v.left)} to do it. Easy.`,
     (v) => `Nice work, ${v.name}. ${workouts(v.needed)} left this week.`,
-    () => "We're cooking. Keep that fire fed. 🔥",
+    () => "We're cooking. Keep those fins moving. 🔥",
   ],
   ready: [
     () => "New week, clean slate. Let's get the first one in.",
-    (v) => `Morning, ${v.name}! I'm warmed up. Are you?`,
+    (v) => `Morning, ${v.name}! Gills fluffed, ready to go. Are you?`,
     (v) => `${workouts(v.goal)} this week. First one's the hardest. Let's go.`,
   ],
   worried: [
@@ -107,14 +121,14 @@ const LINES: Record<EmberMood, Line[]> = {
   fired_up: [
     (v) =>
       v.idle >= IDLE_DAYS
-        ? `It's been ${days(v.idle)}. I'm literally going out. Move! 😤`
-        : "This week's slipping and so am I. Do something!",
+        ? `It's been ${days(v.idle)}. I'm literally drying out here. Move! 😤`
+        : "This week's slipping and my gills are shaking. Do something!",
     (v) => `${v.name}. Shoes. On. Now. I believe in you (angrily).`,
-    () => "I didn't flicker this hard to watch you sit there. Up! 😤",
+    () => "I didn't regrow a whole leg to watch you sit there. Up! 😤",
   ],
   sleepy: [
     () => 'Resting up. Your streak is safe with me. 😴',
-    (v) => `Get well, ${v.name}. I'll keep the embers warm.`,
+    (v) => `Get well, ${v.name}. I'll keep the water warm.`,
     () => "Zzz… no pressure this week. Come back when you're ready.",
   ],
 };

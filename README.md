@@ -30,7 +30,8 @@ they're consistent across devices and can't be edited by the client.
 
 ## Ember, the streak mascot
 
-- A little flame whose mood reflects how your week is going: **blazing** (goal hit),
+- A pink axolotl whose face, color, and gills reflect how your week is going (gills
+  flare up when things are good, droop when they're not): **blazing** (goal hit),
   **happy** (on track), **ready** (fresh week), **worried** (streak at risk), **fired up**
   (4+ idle days, or the week is lost with no freeze), and **sleepy** (rest mode).
 - The first time you open the app each day, Ember greets you full-screen with one headline,

@@ -45,12 +45,12 @@ export default function GreetingScreen() {
     <SafeAreaView style={styles.container}>
       <View style={styles.body}>
         <Animated.View entering={ZoomIn.springify().damping(10)} style={styles.stage}>
-          <View style={[styles.glow, { backgroundColor: look.outer }]} />
+          <View style={[styles.glow, { backgroundColor: look.accent }]} />
           <Ember mood={message.mood} size={170} />
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(200)} style={[styles.bubble, { borderColor: look.outer }]}>
-          <View style={[styles.tail, { borderBottomColor: look.outer }]} />
+        <Animated.View entering={FadeInDown.delay(200)} style={[styles.bubble, { borderColor: look.accent }]}>
+          <View style={[styles.tail, { borderBottomColor: look.accent }]} />
           <AppText variant="title" style={styles.headline}>
             {message.headline}
           </AppText>

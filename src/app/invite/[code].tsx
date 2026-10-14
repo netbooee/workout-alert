@@ -6,7 +6,7 @@ import { AppText, Button } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useRequestPartner } from '@/hooks/use-social';
 
-/** Handles streaks://invite/CODE links shared from the Add partner screen. */
+/** Handles sigamos://invite/CODE links shared from the Add partner screen. */
 export default function InviteScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
   const { mutate, data, error, isPending } = useRequestPartner();

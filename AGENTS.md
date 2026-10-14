@@ -42,7 +42,7 @@ Docs: https://docs.expo.dev/eas/index.md
 
 ## This project
 
-Streaks: an iOS-only social workout-accountability app. See README.md for product rules.
+Sigamos (Spanish for "let's keep going"): an iOS-only social workout-accountability app. See README.md for product rules.
 
 - Backend is Supabase. Schema changes go in a **new** file under `supabase/migrations/`; never edit an applied migration. Keep `src/lib/database.types.ts` in sync (or regenerate with `npx supabase gen types typescript --linked`).
 - Streak logic lives in Postgres (`public.recompute_streak`) and is covered by `supabase/tests/*.test.sql` (pgTAP). Change both together.

@@ -15,8 +15,8 @@ export default function AddPartnerScreen() {
   const share = () =>
     Share.share({
       message:
-        `Be my workout accountability partner on Streaks 🔥\n\n` +
-        `Open this link: streaks://invite/${profile.invite_code}\n` +
+        `Be my workout accountability partner on Sigamos 🔥\n\n` +
+        `Open this link: sigamos://invite/${profile.invite_code}\n` +
         `or enter my code: ${profile.invite_code}`,
     });
 

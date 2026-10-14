@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "Streaks",
-    "slug": "streaks",
+    "name": "Sigamos",
+    "slug": "sigamos",
     "version": "0.1.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "streaks",
+    "scheme": "sigamos",
     "userInterfaceStyle": "dark",
     "ios": {
-      "bundleIdentifier": "com.netbooee.streaks",
+      "bundleIdentifier": "com.netbooee.sigamos",
       "supportsTablet": false,
       "usesAppleSignIn": true
     },
@@ -18,8 +18,8 @@
       [
         "expo-image-picker",
         {
-          "photosPermission": "Streaks uses your photos so you can share workout check-ins with your accountability partners.",
-          "cameraPermission": "Streaks uses the camera so you can snap workout check-ins for your accountability partners.",
+          "photosPermission": "Sigamos uses your photos so you can share workout check-ins with your accountability partners.",
+          "cameraPermission": "Sigamos uses the camera so you can snap workout check-ins for your accountability partners.",
           "microphonePermission": false
         }
       ],
@@ -27,7 +27,7 @@
       [
         "@kingstinct/react-native-healthkit",
         {
-          "NSHealthShareUsageDescription": "Streaks reads your workouts, steps, and heart rate to keep your weekly streak up to date and share progress with your crew.",
+          "NSHealthShareUsageDescription": "Sigamos reads your workouts, steps, and heart rate to keep your weekly streak up to date and share progress with your crew.",
           "NSHealthUpdateUsageDescription": false
         }
       ],

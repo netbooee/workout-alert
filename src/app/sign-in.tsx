@@ -16,7 +16,7 @@ export default function SignInScreen() {
       <KeyboardAvoidingView behavior="padding" style={styles.inner}>
         <View style={styles.hero}>
           <SymbolView name="flame.fill" size={72} tintColor={Colors.flame} />
-          <AppText variant="title">Streaks</AppText>
+          <AppText variant="title">Sigamos</AppText>
           <AppText variant="body" color={Colors.textSecondary} style={{ textAlign: 'center' }}>
             Work out with your people. Keep the streak alive together.
           </AppText>

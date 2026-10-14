@@ -23,5 +23,5 @@ export default ({ config }: ConfigContext): ExpoConfig => {
     ? { ...config.extra, eas: { ...config.extra?.eas, projectId: easProjectId } }
     : config.extra;
 
-  return { ...config, name: config.name ?? 'Streaks', slug: config.slug ?? 'streaks', plugins, extra };
+  return { ...config, name: config.name ?? 'Sigamos', slug: config.slug ?? 'sigamos', plugins, extra };
 };

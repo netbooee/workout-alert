@@ -1,4 +1,6 @@
-# Streaks
+# Sigamos
+
+*Spanish for "let's keep going."*
 
 An iOS app for working out with friends and family. Workouts sync automatically
 from Apple Health, and a **weekly streak** grows every week you hit your goal.
@@ -17,7 +19,7 @@ they're consistent across devices and can't be edited by the client.
 ## Accountability partners
 
 - Everyone has a 6-character **invite code** (Me tab, or Partners → add). Share it as a link
-  (`streaks://invite/CODE`) or have your partner type it in. Once they accept, it's mutual.
+  (`sigamos://invite/CODE`) or have your partner type it in. Once they accept, it's mutual.
 - Partners see each other's **workouts, streaks, weekly progress, and check-in photos**, and
   nobody else can (enforced by row-level security and storage policies).
 - **Check-ins**: workouts from Apple Health show where they came from ("Heart rate from Sam's
@@ -128,12 +130,12 @@ Apple both require one), and a Supabase project.
    ```
 
 3. **Auth** (Supabase dashboard → Authentication):
-   - **Sign in with Apple**: enable the Apple provider and add `com.netbooee.streaks`
+   - **Sign in with Apple**: enable the Apple provider and add `com.netbooee.sigamos`
      (or your own bundle ID from `app.json`) under *Client IDs*. Native sign-in doesn't
      need the secret key.
    - **Google** (optional):
      1. In [Google Cloud Console](https://console.cloud.google.com/apis/credentials), create an
-        OAuth client ID of type **iOS** with bundle ID `com.netbooee.streaks`. Also create a
+        OAuth client ID of type **iOS** with bundle ID `com.netbooee.sigamos`. Also create a
         **Web application** client if you don't have one; Supabase's form asks for it.
      2. In Supabase, enable the Google provider. Put the web client ID and secret in the form,
         add the **iOS client ID** under *Authorized Client IDs*, and turn on

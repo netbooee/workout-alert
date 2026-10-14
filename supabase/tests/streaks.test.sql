@@ -127,6 +127,14 @@ select is((pg_temp.recompute('00000000-0000-0000-0000-00000000000a')).this_week_
 
 -- ─── Row level security ──────────────────────────────────────────────────────
 
+create function pg_temp.try_write_streaks() returns void language plpgsql as $$
+begin
+  update public.streaks set current_weeks = 999;
+exception when insufficient_privilege then
+  null;
+end;
+$$;
+
 set local role authenticated;
 set local request.jwt.claims = '{"sub": "00000000-0000-0000-0000-00000000000b"}';
 
@@ -138,8 +146,10 @@ select throws_ok(
   $$insert into public.workouts (user_id, activity_type, started_at, ended_at, duration_s)
     values ('00000000-0000-0000-0000-00000000000a', 'running', now(), now(), 60)$$,
   '42501', null, 'users cannot insert workouts for someone else');
-select is_empty(
-  $$update public.streaks set current_weeks = 999 returning 1$$,
+-- Depending on the project's default grants this is either refused outright
+-- (no UPDATE privilege) or silently filtered by RLS; either way nothing changes.
+select pg_temp.try_write_streaks();
+select is((select count(*) from public.streaks where current_weeks = 999), 0::bigint,
   'users cannot write streaks directly');
 select is((public.refresh_my_streak()).user_id, '00000000-0000-0000-0000-00000000000b'::uuid,
   'refresh_my_streak recomputes and returns the caller''s streak');

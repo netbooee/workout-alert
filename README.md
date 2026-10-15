@@ -239,6 +239,17 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 
 ## Roadmap
 
+### Next: after TestFlight testing (required before the App Store)
+
+- **App icon.** The app still uses Expo's placeholder icon (`assets/images/icon.png`). Replace it
+  with a Sigamos icon, e.g. Lotl on flame orange, using the same artwork as the website
+  (`website/img/lotl-*.svg`), plus a matching splash image. Needs a new build.
+- **In-app account deletion** (App Store guideline 5.1.1(v)). A "Delete account" option on the
+  Me tab with a confirmation, backed by a security-definer function that deletes the user's auth
+  account and cascades their data, and removes their photos and voice messages from storage.
+  Then update `website/privacy/` and `website/support/`, which currently say "email us" and
+  "coming soon".
+
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~
 3. ~~Weekly streak engine + Home screen~~

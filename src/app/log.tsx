@@ -7,7 +7,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react
 
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { useKeyboardOverlap } from '@/hooks/use-keyboard-overlap';
+import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { useProfile } from '@/lib/auth';
 import { showCelebrationIfEarned } from '@/lib/celebrate';
 import { addEvidencePhotos, MAX_PHOTOS, pickPhoto } from '@/lib/evidence';
@@ -31,7 +31,7 @@ const DURATIONS = [15, 30, 45, 60, 90];
 export default function LogWorkoutScreen() {
   const profile = useProfile();
   const queryClient = useQueryClient();
-  const { ref: screenRef, overlap: keyboardOverlap } = useKeyboardOverlap();
+  const keyboardHeight = useKeyboardHeight();
   const scrollRef = useRef<ScrollView>(null);
   const [type, setType] = useState<(typeof TYPES)[number]>('traditionalStrengthTraining');
   const [minutes, setMinutes] = useState(45);
@@ -78,7 +78,7 @@ export default function LogWorkoutScreen() {
   };
 
   return (
-    <View ref={screenRef} style={[styles.container, { paddingBottom: keyboardOverlap }]}>
+    <View style={[styles.container, { paddingBottom: keyboardHeight }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <AppText variant="heading" color={Colors.textSecondary}>
@@ -163,7 +163,7 @@ export default function LogWorkoutScreen() {
         </Card>
       </ScrollView>
 
-      <View style={[styles.footer, keyboardOverlap > 0 && { paddingBottom: Spacing.md }]}>
+      <View style={[styles.footer, keyboardHeight > 0 && { paddingBottom: Spacing.md }]}>
         <Button title={`Log ${minutes} min ${workoutLabel(type)}`} loading={saving} onPress={save} />
       </View>
     </View>

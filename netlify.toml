@@ -1,0 +1,22 @@
+# Netlify serves the static website in website/ (no build step).
+[build]
+  publish = "website"
+  command = "echo 'Static site, nothing to build'"
+
+# Every /invite/<CODE> link shows the invite page, which reads the code from the URL.
+[[redirects]]
+  from = "/invite/*"
+  to = "/invite/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    X-Frame-Options = "DENY"
+
+[[headers]]
+  for = "/img/*"
+  [headers.values]
+    Cache-Control = "public, max-age=604800"

@@ -219,6 +219,15 @@ Apple both require one), and a Supabase project.
    EAS creates the signing certificate, provisioning profile, and App Store Connect record,
    then uploads the build to TestFlight.
 
+## Website
+
+`website/` is the static site for **sigamos.cloud** (marketing page, `/privacy`, `/terms`,
+`/support`, and `/invite/<CODE>` fallback for invite links), deployed by Netlify from this repo
+(`netlify.toml`, no build step). Keep DNS at Hover so the Resend email records keep working: point
+`@` (A record) and `www` (CNAME) at Netlify. The TestFlight link is a placeholder
+(`REPLACE_ME`) in `website/index.html` and `website/invite/index.html`. Screenshots in
+`website/img/` come from the web preview; swap in real device screenshots when you have them.
+
 ## Checks
 
 ```sh

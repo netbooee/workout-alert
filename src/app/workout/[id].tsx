@@ -18,6 +18,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/avatar';
 import { Comments } from '@/components/comments';
 import { EvidenceBadges } from '@/components/evidence-badges';
+import { PhotoViewer } from '@/components/photo-viewer';
 import { ReactionBar, REACTIONS } from '@/components/reaction-bar';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -189,6 +190,8 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
   const queryClient = useQueryClient();
   const { data: urls } = useEvidenceUrls(workout.photo_paths);
   const [busy, setBusy] = useState(false);
+  const [viewing, setViewing] = useState<number | null>(null);
+  const loaded = workout.photo_paths.map((p) => urls?.[p]).filter((u): u is string => !!u);
 
   const refresh = () => queryClient.invalidateQueries({ queryKey: ['social'] });
 
@@ -229,7 +232,15 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
   return (
     <View style={styles.photos}>
       {workout.photo_paths.map((path) => (
-        <Pressable key={path} disabled={!editable} onLongPress={() => remove(path)} style={styles.photoSlot}>
+        <Pressable
+          key={path}
+          disabled={!urls?.[path]}
+          onPress={() => setViewing(loaded.indexOf(urls![path]!))}
+          onLongPress={editable ? () => remove(path) : undefined}
+          accessibilityRole="imagebutton"
+          accessibilityLabel="Open photo"
+          accessibilityHint={editable ? 'Press and hold to remove' : undefined}
+          style={styles.photoSlot}>
           {urls?.[path] ? (
             <Image source={urls[path]} style={StyleSheet.absoluteFill} contentFit="cover" transition={150} />
           ) : (
@@ -251,6 +262,7 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
           )}
         </Pressable>
       )}
+      <PhotoViewer urls={loaded} index={viewing} onClose={() => setViewing(null)} />
     </View>
   );
 }

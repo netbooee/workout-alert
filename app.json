@@ -28,6 +28,13 @@
           "microphonePermission": "Sigamos uses the microphone so you can record voice messages for your accountability partners."
         }
       ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Sigamos uses your photos so you can share workout check-ins with your accountability partners.",
+          "savePhotosPermission": "Sigamos saves check-in photos you choose to your photo library."
+        }
+      ],
       "expo-notifications",
       [
         "@kingstinct/react-native-healthkit",

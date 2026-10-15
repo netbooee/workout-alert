@@ -164,12 +164,17 @@ buddy** in the mood that matches your week.
 | Check-in photo on a workout | +5 |
 | Hitting your weekly goal | +50 |
 | Earning a partner's incentive | +100 |
+| A partner verifies your workout (✅), once per workout | +5 |
+| Verifying a partner's workout (up to 3 a day) | +2 |
 
 - **Levels** get progressively longer: L2 at 100 XP, L3 at 300, L5 at 1,000, L10 at 4,500.
 - **Weekly league**: you and your partners ranked by XP earned this week (Mon–Sun).
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
 - A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo).
+- **Verifying** doesn't change streaks: every 15+ minute workout counts, verified or not. It
+  earns XP on both sides, and "verified only" incentives count hand-logged workouts only once a
+  partner verifies them. Removing a ✅ takes its XP back.
 
 ## Stack
 

@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(24);
+select plan(25);
 
 create function pg_temp.act_as(p_user uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', p_user)::text, true);
@@ -50,10 +50,12 @@ select throws_ok(
   '42501', null, 'clients cannot write incentives directly');
 
 create temp table offer as
-  select * from public.offer_incentive('00000000-0000-0000-0000-00000000000b', 'workout_days', 3, 1, 'Coffee on me', '☕');
+  select * from public.offer_incentive('00000000-0000-0000-0000-00000000000b', 'workout_days', 3, 1, 'Coffee on me', '☕',
+    p_notes => '  Gym sessions count double. You pick the café!  ');
 grant select on offer to authenticated;
 
 select is((select status from offer), 'offered', 'a partner can offer an incentive');
+select is((select notes from offer), 'Gym sessions count double. You pick the café!', 'the offer keeps its rules and notes, trimmed');
 select throws_ok(
   $$select public.offer_incentive('00000000-0000-0000-0000-00000000000b', 'active_minutes', 60, 1, 'Pizza')$$,
   'P0001', 'You already have an incentive going with them', 'only one open incentive per partner');
@@ -62,7 +64,7 @@ reset role;
 select results_eq(
   $$select user_id, title, body from public.notifications where kind = 'incentive'$$,
   $$values ('00000000-0000-0000-0000-00000000000b'::uuid, 'Sam offered you an incentive 🎁'::text,
-            'Hit 3 workout days this week → ☕ Coffee on me'::text)$$,
+            'Hit 3 workout days this week → ☕ Coffee on me · Gym sessions count double. You pick the café!'::text)$$,
   'the recipient is notified of the offer');
 select is(
   (select extract(isodow from starts_at at time zone 'UTC')::int from offer), 1,

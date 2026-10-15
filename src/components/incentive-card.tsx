@@ -47,6 +47,18 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
         </View>
       </View>
 
+      {i.notes ? (
+        <View style={styles.notes}>
+          <AppText variant="label" style={{ fontSize: 11 }}>
+            Rules and notes
+          </AppText>
+          {/* Two lines on Home; the whole thing on the incentive screen. */}
+          <AppText variant="body" numberOfLines={linked ? 2 : undefined}>
+            {i.notes}
+          </AppText>
+        </View>
+      ) : null}
+
       {(i.status === 'active' || i.status === 'offered') && (
         <View style={{ gap: 6 }}>
           <View style={styles.track}>
@@ -127,6 +139,7 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
 }
 
 const styles = StyleSheet.create({
+  notes: { gap: 2, padding: Spacing.sm, borderRadius: Radius.sm, backgroundColor: Colors.cardRaised },
   card: { gap: Spacing.md },
   earned: { borderColor: Colors.success, borderWidth: 1 },
   header: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },

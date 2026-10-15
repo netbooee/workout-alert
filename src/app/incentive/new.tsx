@@ -15,6 +15,7 @@ import {
   GOAL_OPTIONS,
   goalOption,
   incentiveGoalText,
+  NOTES_MAX,
   REWARD_PRESETS,
   WINDOW_OPTIONS,
 } from '@/lib/incentives';
@@ -34,6 +35,7 @@ export default function NewIncentiveScreen() {
   const [weeks, setWeeks] = useState<number>(1);
   const [emoji, setEmoji] = useState<string>(REWARD_PRESETS[0].emoji);
   const [reward, setReward] = useState<string>(REWARD_PRESETS[0].reward);
+  const [notes, setNotes] = useState('');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   const option = goalOption(kind);
@@ -70,6 +72,7 @@ export default function NewIncentiveScreen() {
         p_reward_emoji: emoji,
         p_activity_type: kind === 'workouts' ? activity : null,
         p_verified_only: verifiedOnly,
+        p_notes: notes.trim() || null,
       },
       {
         onSuccess: () => {
@@ -157,10 +160,21 @@ export default function NewIncentiveScreen() {
                 setEmoji(p.emoji);
                 setReward(p.reward);
               }}
-              accessibilityLabel={p.reward}
+              accessibilityRole="button"
+              accessibilityState={{ selected: emoji === p.emoji }}
+              accessibilityLabel={p.label}
               style={[styles.preset, emoji === p.emoji && styles.presetSelected]}>
-              <AppText variant="title" style={{ fontSize: 24 }}>
+              <AppText variant="title" style={{ fontSize: 26 }}>
                 {p.emoji}
+              </AppText>
+              <AppText
+                variant="caption"
+                color={emoji === p.emoji ? Colors.text : Colors.textSecondary}
+                style={styles.presetLabel}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}>
+                {p.label}
               </AppText>
             </Pressable>
           ))}
@@ -177,6 +191,18 @@ export default function NewIncentiveScreen() {
           Real-world rewards only. You’ll mark it delivered once you’ve paid up.
         </AppText>
 
+        <AppText variant="label">Rules and notes</AppText>
+        <TextInput
+          style={[styles.input, styles.notes]}
+          value={notes}
+          onChangeText={setNotes}
+          maxLength={NOTES_MAX}
+          multiline
+          placeholder="Optional: what counts, where you’ll celebrate, anything they should know"
+          placeholderTextColor={Colors.textMuted}
+          accessibilityLabel="Rules and notes"
+        />
+
         <Card style={styles.toggle}>
           <View style={{ flex: 1 }}>
             <AppText variant="body">Verified workouts only</AppText>
@@ -190,6 +216,7 @@ export default function NewIncentiveScreen() {
           <AppText variant="heading">
             {summary} → {emoji} {reward.trim() || '…'}
           </AppText>
+          {notes.trim() ? <AppText variant="body">{notes.trim()}</AppText> : null}
           <AppText variant="caption" color={Colors.xp}>
             +100 XP for {firstName} when they earn it
           </AppText>
@@ -261,10 +288,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  presets: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  // Three labeled tiles per row.
+  presets: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'space-between', rowGap: Spacing.sm },
   preset: {
-    width: 52,
-    height: 52,
+    width: '31.5%',
+    minHeight: 76,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: 6,
+    gap: 4,
     borderRadius: Radius.md,
     backgroundColor: Colors.card,
     alignItems: 'center',
@@ -273,6 +304,8 @@ const styles = StyleSheet.create({
     borderColor: 'transparent',
   },
   presetSelected: { borderColor: Colors.flame, backgroundColor: Colors.flameSoft },
+  presetLabel: { fontWeight: '600', textAlign: 'center' },
+  notes: { height: undefined, minHeight: 96, paddingTop: 12, paddingBottom: 12, textAlignVertical: 'top' },
   input: {
     height: 48,
     borderRadius: Radius.md,

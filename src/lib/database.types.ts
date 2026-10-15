@@ -190,6 +190,8 @@ export type Database = {
           responded_at: string | null;
           earned_at: string | null;
           delivered_at: string | null;
+          /** The offering partner's rules and notes, if any. */
+          notes: string | null;
         };
         Insert: never;
         Update: never;
@@ -298,6 +300,7 @@ export type Database = {
           p_reward_emoji?: string;
           p_activity_type?: string | null;
           p_verified_only?: boolean;
+          p_notes?: string | null;
         };
         Returns: Database['public']['Tables']['incentives']['Row'];
       };

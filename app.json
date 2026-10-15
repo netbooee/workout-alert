@@ -9,6 +9,7 @@
     "userInterfaceStyle": "dark",
     "ios": {
       "bundleIdentifier": "com.netbooee.sigamos",
+      "appleTeamId": "GB8H6683BF",
       "supportsTablet": false,
       "usesAppleSignIn": true,
       "config": {

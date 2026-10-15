@@ -255,8 +255,9 @@ Apple both require one), and a Supabase project.
 `website/` is the static site for **sigamos.cloud** (marketing page, `/privacy`, `/terms`,
 `/support`, and `/invite/<CODE>` fallback for invite links), deployed by Netlify from this repo
 (`netlify.toml`, no build step). Keep DNS at Hover so the Resend email records keep working: point
-`@` (A record) and `www` (CNAME) at Netlify. The TestFlight link is a placeholder
-(`REPLACE_ME`) in `website/index.html` and `website/invite/index.html`. Screenshots in
+`@` (A record) and `www` (CNAME) at Netlify. The beta buttons use the public TestFlight link
+(https://testflight.apple.com/join/epCEHKDt) in `website/index.html` and
+`website/invite/index.html`. Screenshots in
 `website/img/` come from the web preview; swap in real device screenshots when you have them.
 
 ## Checks
@@ -297,9 +298,8 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 
 ### Beta and website launch
 
-- **Public TestFlight link.** Turn on a public link (App Store Connect → TestFlight → External
-  Testing) and replace the `https://testflight.apple.com/join/REPLACE_ME` placeholder in
-  `website/index.html` (two buttons) and `website/invite/index.html`.
+- ~~**Public TestFlight link.**~~ https://testflight.apple.com/join/epCEHKDt, used by the
+  website's beta buttons.
 - **External TestFlight testing.** Testers outside the team need Apple's Beta App Review:
   fill in the beta description, feedback email, and a demo sign-in for the reviewer, then add
   an external group.

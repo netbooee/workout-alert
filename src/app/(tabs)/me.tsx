@@ -110,7 +110,8 @@ export default function MeScreen() {
             <StepButton label="+" onPress={() => setGoal(profile.weekly_goal + 1)} />
           </View>
           <AppText variant="caption">
-            Changes apply to this week right away. Past weeks keep the goal they had.
+            Changes apply to this week right away, and to the weeks from before you joined. Weeks
+            since you joined keep the goal they had.
           </AppText>
         </Card>
 

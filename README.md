@@ -12,6 +12,9 @@ from Apple Health, and a **weekly streak** grows every week you hit your goal.
 - Hit your goal and the streak grows by one week. The current week never breaks your streak while it's still in progress.
 - Every **4 weeks hit** earns a **streak freeze** (max 2). A missed week automatically spends a freeze instead of resetting the streak.
 - The first sync looks back 12 weeks, so an existing habit shows up as a streak on day one.
+- Changing your goal applies to the current week and to the **weeks from before you joined**
+  (your imported history), so picking a realistic goal on day one counts your past. Weeks since
+  you joined keep the goal they had, so lowering it later can't rewrite them.
 
 Streaks are computed in Postgres (`supabase/migrations`) whenever workouts change, so
 they're consistent across devices and can't be edited by the client.

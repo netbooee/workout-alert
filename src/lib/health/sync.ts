@@ -4,7 +4,11 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-import { fetchDailyStats, fetchWorkoutChanges } from '@/lib/health/healthkit';
+import {
+  fetchDailyStats,
+  fetchWorkoutChanges,
+  requestHealthPermissions,
+} from '@/lib/health/healthkit';
 import { mergeDailyStats, toWorkoutRow } from '@/lib/health/mapping';
 import { supabase } from '@/lib/supabase';
 import { addDays, startOfWeek } from '@/lib/week';
@@ -43,6 +47,10 @@ export function syncHealthData(userId: string): Promise<SyncResult> {
 }
 
 async function runSync(userId: string): Promise<SyncResult> {
+  // Health permission is per device: someone who onboarded elsewhere (or on the
+  // Simulator) hasn't granted it on this phone yet. iOS only shows the sheet
+  // when the answer is undetermined, so this is a no-op on later syncs.
+  await requestHealthPermissions();
   await syncTimezone(userId);
 
   const state = await loadState(userId);

@@ -249,6 +249,14 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   account and cascades their data, and removes their photos and voice messages from storage.
   Then update `website/privacy/` and `website/support/`, which currently say "email us" and
   "coming soon".
+- **Make Lotl's six faces clearly different.** At a glance several moods read as the same
+  face, mostly told apart only by color and gill angle: **worried** looks like **happy** (both
+  smile), and **fired up** looks like **ready** (same eyes, brows, and dots above the head).
+  Give each mood its own eyes, brows, and mouth, e.g. worried: raised, slanted brows and a
+  wobbly frown; ready: bright open eyes and a small determined smile, no angry brows; fired up:
+  keep the angry brows with flared gills and a steam puff. Update `src/components/lotl.tsx`
+  and the website art (`website/img/lotl-*.svg`) together, then check all six side by side at
+  small (Home header) and large (daily greeting) sizes in light and dark mode.
 
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~
@@ -274,6 +282,20 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
       latest state; refreshed when the app syncs, on a timeline through the day, and via silent
       pushes when a partner acts. Mood logic and copy already live in `src/lib/lotl.ts`
       (`lotlMood`, `LOTL_LOOKS`) and should be shared, not duplicated.
+
+### Beta and website launch
+
+- **Public TestFlight link.** Turn on a public link (App Store Connect → TestFlight → External
+  Testing) and replace the `https://testflight.apple.com/join/REPLACE_ME` placeholder in
+  `website/index.html` (two buttons) and `website/invite/index.html`.
+- **External TestFlight testing.** Testers outside the team need Apple's Beta App Review:
+  fill in the beta description, feedback email, and a demo sign-in for the reviewer, then add
+  an external group.
+- **Legal review.** Have a lawyer review `website/privacy/` and `website/terms/` before the
+  App Store launch (they were written as a starting point, not legal advice).
+- **Real screenshots.** The website images (`website/img/*.webp`) come from a web preview with
+  sample data. Replace them with screenshots from a real iPhone (light and dark) once the
+  TestFlight build is in use.
 
 ### Queued ideas (not started)
 

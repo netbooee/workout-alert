@@ -33,7 +33,7 @@
         "@kingstinct/react-native-healthkit",
         {
           "NSHealthShareUsageDescription": "Sigamos reads your workouts, steps, and heart rate to keep your weekly streak up to date and share progress with your crew.",
-          "NSHealthUpdateUsageDescription": false
+          "NSHealthUpdateUsageDescription": "Sigamos does not write to Apple Health. It only reads the workouts and activity you choose to share."
         }
       ],
       [

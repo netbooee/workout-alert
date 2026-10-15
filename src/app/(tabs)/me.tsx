@@ -9,6 +9,7 @@ import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
 import { ProgressChart } from '@/components/progress-chart';
 import { PushPrompt } from '@/components/push-prompt';
+import { RewardShelf } from '@/components/reward-shelf';
 import { StreakHistory } from '@/components/streak-history';
 import { AppText, Button, Card, Segmented } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -70,6 +71,7 @@ export default function MeScreen() {
 
         <StreakHistory weeks={history ?? []} />
         <ProgressChart />
+        <RewardShelf />
 
         <Card>
           <AppText variant="label">Weekly goal</AppText>
@@ -123,6 +125,11 @@ export default function MeScreen() {
             label="When a partner verifies your workout"
             value={profile.notify_verifications}
             onChange={(v) => updateProfile({ notify_verifications: v })}
+          />
+          <Toggle
+            label="Incentives"
+            value={profile.notify_incentives}
+            onChange={(v) => updateProfile({ notify_incentives: v })}
           />
           <Toggle
             label="Comments and voice messages"

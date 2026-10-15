@@ -15,10 +15,17 @@ import { levelFor } from '@/lib/levels';
 
 /** The Duolingo-style "lesson complete" moment after new activity earns XP. */
 export default function CelebrateScreen() {
-  const params = useLocalSearchParams<{ xp: string; workouts: string; weekGoal: string; evidence: string }>();
+  const params = useLocalSearchParams<{
+    xp: string;
+    workouts: string;
+    weekGoal: string;
+    evidence: string;
+    incentive: string;
+  }>();
   const earned = Number(params.xp) || 0;
   const workouts = Number(params.workouts) || 0;
   const weekGoal = params.weekGoal === '1';
+  const incentive = params.incentive === '1';
   const { data: total } = useXpTotal();
   const { data: home } = useHomeData();
   const shown = useCountUp(earned);
@@ -28,13 +35,15 @@ export default function CelebrateScreen() {
   }, []);
 
   const leveledUp = total != null && levelFor(total - earned).level < levelFor(total).level;
-  const title = weekGoal
-    ? 'Week goal hit!'
-    : workouts > 1
-      ? `${workouts} workouts logged!`
-      : workouts === 1
-        ? 'Workout logged!'
-        : 'Check-in added!';
+  const title = incentive
+    ? 'Incentive earned! 🎁'
+    : weekGoal
+      ? 'Week goal hit!'
+      : workouts > 1
+        ? `${workouts} workouts logged!`
+        : workouts === 1
+          ? 'Workout logged!'
+          : 'Check-in added!';
 
   return (
     <SafeAreaView style={styles.container}>

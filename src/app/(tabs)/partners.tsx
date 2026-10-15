@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
 import { FeedCard } from '@/components/feed-card';
+import { IncentiveIntro } from '@/components/incentive-intro';
 import { LeagueCard } from '@/components/league-card';
 import { PartnerCard } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
@@ -69,6 +70,8 @@ export default function PartnersScreen() {
         )}
 
         {accepted.length > 0 && <PushPrompt />}
+
+        <IncentiveIntro partners={accepted} />
 
         {accepted.length > 0 && league.data && <LeagueCard rows={league.data} />}
 

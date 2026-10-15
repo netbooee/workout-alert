@@ -1,17 +1,26 @@
 import * as Haptics from 'expo-haptics';
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { Alert, Pressable, StyleSheet, View, type ColorValue } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { AppText, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useMyIncentives } from '@/hooks/use-incentives';
 import { useNudge, useRemovePartner, type PartnerState } from '@/hooks/use-social';
+import { isOpen } from '@/lib/incentives';
 
 export function PartnerCard({ partner }: { partner: PartnerState }) {
   const nudge = useNudge();
   const remove = useRemovePartner();
   const done = partner.this_week_days >= partner.this_week_goal;
   const recentlyNudged = partner.recently_nudged;
+  const firstName = partner.display_name?.split(' ')[0] ?? '';
+  // Your current incentive for them: open, or earned and waiting for you to deliver.
+  const { given } = useMyIncentives();
+  const incentive = given.find(
+    (i) => i.to_id === partner.partner_id && (isOpen(i) || i.status === 'earned'),
+  );
 
   const confirmRemove = () =>
     Alert.alert(`Remove ${partner.display_name ?? 'partner'}?`, 'You will stop seeing each other’s workouts.', [
@@ -43,21 +52,51 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
           </AppText>
         </View>
       </Pressable>
-      {!done && (
+      {incentive && (
         <Pressable
-          disabled={recentlyNudged || nudge.isPending}
-          onPress={() => {
-            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-            nudge.mutate(partner.partner_id, {
-              onError: (e) => Alert.alert('Could not nudge', e instanceof Error ? e.message : String(e)),
-            });
-          }}
-          style={[styles.nudge, recentlyNudged && { opacity: 0.5 }]}>
-          <AppText variant="caption" color={Colors.text}>
-            {recentlyNudged ? 'Nudged 👋' : `👋 Nudge ${partner.display_name?.split(' ')[0] ?? ''}`}
+          onPress={() => router.push({ pathname: '/incentive/[id]', params: { id: incentive.id } })}
+          style={[styles.incentive, incentive.status === 'earned' && styles.incentiveEarned]}>
+          <AppText variant="caption" color={Colors.text} style={{ flex: 1 }} numberOfLines={1}>
+            {incentive.reward_emoji}{' '}
+            {incentive.status === 'earned'
+              ? `${firstName} earned it! Tap to mark delivered`
+              : incentive.status === 'offered'
+                ? `Waiting for ${firstName} to accept: ${incentive.reward}`
+                : `${incentive.progress} of ${incentive.goal_target} toward ${incentive.reward}`}
           </AppText>
+          <SymbolView name="chevron.right" size={12} tintColor={Colors.textMuted} />
         </Pressable>
       )}
+      <View style={styles.actions}>
+        {!done && (
+          <Pressable
+            disabled={recentlyNudged || nudge.isPending}
+            onPress={() => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              nudge.mutate(partner.partner_id, {
+                onError: (e) => Alert.alert('Could not nudge', e instanceof Error ? e.message : String(e)),
+              });
+            }}
+            style={[styles.action, recentlyNudged && { opacity: 0.5 }]}>
+            <AppText variant="caption" color={Colors.text}>
+              {recentlyNudged ? 'Nudged 👋' : `👋 Nudge ${firstName}`}
+            </AppText>
+          </Pressable>
+        )}
+        {!incentive && (
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync();
+              router.push({ pathname: '/incentive/new', params: { to: partner.partner_id } });
+            }}
+            accessibilityLabel={`Offer ${firstName} an incentive`}
+            style={[styles.action, styles.offer]}>
+            <AppText variant="caption" color={Colors.flame}>
+              🎁 Offer an incentive
+            </AppText>
+          </Pressable>
+        )}
+      </View>
     </Card>
   );
 }
@@ -82,8 +121,19 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
     backgroundColor: Colors.xpSoft,
   },
-  nudge: {
-    alignSelf: 'flex-start',
+  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  offer: { backgroundColor: Colors.flameSoft },
+  incentive: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: 10,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.flameSoft,
+  },
+  incentiveEarned: { backgroundColor: Colors.xpSoft, borderWidth: 1, borderColor: Colors.success },
+  action: {
     paddingHorizontal: 14,
     height: 32,
     justifyContent: 'center',

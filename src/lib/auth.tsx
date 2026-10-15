@@ -81,6 +81,7 @@ export function useUpdateProfile() {
         | 'notify_verifications'
         | 'notify_streak_reminders'
         | 'notify_comments'
+        | 'notify_incentives'
       >
     >,
   ) => {

@@ -1,9 +1,11 @@
 import { Link } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityRings } from '@/components/activity-rings';
+import { IncentiveCard } from '@/components/incentive-card';
 import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
 import { NudgeBanner } from '@/components/nudge-banner';
@@ -14,6 +16,7 @@ import { WeekDots } from '@/components/week-dots';
 import { WorkoutRow } from '@/components/workout-row';
 import { Colors, Spacing } from '@/constants/theme';
 import { useHealthSync } from '@/hooks/use-health-sync';
+import { useMyIncentives } from '@/hooks/use-incentives';
 import { useLotl } from '@/hooks/use-lotl';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
@@ -26,6 +29,15 @@ export default function HomeScreen() {
   const { data, isPending, error } = useHomeData();
   const { data: xp } = useXpTotal();
   const lotl = useLotl();
+  const { received } = useMyIncentives();
+  const [openedAt] = useState(() => Date.now());
+  // Offers and live goals stay on Home; earned ones for a few days, then on the reward shelf.
+  const incentives = received.filter(
+    (i) =>
+      i.status === 'offered' ||
+      i.status === 'active' ||
+      (i.status === 'earned' && openedAt - new Date(i.earned_at ?? 0).getTime() < EARNED_ON_HOME_MS),
+  );
 
   const days = buildWeek(data?.weekWorkouts ?? [], profile.min_workout_minutes);
   const activeDays = days.filter((d) => d.active).length;
@@ -61,6 +73,9 @@ export default function HomeScreen() {
         </View>
         <LevelBar xp={xp ?? 0} />
         <NudgeBanner />
+        {incentives.map((i) => (
+          <IncentiveCard key={i.id} incentive={i} />
+        ))}
 
         {(error || syncError) && (
           <Card style={{ borderColor: Colors.danger }}>
@@ -118,6 +133,8 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
+
+const EARNED_ON_HOME_MS = 3 * 24 * 3600 * 1000;
 
 /** Older workouts are a tap away in the Progress chart's week view. */
 const RECENT_COUNT = 5;

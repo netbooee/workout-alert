@@ -9,6 +9,7 @@ export interface Celebration {
   workouts: number;
   weekGoal: boolean;
   evidence: boolean;
+  incentive: boolean;
 }
 
 const key = (userId: string) => `celebrate:last-seen:${userId}`;
@@ -43,6 +44,7 @@ export async function takeCelebration(userId: string): Promise<Celebration | nul
     workouts: data.filter((e) => e.kind === 'workout').length,
     weekGoal: data.some((e) => e.kind === 'week_goal'),
     evidence: data.some((e) => e.kind === 'evidence'),
+    incentive: data.some((e) => e.kind === 'incentive'),
   };
 }
 
@@ -59,6 +61,7 @@ export async function showCelebrationIfEarned(userId: string): Promise<void> {
       workouts: String(earned.workouts),
       weekGoal: earned.weekGoal ? '1' : '0',
       evidence: earned.evidence ? '1' : '0',
+      incentive: earned.incentive ? '1' : '0',
     },
   });
 }

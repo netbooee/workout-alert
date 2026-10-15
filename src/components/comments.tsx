@@ -60,7 +60,7 @@ export function Comments({ workout }: { workout: Workout }) {
         <AppText variant="caption">
           {isOwner
             ? 'Your partners’ comments and voice messages show up here.'
-            : 'Be the first to cheer them on. Type a message or hold a quick voice note.'}
+            : 'Be the first to cheer them on. Type a message or tap the mic for a quick voice note.'}
         </AppText>
       )}
       {comments?.map((c) => {

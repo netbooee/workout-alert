@@ -43,6 +43,23 @@ The Me tab has a **Progress** chart: weekly active minutes or workout count for 
 first active week, current week excluded). Tap a bar to see that week's totals, streak
 status, and workouts by day. The math is in `src/lib/progress.ts` (unit-tested).
 
+## Incentives
+
+A partner can reward you for extra effort: **"Hit 5 workout days this week → ☕ Coffee on me"**.
+
+- **Offer** from a partner's card (🎁 Offer an incentive), a partner's workout, or the intro card
+  on the Partners tab. Goals: workout days, active minutes, a number of workouts (optionally one
+  type, e.g. 3 runs), or reaching a streak length; over 1, 2, or 4 weeks counted from this Monday
+  in the recipient's timezone. Rewards are real-world text (no money in the app).
+- **Verified only** (off by default) counts only Apple Health workouts or ones a partner verified.
+- The recipient accepts or passes. Progress updates automatically from workouts (computed in
+  Postgres). Hitting the goal earns it: **+100 XP**, a celebration, and pushes to both people.
+  The giver marks it **delivered**; it lands on the recipient's **reward shelf** (Me tab).
+- One open incentive per giver → recipient. Unmet ones expire at the deadline (hourly sweep) with
+  a gentle message; no shaming.
+- Logic: `supabase/migrations/20261003000000_incentives.sql` (pgTAP in
+  `supabase/tests/incentives.test.sql`); wording mirrored in `src/lib/incentives.ts`.
+
 ## Lotl, the streak mascot
 
 - A pink axolotl whose face, color, and gills reflect how your week is going (gills
@@ -84,6 +101,8 @@ styles re-color instantly; React Navigation gets plain hex values via `Palettes`
   day, only if you have a streak, and never once the week is already out of reach.
 - **Comments**: "Sam commented on your run 💬 · “Hill repeats on a Friday?!”" or "Sam sent you
   a voice message 🎙️". Replies notify the people already in the conversation.
+- **Incentives**: "Sam offered you an incentive 🎁 · Hit 5 workout days this week → ☕ Coffee on
+  me", accepted, earned ("You earned Sam's incentive! 🎉"), delivered, or ended.
 - Tapping opens the relevant screen. Each kind can be switched off on the Me tab.
 - How it works: database triggers write to `notifications` and send to the recipient's
   devices through Expo's push service using `pg_net`. No separate server is needed.
@@ -95,6 +114,7 @@ styles re-color instantly; React Navigation gets plain hex values via `Palettes`
 | Workout (5+ min) | 10 + 1 per 2 min, up to 40 |
 | Check-in photo on a workout | +5 |
 | Hitting your weekly goal | +50 |
+| Earning a partner's incentive | +100 |
 
 - **Levels** get progressively longer: L2 at 100 XP, L3 at 300, L5 at 1,000, L10 at 4,500.
 - **Weekly league**: you and your partners ranked by XP earned this week (Mon–Sun).

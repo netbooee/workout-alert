@@ -21,6 +21,7 @@ import { EvidenceBadges } from '@/components/evidence-badges';
 import { ReactionBar, REACTIONS } from '@/components/reaction-bar';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useMyIncentives } from '@/hooks/use-incentives';
 import { useNames, useWorkout } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import { showCelebrationIfEarned } from '@/lib/celebrate';
@@ -101,9 +102,34 @@ export default function WorkoutScreen() {
 
         <Comments workout={w} />
 
+        {!isOwner && <RewardPrompt partnerId={w.user_id} name={nameOf(w.user_id)} />}
+
         {isOwner && <DeleteWorkout workout={w} />}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/** On a partner's workout: offer them an incentive (unless one is already going). */
+function RewardPrompt({ partnerId, name }: { partnerId: string; name: string }) {
+  const { given } = useMyIncentives();
+  const active = given.some(
+    (i) => i.to_id === partnerId && ['offered', 'active', 'earned'].includes(i.status),
+  );
+  if (active) return null;
+  return (
+    <Pressable
+      onPress={() => router.push({ pathname: '/incentive/new', params: { to: partnerId } })}
+      style={styles.reward}>
+      <AppText variant="body">🎁</AppText>
+      <View style={{ flex: 1 }}>
+        <AppText variant="heading" style={{ fontSize: 15 }}>
+          Reward {name.split(' ')[0]} for extra effort
+        </AppText>
+        <AppText variant="caption">Offer a treat for a stretch goal. They get +100 XP too.</AppText>
+      </View>
+      <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />
+    </Pressable>
   );
 }
 
@@ -282,6 +308,15 @@ function Centered({ children }: { children: React.ReactNode }) {
 }
 
 const styles = StyleSheet.create({
+  reward: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    borderCurve: 'continuous',
+    backgroundColor: Colors.flameSoft,
+  },
   delete: { alignItems: 'center', paddingVertical: Spacing.md },
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },

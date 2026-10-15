@@ -1,3 +1,4 @@
+import * as Haptics from 'expo-haptics';
 import type { PropsWithChildren } from 'react';
 import {
   ActivityIndicator,
@@ -5,6 +6,7 @@ import {
   StyleSheet,
   Text,
   View,
+  type ColorValue,
   type PressableProps,
   type StyleProp,
   type TextProps,
@@ -20,7 +22,7 @@ export function AppText({
   color,
   style,
   ...props
-}: TextProps & { variant?: TextVariant; color?: string }) {
+}: TextProps & { variant?: TextVariant; color?: ColorValue }) {
   return <Text {...props} style={[textStyles[variant], color ? { color } : null, style]} />;
 }
 
@@ -73,7 +75,57 @@ const textStyles = StyleSheet.create({
   label: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary, letterSpacing: 0.6, textTransform: 'uppercase' },
 });
 
+/** A compact pill-style segmented control. */
+export function Segmented<T extends string>({
+  options,
+  value,
+  onChange,
+}: {
+  options: { key: T; label: string }[];
+  value: T;
+  onChange: (key: T) => void;
+}) {
+  return (
+    <View style={styles.segmented}>
+      {options.map((o) => {
+        const selected = o.key === value;
+        return (
+          <Pressable
+            key={o.key}
+            onPress={() => {
+              if (selected) return;
+              Haptics.selectionAsync();
+              onChange(o.key);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected }}
+            style={[styles.segment, selected && styles.segmentSelected]}>
+            <AppText
+              variant="caption"
+              color={selected ? Colors.text : Colors.textSecondary}
+              style={{ fontSize: 12 }}>
+              {o.label}
+            </AppText>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  segmented: {
+    flexDirection: 'row',
+    backgroundColor: Colors.cardRaised,
+    borderRadius: Radius.pill,
+    padding: 2,
+  },
+  segment: {
+    paddingHorizontal: Spacing.sm + 2,
+    paddingVertical: 4,
+    borderRadius: Radius.pill,
+  },
+  segmentSelected: { backgroundColor: Colors.border },
   card: {
     backgroundColor: Colors.card,
     borderRadius: Radius.lg,

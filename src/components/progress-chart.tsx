@@ -3,8 +3,8 @@ import { router } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Card } from '@/components/ui';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { AppText, Card, Segmented } from '@/components/ui';
+import { Colors, Spacing } from '@/constants/theme';
 import { useProgressWorkouts } from '@/hooks/use-home-data';
 import {
   metricValue,
@@ -139,43 +139,6 @@ export function ProgressChart() {
   );
 }
 
-function Segmented<T extends string>({
-  options,
-  value,
-  onChange,
-}: {
-  options: { key: T; label: string }[];
-  value: T;
-  onChange: (key: T) => void;
-}) {
-  return (
-    <View style={styles.segmented}>
-      {options.map((o) => {
-        const selected = o.key === value;
-        return (
-          <Pressable
-            key={o.key}
-            onPress={() => {
-              if (selected) return;
-              Haptics.selectionAsync();
-              onChange(o.key);
-            }}
-            accessibilityRole="button"
-            accessibilityState={{ selected }}
-            style={[styles.segment, selected && styles.segmentSelected]}>
-            <AppText
-              variant="caption"
-              color={selected ? Colors.text : Colors.textSecondary}
-              style={{ fontSize: 12 }}>
-              {o.label}
-            </AppText>
-          </Pressable>
-        );
-      })}
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   header: {
     flexDirection: 'row',
@@ -189,7 +152,7 @@ const styles = StyleSheet.create({
   },
   chart: {
     height: CHART_HEIGHT,
-    marginTop: Spacing.sm,
+    marginTop: Spacing.lg,
     justifyContent: 'flex-end',
   },
   axisMax: { position: 'absolute', top: -Spacing.md, right: 0, fontSize: 10 },
@@ -214,16 +177,4 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  segmented: {
-    flexDirection: 'row',
-    backgroundColor: Colors.cardRaised,
-    borderRadius: Radius.pill,
-    padding: 2,
-  },
-  segment: {
-    paddingHorizontal: Spacing.sm + 2,
-    paddingVertical: 4,
-    borderRadius: Radius.pill,
-  },
-  segmentSelected: { backgroundColor: Colors.border },
 });

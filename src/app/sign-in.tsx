@@ -1,7 +1,7 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Alert, KeyboardAvoidingView, StyleSheet, TextInput, View } from 'react-native';
+import { Alert, KeyboardAvoidingView, StyleSheet, TextInput, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GoogleButton } from '@/components/google-button';
@@ -35,6 +35,7 @@ export default function SignInScreen() {
 }
 
 function AppleSignIn() {
+  const light = useColorScheme() === 'light';
   const signIn = async () => {
     try {
       const credential = await AppleAuthentication.signInAsync({
@@ -67,7 +68,11 @@ function AppleSignIn() {
   return (
     <AppleAuthentication.AppleAuthenticationButton
       buttonType={AppleAuthentication.AppleAuthenticationButtonType.CONTINUE}
-      buttonStyle={AppleAuthentication.AppleAuthenticationButtonStyle.WHITE}
+      buttonStyle={
+        light
+          ? AppleAuthentication.AppleAuthenticationButtonStyle.BLACK
+          : AppleAuthentication.AppleAuthenticationButtonStyle.WHITE
+      }
       cornerRadius={Radius.md}
       style={{ height: 52 }}
       onPress={signIn}

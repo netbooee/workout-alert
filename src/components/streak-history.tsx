@@ -1,10 +1,10 @@
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type ColorValue } from 'react-native';
 
 import { AppText, Card } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import type { StreakWeek } from '@/lib/database.types';
 
-const STATUS_COLOR: Record<StreakWeek['status'], string> = {
+const STATUS_COLOR: Record<StreakWeek['status'], ColorValue> = {
   hit: Colors.flame,
   frozen: Colors.freeze,
   missed: Colors.cardRaised,
@@ -48,7 +48,7 @@ export function StreakHistory({ weeks }: { weeks: StreakWeek[] }) {
   );
 }
 
-function Legend({ color, label }: { color: string; label: string }) {
+function Legend({ color, label }: { color: ColorValue; label: string }) {
   return (
     <View style={styles.legendItem}>
       <View style={[styles.swatch, { backgroundColor: color }]} />

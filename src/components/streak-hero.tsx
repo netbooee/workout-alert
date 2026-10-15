@@ -1,6 +1,6 @@
 import { SymbolView } from 'expo-symbols';
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type ColorValue } from 'react-native';
 
 import { AppText, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -83,7 +83,7 @@ function message(state: WeekState, weeks: number): string {
   }
 }
 
-function messageColor(state: WeekState): string {
+function messageColor(state: WeekState): ColorValue {
   switch (state.kind) {
     case 'done':
       return Colors.success;

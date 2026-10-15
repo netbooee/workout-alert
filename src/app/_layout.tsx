@@ -1,36 +1,46 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { DarkTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
+import { useColorScheme } from 'react-native';
 
-import { Colors } from '@/constants/theme';
+import { Colors, Palettes } from '@/constants/theme';
+import { restoreAppearance } from '@/lib/appearance';
 import { AuthProvider, useAuth } from '@/lib/auth';
 
 SplashScreen.preventAutoHideAsync();
+restoreAppearance();
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 60_000 } },
 });
 
-const theme = {
-  ...DarkTheme,
-  colors: {
-    ...DarkTheme.colors,
-    primary: Colors.flame,
-    background: Colors.background,
-    card: Colors.background,
-    text: Colors.text,
-    border: Colors.border,
-  },
-};
+// React Navigation reads these colors in JavaScript, so it gets plain hex values
+// for the current scheme rather than the dynamic Colors.
+function navigationTheme(scheme: 'light' | 'dark') {
+  const base = scheme === 'light' ? DefaultTheme : DarkTheme;
+  const palette = Palettes[scheme];
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: palette.flame,
+      background: palette.background,
+      card: palette.background,
+      text: palette.text,
+      border: palette.border,
+    },
+  };
+}
 
 export default function RootLayout() {
+  const scheme = useColorScheme() === 'light' ? 'light' : 'dark';
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <ThemeProvider value={theme}>
-          <StatusBar style="light" />
+        <ThemeProvider value={navigationTheme(scheme)}>
+          <StatusBar style="auto" />
           <RootNavigator />
         </ThemeProvider>
       </AuthProvider>

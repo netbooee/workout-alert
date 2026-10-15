@@ -59,6 +59,12 @@ Sick, injured, or traveling? Turn on Rest mode (Me tab). Weeks you don't hit are
 *rest*: they don't break your streak, don't spend a freeze, and hold friend streaks. Streak
 reminders pause. Workouts during rest still count.
 
+## Appearance
+
+Light, dark, or **Automatic** (follows the iPhone), set on the Me tab. Theme colors in
+`src/constants/theme.ts` are iOS dynamic colors with a light and dark value each, so static
+styles re-color instantly; React Navigation gets plain hex values via `Palettes`.
+
 ## Push notifications
 
 - **Nudges**: "Alex nudged you 👋 · You're at 2 of 4 days this week. Time to move!"
@@ -208,14 +214,13 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 
 ### Queued ideas (not started)
 
-- **Light mode.** The app is dark-only today (`userInterfaceStyle: "dark"` in `app.json`, one
-  palette in `src/constants/theme.ts` used by ~30 files). Plan: a light palette alongside the
-  dark one, follow the iPhone's setting (with an override on Me), and read colors through a
-  hook instead of static styles. Native build needed for the `app.json` change.
 - **Short video check-ins.** Recorded only inside the app (no uploads from the library) and
-  capped at 30 seconds to keep storage small. Needs the camera in video mode, compression
-  before upload, a size limit on the `evidence` bucket, and a player on the workout screen.
-  Confirm before building: the cap is a 30-second *maximum*, not a minimum.
+  capped at a 30-second maximum to keep storage small. Needs the camera in video mode,
+  compression before upload, a size limit on the `evidence` bucket, and a player on the
+  workout screen.
+- **Motivation from partners.** Let a partner send a motivational photo or short video
+  (same in-app, 30-second limit) back to someone, e.g. in reply to a nudge or on a workout,
+  with a push notification and a place to see it (Home banner or the daily greeting).
 - **Hide Lotl.** A setting for people who'd rather not have a character: Home shows a plain
   header and the daily greeting becomes a simple summary card (or turns off).
 - **More characters.** Two or three alternatives to Lotl with the same six moods, picked on

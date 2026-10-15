@@ -1,6 +1,9 @@
-// Dark-only palette with one hot accent (flame orange) reserved for streaks.
+import { Appearance, DynamicColorIOS, Platform, type ColorValue } from 'react-native';
 
-export const Colors = {
+// One hot accent (flame orange) reserved for streaks, on a near-black (dark) or
+// iOS grouped-gray (light) background. Text on accent fills stays black in both.
+
+const dark = {
   background: '#0B0B0F',
   card: '#16161D',
   cardRaised: '#1E1E27',
@@ -22,7 +25,50 @@ export const Colors = {
   ringMove: '#FF375F',
   ringExercise: '#9BF03C',
   ringSteps: '#3BD1FF',
-} as const;
+};
+
+type ColorName = keyof typeof dark;
+
+const light: Record<ColorName, string> = {
+  background: '#F2F2F7',
+  card: '#FFFFFF',
+  cardRaised: '#EBEBF0',
+  border: '#E3E3E8',
+  text: '#0B0B0F',
+  textSecondary: '#6B6B76',
+  textMuted: '#A1A1AA',
+
+  flame: '#FF6B1A',
+  flameSoft: 'rgba(255, 107, 26, 0.14)',
+  freeze: '#0EA5E9',
+  freezeSoft: 'rgba(14, 165, 233, 0.14)',
+  success: '#059669',
+  xp: '#E0A200',
+  rest: '#6366F1',
+  xpSoft: 'rgba(224, 162, 0, 0.16)',
+  danger: '#DC2626',
+
+  ringMove: '#FF2D55',
+  ringExercise: '#5FC40E',
+  ringSteps: '#0EA5E9',
+};
+
+/** Plain hex values per scheme, for code that needs strings (e.g. the navigation theme). */
+export const Palettes = { light, dark };
+
+/**
+ * Theme colors. On iOS each one is a dynamic color that the system resolves for
+ * the current light/dark appearance, so they work in static StyleSheets and
+ * switch instantly. Elsewhere (the web preview) they're fixed at load.
+ */
+export const Colors = Object.fromEntries(
+  (Object.keys(dark) as ColorName[]).map((name) => [
+    name,
+    Platform.OS === 'ios'
+      ? DynamicColorIOS({ light: light[name], dark: dark[name] })
+      : (Appearance.getColorScheme() === 'light' ? light : dark)[name],
+  ]),
+) as Record<ColorName, ColorValue>;
 
 export const Spacing = {
   xs: 4,

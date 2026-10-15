@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { SymbolView } from 'expo-symbols';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { Alert, Pressable, StyleSheet, View, type ColorValue } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { AppText, Card } from '@/components/ui';
@@ -62,7 +62,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
   );
 }
 
-function Stat({ icon, color, text }: { icon: 'flame.fill' | 'checkmark.circle.fill' | 'circle.dashed'; color: string; text: string }) {
+function Stat({ icon, color, text }: { icon: 'flame.fill' | 'checkmark.circle.fill' | 'circle.dashed'; color: ColorValue; text: string }) {
   return (
     <View style={styles.stat}>
       <SymbolView name={icon} size={13} tintColor={color} />

@@ -1,5 +1,5 @@
 import { Link, Stack, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View, type ColorValue } from 'react-native';
 
 import { AppText, Card } from '@/components/ui';
 import { WorkoutRow } from '@/components/workout-row';
@@ -10,7 +10,7 @@ import { weekRangeLabel } from '@/lib/progress';
 import { formatDuration } from '@/lib/workout-types';
 import { addDays, dayKey } from '@/lib/week';
 
-const STATUS: Record<StreakWeek['status'], { label: string; color: string }> = {
+const STATUS: Record<StreakWeek['status'], { label: string; color: ColorValue }> = {
   hit: { label: 'Goal hit 🔥', color: Colors.flame },
   frozen: { label: 'Covered by a freeze', color: Colors.freeze },
   missed: { label: 'Goal missed', color: Colors.textSecondary },

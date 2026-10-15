@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Lotl } from '@/components/lotl';
@@ -10,10 +10,11 @@ import { LevelBar } from '@/components/level-bar';
 import { ProgressChart } from '@/components/progress-chart';
 import { PushPrompt } from '@/components/push-prompt';
 import { StreakHistory } from '@/components/streak-history';
-import { AppText, Button, Card } from '@/components/ui';
+import { AppText, Button, Card, Segmented } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
+import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 import { supabase } from '@/lib/supabase';
@@ -99,6 +100,8 @@ export default function MeScreen() {
           </View>
         </Card>
 
+        <AppearanceCard />
+
         <Card>
           <AppText variant="label">Notifications</AppText>
           <Toggle
@@ -144,7 +147,7 @@ export default function MeScreen() {
   );
 }
 
-function Stat({ label, value, unit, color }: { label: string; value: number; unit?: string; color?: string }) {
+function Stat({ label, value, unit, color }: { label: string; value: number; unit?: string; color?: ColorValue }) {
   return (
     <Card style={styles.stat}>
       <AppText variant="label">{label}</AppText>
@@ -211,6 +214,7 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
 }
 
 const styles = StyleSheet.create({
+  appearanceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
   stats: { flexDirection: 'row', gap: Spacing.sm },
@@ -229,3 +233,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
 });
+
+const APPEARANCE_OPTIONS: { key: AppearancePref; label: string }[] = [
+  { key: 'system', label: 'Automatic' },
+  { key: 'light', label: 'Light' },
+  { key: 'dark', label: 'Dark' },
+];
+
+function AppearanceCard() {
+  const [pref, setPref] = useAppearancePref();
+  return (
+    <Card>
+      <View style={styles.appearanceRow}>
+        <AppText variant="label">Appearance</AppText>
+        <Segmented options={APPEARANCE_OPTIONS} value={pref} onChange={setPref} />
+      </View>
+      <AppText variant="caption">Automatic follows your iPhone’s light or dark setting.</AppText>
+    </Card>
+  );
+}

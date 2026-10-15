@@ -34,6 +34,7 @@ export type Database = {
           notify_incentives: boolean;
           notify_streak_reminders: boolean;
           resting_since: string | null;
+          mascot: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
           created_at: string;
         };
         Insert: never;
@@ -51,6 +52,7 @@ export type Database = {
           weekly_goal?: number;
           min_workout_minutes?: number;
           onboarded_at?: string | null;
+          mascot?: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
         };
         Relationships: [];
       };
@@ -71,6 +73,8 @@ export type Database = {
           note: string | null;
           photo_paths: string[];
           source_name: string | null;
+          /** Set when another device recorded the same workout; points at the copy that counts. */
+          duplicate_of: string | null;
           created_at: string;
         };
         Insert: {
@@ -186,6 +190,8 @@ export type Database = {
           responded_at: string | null;
           earned_at: string | null;
           delivered_at: string | null;
+          /** The offering partner's rules and notes, if any. */
+          notes: string | null;
         };
         Insert: never;
         Update: never;
@@ -294,6 +300,7 @@ export type Database = {
           p_reward_emoji?: string;
           p_activity_type?: string | null;
           p_verified_only?: boolean;
+          p_notes?: string | null;
         };
         Returns: Database['public']['Tables']['incentives']['Row'];
       };
@@ -327,6 +334,8 @@ export type Database = {
           this_week_goal: number;
           friend_streak: number;
           last_nudged_at: string | null;
+          mascot: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
+          resting: boolean;
         }[];
       };
       weekly_league: {

@@ -22,12 +22,14 @@ export function useHomeData() {
           .from('workouts')
           .select('*')
           .eq('user_id', userId!)
+          .is('duplicate_of', null)
           .gte('started_at', startOfWeek(now).toISOString())
           .order('started_at', { ascending: false }),
         supabase
           .from('workouts')
           .select('*')
           .eq('user_id', userId!)
+          .is('duplicate_of', null)
           .order('started_at', { ascending: false })
           .limit(10),
         supabase
@@ -80,6 +82,7 @@ export function useProgressWorkouts() {
         .from('workouts')
         .select('started_at, duration_s')
         .eq('user_id', userId!)
+        .is('duplicate_of', null)
         .gte('started_at', since.toISOString());
       if (error) throw error;
       return data;
@@ -101,6 +104,7 @@ export function useWeekDetail(weekStart: string) {
           .from('workouts')
           .select('*')
           .eq('user_id', userId!)
+          .is('duplicate_of', null)
           .gte('started_at', start.toISOString())
           .lt('started_at', addDays(start, 7).toISOString())
           .order('started_at'),

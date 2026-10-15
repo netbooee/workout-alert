@@ -5,15 +5,18 @@ import * as Haptics from 'expo-haptics';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Lotl } from '@/components/lotl';
+import { Mascot } from '@/components/mascots';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useLotl } from '@/hooks/use-lotl';
+import { useProfile } from '@/lib/auth';
+import { mascotKind } from '@/lib/mascots';
 import { LOTL_LOOKS } from '@/lib/lotl';
 
-/** Lotl's once-a-day greeting: mood, one headline, up to three facts, one action. */
+/** Your buddy's once-a-day greeting: mood, one headline, up to three facts, one action. */
 export default function GreetingScreen() {
-  // The greeting is the one place Lotl may be properly fired up.
+  const { mascot } = useProfile();
+  // The greeting is the one place your buddy may be properly fired up.
   const message = useLotl({ calm: false });
 
   useEffect(() => {
@@ -46,7 +49,7 @@ export default function GreetingScreen() {
       <View style={styles.body}>
         <Animated.View entering={ZoomIn.springify().damping(10)} style={styles.stage}>
           <View style={[styles.glow, { backgroundColor: look.accent }]} />
-          <Lotl mood={message.mood} size={170} />
+          <Mascot kind={mascotKind(mascot)} mood={message.mood} size={170} />
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(200)} style={[styles.bubble, { borderColor: look.accent }]}>

@@ -6,8 +6,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityRings } from '@/components/activity-rings';
 import { IncentiveCard } from '@/components/incentive-card';
-import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
+import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
 import { ProgressMini } from '@/components/progress-mini';
 import { StreakHero } from '@/components/streak-hero';
@@ -21,6 +21,7 @@ import { useLotl } from '@/hooks/use-lotl';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
+import { MASCOTS, mascotKind } from '@/lib/mascots';
 import { buildWeek, weekState } from '@/lib/week';
 
 export default function HomeScreen() {
@@ -53,8 +54,8 @@ export default function HomeScreen() {
         }>
         <View style={styles.titleRow}>
           <Link href="/greeting" asChild>
-            <Pressable accessibilityLabel="Talk to Lotl" hitSlop={8}>
-              <Lotl mood={lotl?.mood ?? 'ready'} size={52} />
+            <Pressable accessibilityLabel={`Talk to ${MASCOTS[mascotKind(profile.mascot)].name}`} hitSlop={8}>
+              <Mascot kind={mascotKind(profile.mascot)} mood={lotl?.mood ?? 'ready'} size={52} />
             </Pressable>
           </Link>
           <View style={{ flex: 1 }}>

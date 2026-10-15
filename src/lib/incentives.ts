@@ -46,15 +46,19 @@ export const WINDOW_OPTIONS = [
 ] as const;
 
 export const REWARD_PRESETS = [
-  { emoji: '☕', reward: 'Coffee on me' },
-  { emoji: '🍕', reward: 'Pizza night on me' },
-  { emoji: '🍦', reward: 'Ice cream on me' },
-  { emoji: '🎬', reward: 'Movie night, my treat' },
-  { emoji: '💆', reward: 'A massage on me' },
-  { emoji: '👟', reward: 'New running socks' },
-  { emoji: '🍽️', reward: 'Dinner on me' },
-  { emoji: '🎁', reward: 'A surprise' },
+  { emoji: '🎁', label: 'Surprise', reward: 'A surprise' },
+  { emoji: '🤳', label: 'Selfie', reward: 'A selfie' },
+  { emoji: '☕', label: 'Coffee', reward: 'Coffee on me' },
+  { emoji: '🍕', label: 'Pizza', reward: 'Pizza night on me' },
+  { emoji: '🍦', label: 'Ice cream', reward: 'Ice cream on me' },
+  { emoji: '🎬', label: 'Movie', reward: 'Movie night, my treat' },
+  { emoji: '💆', label: 'Massage', reward: 'A massage on me' },
+  { emoji: '👟', label: 'Socks', reward: 'New running socks' },
+  { emoji: '🍽️', label: 'Dinner', reward: 'Dinner on me' },
 ] as const;
+
+/** Longest "rules and notes" a partner can add to an offer (matches the database). */
+export const NOTES_MAX = 500;
 
 const plural = (n: number, word: string) => `${word}${n === 1 ? '' : 's'}`;
 

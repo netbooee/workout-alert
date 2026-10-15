@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
-import { lotlMessage, lotlMood, type LotlInput } from './lotl';
+import { lotlMessage, lotlMood, partnerMood, type LotlInput } from './lotl';
+import type { MascotKind } from './mascots';
 
 // Weekdays in Sept/Oct 2026 (local time).
 const mon = new Date(2026, 8, 28, 9);
@@ -125,4 +126,41 @@ describe('lotlMessage', () => {
     });
     expect(msg.facts).toHaveLength(3);
   });
+
+  it('gives each character its own voice without borrowing Lotl\'s', () => {
+    const moods = [
+      { now: fri, weekDays: 4 },
+      { weekDays: 2 },
+      { now: mon, weekDays: 0, daysSinceLastWorkout: 2 },
+      { now: fri, weekDays: 2 },
+      { weekDays: 0, daysSinceLastWorkout: 5 },
+      { resting: true },
+    ];
+    const headlines = (mascot: MascotKind) =>
+      moods.flatMap((m) =>
+        Array.from({ length: 30 }, (_, d) => lotlMessage({ ...base, ...m, now: new Date(2026, 9, 1 + d, 9), mascot }).headline),
+      );
+    for (const mascot of ['capybara', 'sloth', 'red_panda'] as const) {
+      expect(headlines(mascot).join(' ')).not.toMatch(/gill|fins|water|leg\b/i);
+    }
+    expect(new Set(headlines('sloth'))).not.toEqual(new Set(headlines('capybara')));
+    expect(lotlMessage({ ...base, mascot: 'sloth' }).mood).toBe(lotlMessage(base).mood);
+  });
 });
+
+describe('partnerMood', () => {
+  const p = { weekDays: 1, weekGoal: 4, streakWeeks: 6, resting: false };
+
+  it('celebrates a partner who hit their goal', () => {
+    expect(partnerMood({ ...p, weekDays: 4 }, fri)).toBe('blazing');
+  });
+
+  it('worries, but never gets angry, when a partner is behind', () => {
+    expect(partnerMood({ ...p, weekDays: 0 }, sun)).toBe('worried');
+  });
+
+  it('sleeps while a partner rests', () => {
+    expect(partnerMood({ ...p, resting: true }, fri)).toBe('sleepy');
+  });
+});
+

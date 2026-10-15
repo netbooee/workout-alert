@@ -2,6 +2,7 @@
 // what it suggests you do. Pure (no React Native imports) so it's unit-testable and so
 // a future home-screen widget can reuse the same rules and look.
 
+import type { MascotKind } from '@/lib/mascots';
 import { dayKey, weekState } from '@/lib/week';
 
 export type LotlMood = 'blazing' | 'happy' | 'ready' | 'worried' | 'fired_up' | 'sleepy';
@@ -49,6 +50,8 @@ export interface LotlInput {
   league?: { rank: number; size: number; gapToNext: number; aheadName?: string | null } | null;
   /** Downgrade "fired up" to "worried" once the day's greeting has been seen. */
   calm?: boolean;
+  /** Which character is talking (defaults to Lotl); it changes the voice, not the mood. */
+  mascot?: MascotKind;
 }
 
 export interface LotlFact {
@@ -85,6 +88,24 @@ export function lotlMood(i: LotlInput): LotlMood {
   return i.calm && mood === 'fired_up' ? 'worried' : mood;
 }
 
+/**
+ * A partner's mood for their card, from what my_partners shares. It never shows them
+ * fired up (that's only for your own daily greeting) and assumes a freeze could save
+ * the week, so a partner's buddy is at most worried.
+ */
+export function partnerMood(p: { weekDays: number; weekGoal: number; streakWeeks: number; resting: boolean }, now: Date): LotlMood {
+  return lotlMood({
+    now,
+    streakWeeks: p.streakWeeks,
+    freezes: 1,
+    weekDays: p.weekDays,
+    weekGoal: p.weekGoal,
+    daysSinceLastWorkout: null,
+    resting: p.resting,
+    calm: true,
+  });
+}
+
 // ─── Lines ───────────────────────────────────────────────────────────────────
 // Several variants per mood; one is picked per day so it doesn't repeat.
 
@@ -94,20 +115,18 @@ type Line = (v: Vars) => string;
 const days = (n: number) => `${n} day${n === 1 ? '' : 's'}`;
 const workouts = (n: number) => `${n} workout${n === 1 ? '' : 's'}`;
 
+/** Lines any character can say. */
 const LINES: Record<LotlMood, Line[]> = {
   blazing: [
     (v) => `${v.goal} for ${v.goal}. You're unstoppable, ${v.name}. 🔥`,
-    () => 'Week goal: crushed. My gills are doing a happy dance.',
-    (v) => (v.streak > 1 ? `${v.streak} weeks strong. Rest up, champ.` : 'Goal hit! Look at me wiggle.'),
+    (v) => (v.streak > 1 ? `${v.streak} weeks strong. Rest up, champ.` : 'Goal hit! What a week.'),
   ],
   happy: [
     (v) => `${v.needed} to go and ${days(v.left)} to do it. Easy.`,
     (v) => `Nice work, ${v.name}. ${workouts(v.needed)} left this week.`,
-    () => "We're cooking. Keep those fins moving. 🔥",
   ],
   ready: [
     () => "New week, clean slate. Let's get the first one in.",
-    (v) => `Morning, ${v.name}! Gills fluffed, ready to go. Are you?`,
     (v) => `${workouts(v.goal)} this week. First one's the hardest. Let's go.`,
   ],
   worried: [
@@ -120,17 +139,55 @@ const LINES: Record<LotlMood, Line[]> = {
   ],
   fired_up: [
     (v) =>
-      v.idle >= IDLE_DAYS
-        ? `It's been ${days(v.idle)}. I'm literally drying out here. Move! 😤`
-        : "This week's slipping and my gills are shaking. Do something!",
+      v.idle >= IDLE_DAYS ? `It's been ${days(v.idle)}. Time to move! 😤` : "This week's slipping. Do something!",
     (v) => `${v.name}. Shoes. On. Now. I believe in you (angrily).`,
-    () => "I didn't regrow a whole leg to watch you sit there. Up! 😤",
   ],
   sleepy: [
     () => 'Resting up. Your streak is safe with me. 😴',
-    (v) => `Get well, ${v.name}. I'll keep the water warm.`,
     () => "Zzz… no pressure this week. Come back when you're ready.",
   ],
+};
+
+/** Each character's own voice, mixed in with the shared lines. */
+const FLAVOR: Record<MascotKind, Record<LotlMood, Line[]>> = {
+  lotl: {
+    blazing: [() => 'Week goal: crushed. My gills are doing a happy dance.'],
+    happy: [() => "We're cooking. Keep those fins moving. 🔥"],
+    ready: [(v) => `Morning, ${v.name}! Gills fluffed, ready to go. Are you?`],
+    worried: [],
+    fired_up: [
+      (v) =>
+        v.idle >= IDLE_DAYS
+          ? `It's been ${days(v.idle)}. I'm literally drying out here. Move! 😤`
+          : "This week's slipping and my gills are shaking. Do something!",
+      () => "I didn't regrow a whole leg to watch you sit there. Up! 😤",
+    ],
+    sleepy: [(v) => `Get well, ${v.name}. I'll keep the water warm.`],
+  },
+  capybara: {
+    blazing: [() => "Goal hit. I'm celebrating with a long, warm bath. ♨️"],
+    happy: [() => "Nice and easy. We're right on pace."],
+    ready: [(v) => `Morning, ${v.name}. No rush, but the first workout won't do itself.`],
+    worried: [() => "I'm usually chill, but even I'm a little nervous. 😅"],
+    fired_up: [() => "I don't do angry. But this is me, doing angry. Go! 😤"],
+    sleepy: [() => 'Nap time for both of us. Your streak is safe. 🍊'],
+  },
+  sloth: {
+    blazing: [() => "Even I'm impressed, and I'm hard to impress. Slowly. 🔥"],
+    happy: [() => 'Slow and steady is still steady. Nice pace.'],
+    ready: [(v) => `New week, ${v.name}. If I can move, so can you.`],
+    worried: [() => "I move at a quarter mile an hour and even I'm worried. Let's go."],
+    fired_up: [() => 'I just climbed down a whole tree for this. Up! 😤'],
+    sleepy: [() => "Hanging out till you're better. Take your time. 😴"],
+  },
+  red_panda: {
+    blazing: [() => 'Goal hit! Doing my happy tail swish. 🔥'],
+    happy: [(v) => `Cozy pace, ${v.name}. Keep it rolling.`],
+    ready: [(v) => `Morning, ${v.name}! Tail fluffed, ready to go.`],
+    worried: [() => 'My ears are drooping… we need a workout soon.'],
+    fired_up: [() => 'Tail puffed, ears up. Time to move! 😤'],
+    sleepy: [() => 'Curled up in my tail till you feel better. 😴'],
+  },
 };
 
 function pick<T>(items: T[], seed: string): T {
@@ -152,7 +209,8 @@ export function lotlMessage(i: LotlInput): LotlMessage {
     streak: i.streakWeeks,
     goal: i.weekGoal,
   };
-  const headline = pick(LINES[mood], `${dayKey(i.now)}:${mood}`)(vars);
+  const lines = [...LINES[mood], ...FLAVOR[i.mascot ?? 'lotl'][mood]];
+  const headline = pick(lines, `${dayKey(i.now)}:${mood}`)(vars);
 
   const facts: LotlFact[] = [];
   facts.push(

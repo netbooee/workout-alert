@@ -12,6 +12,7 @@ import {
 } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
 import { lotlMessage, type LotlMessage } from '@/lib/lotl';
+import { mascotKind } from '@/lib/mascots';
 import { buildWeek, dayKey, startOfDay } from '@/lib/week';
 
 const firstName = (name: string) => name.split(' ')[0] ?? name;
@@ -68,12 +69,17 @@ export function useLotl({ calm = true }: { calm?: boolean } = {}): LotlMessage |
           }
         : null,
     calm,
+    mascot: mascotKind(profile.mascot),
   });
 }
 
 const greetedKey = (userId: string) => `lotl:greeted:${userId}`;
+const welcomedKey = (userId: string) => `welcome:seen:${userId}`;
 
-/** Opens Lotl's greeting the first time the app is opened each day. */
+/**
+ * The first time someone opens the app it shows the welcome tour; after that,
+ * your buddy's greeting the first time the app is opened each day (never both at once).
+ */
 export function useDailyGreeting() {
   const profile = useProfile();
   const { isSuccess } = useHomeData();
@@ -83,7 +89,20 @@ export function useDailyGreeting() {
     let cancelled = false;
     (async () => {
       const today = dayKey(new Date());
-      if ((await AsyncStorage.getItem(greetedKey(profile.id))) === today || cancelled) return;
+      const [welcomed, greeted] = await Promise.all([
+        AsyncStorage.getItem(welcomedKey(profile.id)),
+        AsyncStorage.getItem(greetedKey(profile.id)),
+      ]);
+      if (cancelled) return;
+      if (!welcomed) {
+        await AsyncStorage.multiSet([
+          [welcomedKey(profile.id), '1'],
+          [greetedKey(profile.id), today],
+        ]);
+        router.push('/welcome');
+        return;
+      }
+      if (greeted === today) return;
       await AsyncStorage.setItem(greetedKey(profile.id), today);
       router.push('/greeting');
     })();

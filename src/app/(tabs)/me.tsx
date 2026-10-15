@@ -2,11 +2,12 @@ import * as Haptics from 'expo-haptics';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
+import { MascotPicker } from '@/components/mascot-picker';
+import { Mascot } from '@/components/mascots';
 import { ProgressChart } from '@/components/progress-chart';
 import { PushPrompt } from '@/components/push-prompt';
 import { RewardShelf } from '@/components/reward-shelf';
@@ -18,6 +19,7 @@ import { useXpTotal } from '@/hooks/use-social';
 import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
+import { mascotKind } from '@/lib/mascots';
 import { supabase } from '@/lib/supabase';
 
 export default function MeScreen() {
@@ -38,6 +40,23 @@ export default function MeScreen() {
     }
   };
 
+  const editName = () =>
+    Alert.prompt(
+      'Your name',
+      'This is how partners see you.',
+      async (value) => {
+        const name = value.trim().slice(0, 40);
+        if (!name || name === profile.display_name) return;
+        try {
+          await updateProfile({ display_name: name });
+        } catch (e) {
+          Alert.alert('Could not save your name', e instanceof Error ? e.message : String(e));
+        }
+      },
+      'plain-text',
+      profile.display_name ?? '',
+    );
+
   const resync = async () => {
     setResyncing(true);
     try {
@@ -54,7 +73,14 @@ export default function MeScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <AppText variant="title">{profile.display_name ?? 'You'}</AppText>
+        <Pressable onPress={editName} accessibilityRole="button" accessibilityHint="Change the name partners see" style={styles.nameRow}>
+          <AppText variant="title" style={{ flexShrink: 1 }} numberOfLines={1}>
+            {profile.display_name ?? 'Add your name'}
+          </AppText>
+          <AppText variant="caption" color={Colors.flame}>
+            Edit
+          </AppText>
+        </Pressable>
         <Card>
           <LevelBar xp={xp ?? 0} />
           <AppText variant="caption">
@@ -84,9 +110,12 @@ export default function MeScreen() {
             <StepButton label="+" onPress={() => setGoal(profile.weekly_goal + 1)} />
           </View>
           <AppText variant="caption">
-            Changes apply to this week right away. Past weeks keep the goal they had.
+            Changes apply to this week right away, and to the weeks from before you joined. Weeks
+            since you joined keep the goal they had.
           </AppText>
         </Card>
+
+        <MascotPicker />
 
         <RestModeCard resting={!!profile.resting_since} />
 
@@ -153,6 +182,19 @@ export default function MeScreen() {
           <Button title="Re-sync health data" variant="secondary" loading={resyncing} onPress={resync} />
         </Card>
 
+        <Card>
+          <AppText variant="label">Help</AppText>
+          <AppText variant="caption">A quick tour of streaks, partners, incentives, and your buddy.</AppText>
+          <Link href="/welcome" asChild>
+            <Button title="Show the welcome tour" variant="secondary" />
+          </Link>
+          <Button
+            title="Help and support"
+            variant="secondary"
+            onPress={() => Linking.openURL('https://sigamos.cloud/support/')}
+          />
+        </Card>
+
         <Button title="Sign out" variant="secondary" onPress={signOut} />
       </ScrollView>
     </SafeAreaView>
@@ -172,6 +214,7 @@ function Stat({ label, value, unit, color }: { label: string; value: number; uni
 }
 
 function RestModeCard({ resting }: { resting: boolean }) {
+  const { mascot } = useProfile();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
 
@@ -186,7 +229,7 @@ function RestModeCard({ resting }: { resting: boolean }) {
   return (
     <Card>
       <View style={styles.restRow}>
-        <Lotl mood={resting ? 'sleepy' : 'ready'} size={40} />
+        <Mascot kind={mascotKind(mascot)} mood={resting ? 'sleepy' : 'ready'} size={40} />
         <View style={{ flex: 1 }}>
           <AppText variant="heading">Rest mode</AppText>
           <AppText variant="caption">
@@ -226,6 +269,7 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
 }
 
 const styles = StyleSheet.create({
+  nameRow: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.sm },
   appearanceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },

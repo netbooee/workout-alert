@@ -16,7 +16,11 @@ export interface EvidenceBadge {
   strength: 'strong' | 'medium' | 'weak';
 }
 
-export function evidenceBadges(w: EvidenceInput): EvidenceBadge[] {
+/**
+ * `alsoRecordedBy`: the other devices that recorded the same workout (their copies are
+ * folded into this one server-side), which makes it stronger evidence.
+ */
+export function evidenceBadges(w: EvidenceInput, alsoRecordedBy: readonly string[] = []): EvidenceBadge[] {
   const badges: EvidenceBadge[] = [];
   const device = w.source_name?.trim() || 'Apple Health';
 
@@ -24,6 +28,11 @@ export function evidenceBadges(w: EvidenceInput): EvidenceBadge[] {
     badges.push({ icon: 'heart.fill', label: `Heart rate from ${device}`, strength: 'strong' });
   } else if (w.source === 'healthkit') {
     badges.push({ icon: 'applewatch', label: `Recorded by ${device}`, strength: 'medium' });
+  }
+
+  const others = [...new Set(alsoRecordedBy.map((d) => d.trim() || 'another app'))];
+  if (others.length > 0) {
+    badges.push({ icon: 'checkmark.seal.fill', label: `Also recorded by ${others.join(' and ')}`, strength: 'strong' });
   }
 
   const photos = w.photo_paths.length;

@@ -135,10 +135,11 @@ select is(pg_temp.xp('00000000-0000-0000-0000-00000000000b', 'evidence'), 5::big
 select is(pg_temp.xp('00000000-0000-0000-0000-00000000000b', 'week_goal'), 50::bigint,
   'hitting the weekly goal earns 50 XP');
 
+-- Blair: workout XP + 50 for the week goal + 5 for Alex's ✅. Alex: +2 for verifying it.
 select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
 select results_eq(
   $$select display_name, xp from public.weekly_league((select ts from t_now))$$,
-  $$values ('Blair'::text, 80), ('Alex'::text, 0), ('Casey'::text, 0)$$,
+  $$values ('Blair'::text, 85), ('Alex'::text, 2), ('Casey'::text, 0)$$,
   'the weekly league ranks you and your partners by XP');
 
 reset role;

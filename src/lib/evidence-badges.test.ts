@@ -20,6 +20,14 @@ describe('evidenceBadges', () => {
     expect(badges.map((b) => b.label)).toEqual(['Heart rate from Apple Health', '2 photos']);
   });
 
+  it('notes the other devices that recorded the same workout', () => {
+    const badges = evidenceBadges(
+      { source: 'healthkit', source_name: 'Apple Watch', avg_hr: 120, photo_paths: [] },
+      ['WHOOP', 'Fitbit', 'WHOOP'],
+    );
+    expect(badges[1]).toEqual({ icon: 'checkmark.seal.fill', label: 'Also recorded by WHOOP and Fitbit', strength: 'strong' });
+  });
+
   it('marks manual workouts without photos as self-reported', () => {
     expect(evidenceBadges({ ...base, source: 'manual' })).toEqual([
       { icon: 'hand.raised.fill', label: 'Self-reported', strength: 'weak' },

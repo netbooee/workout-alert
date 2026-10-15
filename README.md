@@ -12,6 +12,16 @@ from Apple Health, and a **weekly streak** grows every week you hit your goal.
 - Hit your goal and the streak grows by one week. The current week never breaks your streak while it's still in progress.
 - Every **4 weeks hit** earns a **streak freeze** (max 2). A missed week automatically spends a freeze instead of resetting the streak.
 - The first sync looks back 12 weeks, so an existing habit shows up as a streak on day one.
+- **Two trackers, one workout.** Wearing more than one device (say an Apple Watch and a Whoop)
+  records most workouts twice in Apple Health. Overlapping workouts from different devices
+  (overlapping by at least half of the shorter one) count once: the richest copy stays (heart
+  rate, then longest), the others are folded into it (`workouts.duplicate_of`) and show as
+  "Also recorded by …". A workout only one device caught still counts. Folded copies earn no
+  XP, don't count toward incentives, and don't trigger a second partner notification;
+  reactions, comments, and photos on them move to the copy that counts.
+- Changing your goal applies to the current week and to the **weeks from before you joined**
+  (your imported history), so picking a realistic goal on day one counts your past. Weeks since
+  you joined keep the goal they had, so lowering it later can't rewrite them.
 
 Streaks are computed in Postgres (`supabase/migrations`) whenever workouts change, so
 they're consistent across devices and can't be edited by the client.
@@ -73,6 +83,22 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   the daily greeting (the header calms down to worried).
 - Mood rules and copy live in `src/lib/lotl.ts` (unit-tested); the drawing is
   `src/components/lotl.tsx`. The mood → color/scale table is shared so a widget can match.
+- **Pick your buddy** on the Me tab, free to switch any time: Lotl, **Capi** the capybara,
+  **Lento** the sloth, or **Canela** the red panda (`profiles.mascot`). All four show the
+  same six moods with the same signature on the face (sunglasses, ^ ^ eyes, sweatband,
+  sweat drop, gritted teeth, sleep bubble); ears and arms stand in for Lotl's gills. Each
+  has its own voice mixed into the shared greeting lines.
+- **Partners see your buddy** on your partner card, in a mood that matches your week
+  (never fired up; asleep in rest mode, which is only shared once you're partners).
+- Drawings live in `src/components/mascots/` (shared face and motion, one file per animal).
+
+## Welcome tour
+
+The first time someone opens the app (after onboarding) they get a five-page swipeable tour:
+what Sigamos is, how the weekly streak works, partners, incentives and XP, and picking a
+buddy plus the widget. **Skip** works on every page, and it takes the place of that day's
+greeting so two pop-ups never stack. Reopen it any time from **Me → Help → Show the welcome
+tour** (`src/app/welcome.tsx`; seen-state is per account in AsyncStorage).
 
 ## Rest mode
 
@@ -85,6 +111,29 @@ reminders pause. Workouts during rest still count.
 Light, dark, or **Automatic** (follows the iPhone), set on the Me tab. Theme colors in
 `src/constants/theme.ts` are iOS dynamic colors with a light and dark value each, so static
 styles re-color instantly; React Navigation gets plain hex values via `Palettes`.
+
+## Widget
+
+A home-screen and Lock Screen widget (iOS) built with `expo-widgets`, showing **your chosen
+buddy** in the mood that matches your week.
+
+- **Small:** your buddy, streak, one message, and the week's dots.
+- **Medium:** adds day letters and the one reminder that matters most: a partner request or
+  incentive offer waiting on you, today's nudge, an incentive you're close to earning, a
+  partner who already worked out today, or your league rank.
+- **Lock Screen:** a ring for this week's days with your streak, a three-line rectangle, and
+  an inline line above the clock. Lock Screen versions never show partners' names.
+- **Through the day:** the app hands the widget a timeline for the rest of the week, assuming
+  no new workouts, so it changes on its own: gentle in the morning, firmer at 1 PM, and
+  urgent (fired up) at 6 PM when today has to count. It calms down once you've worked out.
+- **Taps** open the right screen (an offer, Partners, Log a workout, or Home).
+- Refreshed whenever the app opens, syncs, comes back to the foreground, or you switch
+  buddies. Signing out clears it.
+- What it says lives in `src/lib/widget.ts` (unit-tested); the SwiftUI layout is
+  `src/widgets/streak-widget.tsx`. Buddy pictures are pre-rendered PNGs in `assets/mascots/`
+  (re-export them from `src/components/mascots/` when the drawings change, and bump
+  `VERSION` in `src/widgets/pictures.ts`); the app copies them into the shared App Group
+  (`group.com.netbooee.sigamos`) for the widget.
 
 ## Push notifications
 
@@ -115,12 +164,17 @@ styles re-color instantly; React Navigation gets plain hex values via `Palettes`
 | Check-in photo on a workout | +5 |
 | Hitting your weekly goal | +50 |
 | Earning a partner's incentive | +100 |
+| A partner verifies your workout (✅), once per workout | +5 |
+| Verifying a partner's workout (up to 3 a day) | +2 |
 
 - **Levels** get progressively longer: L2 at 100 XP, L3 at 300, L5 at 1,000, L10 at 4,500.
 - **Weekly league**: you and your partners ranked by XP earned this week (Mon–Sun).
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
 - A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo).
+- **Verifying** doesn't change streaks: every 15+ minute workout counts, verified or not. It
+  earns XP on both sides, and "verified only" incentives count hand-logged workouts only once a
+  partner verifies them. Removing a ✅ takes its XP back.
 
 ## Stack
 
@@ -224,8 +278,9 @@ Apple both require one), and a Supabase project.
 `website/` is the static site for **sigamos.cloud** (marketing page, `/privacy`, `/terms`,
 `/support`, and `/invite/<CODE>` fallback for invite links), deployed by Netlify from this repo
 (`netlify.toml`, no build step). Keep DNS at Hover so the Resend email records keep working: point
-`@` (A record) and `www` (CNAME) at Netlify. The TestFlight link is a placeholder
-(`REPLACE_ME`) in `website/index.html` and `website/invite/index.html`. Screenshots in
+`@` (A record) and `www` (CNAME) at Netlify. The beta buttons use the public TestFlight link
+(https://testflight.apple.com/join/epCEHKDt) in `website/index.html` and
+`website/invite/index.html`. Screenshots in
 `website/img/` come from the web preview; swap in real device screenshots when you have them.
 
 ## Checks
@@ -249,14 +304,6 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   account and cascades their data, and removes their photos and voice messages from storage.
   Then update `website/privacy/` and `website/support/`, which currently say "email us" and
   "coming soon".
-- **Make Lotl's six faces clearly different.** At a glance several moods read as the same
-  face, mostly told apart only by color and gill angle: **worried** looks like **happy** (both
-  smile), and **fired up** looks like **ready** (same eyes, brows, and dots above the head).
-  Give each mood its own eyes, brows, and mouth, e.g. worried: raised, slanted brows and a
-  wobbly frown; ready: bright open eyes and a small determined smile, no angry brows; fired up:
-  keep the angry brows with flared gills and a steam puff. Update `src/components/lotl.tsx`
-  and the website art (`website/img/lotl-*.svg`) together, then check all six side by side at
-  small (Home header) and large (daily greeting) sizes in light and dark mode.
 
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~
@@ -268,26 +315,14 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 8. Achievements/badges, self-set rewards, challenges
 9. Background HealthKit delivery
 10. ~~Lotl mascot, daily greeting, rest mode~~
-11. **Duolingo-style home-screen widget with Lotl.** Lotl's face changes with your mood
-    (blazing → fired up → sleepy) and the widget nudges you like Duolingo's does:
-    - **Small:** Lotl plus one line, e.g. "2 more days to keep your 6-week streak 🔥".
-    - **Medium:** Lotl, this week's dots, and the most important reminder.
-    - **Lock screen:** a streak count / days-left circle.
-    - **Reminders it surfaces:** streak at risk (with days left), "last chance" on Sunday,
-      a partner's nudge, an incentive close to done ("1 workout from Sam's ☕"), unanswered
-      incentive offers or partner requests, and Rest mode.
-    - Gets more urgent through the day when a workout is still needed, calms down once you've
-      worked out, and taps open the right screen.
-    - Needs a native WidgetKit extension (SwiftUI) plus an App Group so the app can hand it the
-      latest state; refreshed when the app syncs, on a timeline through the day, and via silent
-      pushes when a partner acts. Mood logic and copy already live in `src/lib/lotl.ts`
-      (`lotlMood`, `LOTL_LOOKS`) and should be shared, not duplicated.
+11. ~~Home-screen and Lock Screen widget with your buddy~~ (see "Widget" above). Next:
+    refresh it in the background (background task or silent pushes when a partner acts),
+    since today it updates when the app opens, syncs, or comes back to the foreground.
 
 ### Beta and website launch
 
-- **Public TestFlight link.** Turn on a public link (App Store Connect → TestFlight → External
-  Testing) and replace the `https://testflight.apple.com/join/REPLACE_ME` placeholder in
-  `website/index.html` (two buttons) and `website/invite/index.html`.
+- ~~**Public TestFlight link.**~~ https://testflight.apple.com/join/epCEHKDt, used by the
+  website's beta buttons.
 - **External TestFlight testing.** Testers outside the team need Apple's Beta App Review:
   fill in the beta description, feedback email, and a demo sign-in for the reviewer, then add
   an external group.
@@ -308,6 +343,7 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   with a push notification and a place to see it (Home banner or the daily greeting).
 - **Hide Lotl.** A setting for people who'd rather not have a character: Home shows a plain
   header and the daily greeting becomes a simple summary card (or turns off).
-- **More characters.** Two or three alternatives to Lotl with the same six moods, picked on
-  the Me tab. `LOTL_LOOKS` / `lotlMood` already separate the mood logic from the drawing, so
-  each character is a new drawing plus its own copy for the greeting.
+- **Special characters (one-time purchases).** Extra characters beyond the free four, bought
+  once (no subscription). To be designed later: which characters, pricing, App Store in-app
+  purchases (StoreKit, e.g. via `expo-iap` or RevenueCat), restoring purchases, and how
+  partners see a bought character.

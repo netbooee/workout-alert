@@ -73,6 +73,18 @@ export async function removeEvidencePhoto(workout: Workout, path: string): Promi
   return data;
 }
 
+/**
+ * Deletes a workout and its check-in photos. The database recomputes the
+ * streak and takes back the workout's XP (and any week-goal bonus it earned).
+ */
+export async function deleteWorkout(workout: Workout): Promise<void> {
+  const { error } = await supabase.from('workouts').delete().eq('id', workout.id);
+  if (error) throw error;
+  if (workout.photo_paths.length > 0) {
+    await supabase.storage.from(BUCKET).remove(workout.photo_paths);
+  }
+}
+
 /** Signed URLs for evidence photos, valid for an hour. */
 export function useEvidenceUrls(paths: string[]) {
   return useQuery({

@@ -24,7 +24,14 @@ import { useNames, useWorkout } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import { showCelebrationIfEarned } from '@/lib/celebrate';
 import type { Workout } from '@/lib/database.types';
-import { addEvidencePhotos, MAX_PHOTOS, pickPhoto, removeEvidencePhoto, useEvidenceUrls } from '@/lib/evidence';
+import {
+  addEvidencePhotos,
+  deleteWorkout,
+  MAX_PHOTOS,
+  pickPhoto,
+  removeEvidencePhoto,
+  useEvidenceUrls,
+} from '@/lib/evidence';
 import { supabase } from '@/lib/supabase';
 import { formatDuration, workoutIcon, workoutLabel } from '@/lib/workout-types';
 
@@ -90,8 +97,62 @@ export default function WorkoutScreen() {
             </AppText>
           )}
         </Card>
+
+        {isOwner && <DeleteWorkout workout={w} />}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function DeleteWorkout({ workout }: { workout: Workout }) {
+  const queryClient = useQueryClient();
+  const [deleting, setDeleting] = useState(false);
+
+  // Apple Health is the source of truth for synced workouts: deleting one here
+  // would bring it back on the next full sync, so point people to Health.
+  if (workout.source === 'healthkit') {
+    return (
+      <AppText variant="caption" style={{ textAlign: 'center' }}>
+        From Apple Health. To remove it, delete it in the Health app and it disappears here on the
+        next sync.
+      </AppText>
+    );
+  }
+
+  const confirm = () =>
+    Alert.alert(
+      'Delete this workout?',
+      'Its photos, reactions, and XP are removed too, and your streak is updated.',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: async () => {
+            setDeleting(true);
+            try {
+              await deleteWorkout(workout);
+              await queryClient.invalidateQueries();
+              router.back();
+            } catch (e) {
+              setDeleting(false);
+              Alert.alert('Could not delete workout', e instanceof Error ? e.message : String(e));
+            }
+          },
+        },
+      ],
+    );
+
+  return (
+    <Pressable onPress={confirm} disabled={deleting} style={styles.delete} hitSlop={8}>
+      {deleting ? (
+        <ActivityIndicator color={Colors.danger} />
+      ) : (
+        <AppText variant="heading" color={Colors.danger}>
+          Delete workout
+        </AppText>
+      )}
+    </Pressable>
   );
 }
 
@@ -218,6 +279,7 @@ function Centered({ children }: { children: React.ReactNode }) {
 }
 
 const styles = StyleSheet.create({
+  delete: { alignItems: 'center', paddingVertical: Spacing.md },
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
   hero: { alignItems: 'center', gap: Spacing.sm, paddingTop: Spacing.lg },

@@ -27,6 +27,8 @@ they're consistent across devices and can't be edited by the client.
   with photos (the + on Home) for sessions without a watch. Hand-logged workouts without a
   photo are labelled *self-reported*.
 - Partners react 🔥 💪 👏 or ✅ **Verify** (you can't verify your own).
+- **Delete** a hand-logged workout from its detail screen (its photos, reactions, and XP go
+  with it). Apple Health workouts are deleted in the Health app and disappear on the next sync.
 - **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
 - Long-press a partner card to remove them.
 

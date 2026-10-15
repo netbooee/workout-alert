@@ -105,7 +105,7 @@ reminders pause. Workouts during rest still count.
 src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
   onboarding.tsx         Weekly goal + Apple Health permission
-  (tabs)/index.tsx       Home: streak, week dots, rings, recent workouts
+  (tabs)/index.tsx       Home: streak + week dots, rings, 8-week trend, recent workouts
   (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code
   week/[start].tsx       One week from the progress chart: totals and workouts by day

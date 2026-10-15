@@ -5,9 +5,9 @@ import { AppText, Card } from '@/components/ui';
 import { Colors, DailyTargets, Spacing } from '@/constants/theme';
 import type { DailyActivity } from '@/lib/database.types';
 
-const SIZE = 112;
-const STROKE = 12;
-const GAP = 3;
+const SIZE = 88;
+const STROKE = 10;
+const GAP = 2;
 
 export function ActivityRings({ today }: { today: DailyActivity | null }) {
   const rings = [
@@ -70,8 +70,8 @@ export function ActivityRings({ today }: { today: DailyActivity | null }) {
       <View style={styles.legend}>
         <AppText variant="label">Today</AppText>
         {rings.map((r) => (
-          <View key={r.label}>
-            <AppText variant="caption" color={r.color}>
+          <View key={r.label} style={styles.line}>
+            <AppText variant="caption" color={r.color} style={styles.ringLabel}>
               {r.label}
             </AppText>
             <AppText variant="heading">
@@ -90,5 +90,7 @@ export function ActivityRings({ today }: { today: DailyActivity | null }) {
 
 const styles = StyleSheet.create({
   card: { flexDirection: 'row', alignItems: 'center', gap: Spacing.lg },
-  legend: { flex: 1, gap: 6 },
+  legend: { flex: 1, gap: 4 },
+  line: { flexDirection: 'row', alignItems: 'baseline' },
+  ringLabel: { width: 72 },
 });

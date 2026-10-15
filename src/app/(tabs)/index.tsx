@@ -7,6 +7,7 @@ import { ActivityRings } from '@/components/activity-rings';
 import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
 import { NudgeBanner } from '@/components/nudge-banner';
+import { ProgressMini } from '@/components/progress-mini';
 import { StreakHero } from '@/components/streak-hero';
 import { AppText, Card } from '@/components/ui';
 import { WeekDots } from '@/components/week-dots';
@@ -73,20 +74,33 @@ export default function HomeScreen() {
           <ActivityIndicator color={Colors.flame} style={{ marginTop: Spacing.xl }} />
         ) : (
           <>
-            <StreakHero streak={data?.streak ?? null} state={state} resting={!!profile.resting_since} />
-            <WeekDots days={days} goal={profile.weekly_goal} />
+            <StreakHero streak={data?.streak ?? null} state={state} resting={!!profile.resting_since}>
+              <WeekDots days={days} goal={profile.weekly_goal} embedded />
+            </StreakHero>
             <ActivityRings today={data?.today ?? null} />
+            <ProgressMini />
 
             <Card>
               <AppText variant="label">Recent workouts</AppText>
               {data?.recentWorkouts.length ? (
-                data.recentWorkouts.map((w) => (
-                  <Link key={w.id} href={{ pathname: '/workout/[id]', params: { id: w.id } }} asChild>
-                    <Pressable>
-                      <WorkoutRow workout={w} />
-                    </Pressable>
-                  </Link>
-                ))
+                <>
+                  {data.recentWorkouts.slice(0, RECENT_COUNT).map((w) => (
+                    <Link key={w.id} href={{ pathname: '/workout/[id]', params: { id: w.id } }} asChild>
+                      <Pressable>
+                        <WorkoutRow workout={w} />
+                      </Pressable>
+                    </Link>
+                  ))}
+                  {data.recentWorkouts.length > RECENT_COUNT && (
+                    <Link href="/me" asChild>
+                      <Pressable hitSlop={8} style={styles.more}>
+                        <AppText variant="caption" color={Colors.flame}>
+                          See older workouts by week
+                        </AppText>
+                      </Pressable>
+                    </Link>
+                  )}
+                </>
               ) : (
                 <View style={{ paddingVertical: Spacing.md, gap: Spacing.xs }}>
                   <AppText variant="body">No workouts yet.</AppText>
@@ -105,8 +119,12 @@ export default function HomeScreen() {
   );
 }
 
+/** Older workouts are a tap away in the Progress chart's week view. */
+const RECENT_COUNT = 5;
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  more: { alignItems: 'center', paddingTop: Spacing.xs },
 });

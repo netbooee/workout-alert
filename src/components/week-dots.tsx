@@ -5,10 +5,20 @@ import { AppText, Card } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import type { WeekDay } from '@/lib/week';
 
-export function WeekDots({ days, goal }: { days: WeekDay[]; goal: number }) {
+export function WeekDots({
+  days,
+  goal,
+  embedded = false,
+}: {
+  days: WeekDay[];
+  goal: number;
+  /** Render inside another card (the streak card on Home) instead of in its own. */
+  embedded?: boolean;
+}) {
   const active = days.filter((d) => d.active).length;
+  const Container = embedded ? View : Card;
   return (
-    <Card>
+    <Container style={embedded ? styles.embedded : undefined}>
       <View style={styles.header}>
         <AppText variant="label">This week</AppText>
         <AppText variant="heading">
@@ -34,13 +44,14 @@ export function WeekDots({ days, goal }: { days: WeekDay[]; goal: number }) {
           </View>
         ))}
       </View>
-    </Card>
+    </Container>
   );
 }
 
 const DOT = 34;
 
 const styles = StyleSheet.create({
+  embedded: { gap: Spacing.sm },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'baseline' },
   row: { flexDirection: 'row', justifyContent: 'space-between', paddingTop: Spacing.xs },
   day: { alignItems: 'center', gap: 6 },

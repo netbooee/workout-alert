@@ -1,4 +1,5 @@
 import { SymbolView } from 'expo-symbols';
+import type { ReactNode } from 'react';
 import { StyleSheet, View } from 'react-native';
 
 import { AppText, Card } from '@/components/ui';
@@ -10,10 +11,13 @@ export function StreakHero({
   streak,
   state,
   resting = false,
+  children,
 }: {
   streak: Streak | null;
   state: WeekState;
   resting?: boolean;
+  /** Rendered between the streak and the status line (Home puts the week dots here). */
+  children?: ReactNode;
 }) {
   const weeks = streak?.current_weeks ?? 0;
   const lit = weeks > 0 || state.kind === 'done';
@@ -24,7 +28,7 @@ export function StreakHero({
         <View style={[styles.flame, { backgroundColor: lit ? Colors.flameSoft : Colors.cardRaised }]}>
           <SymbolView
             name="flame.fill"
-            size={44}
+            size={38}
             tintColor={lit ? Colors.flame : Colors.textMuted}
             animationSpec={lit ? { effect: { type: 'bounce' } } : undefined}
           />
@@ -35,6 +39,7 @@ export function StreakHero({
         </View>
         <FreezeChips count={streak?.freezes_banked ?? 0} />
       </View>
+      {children}
       <AppText variant="body" color={resting ? Colors.rest : messageColor(state)}>
         {resting ? 'Rest mode is on. Your streak is protected 😴' : message(state, weeks)}
       </AppText>
@@ -90,11 +95,11 @@ function messageColor(state: WeekState): string {
 }
 
 const styles = StyleSheet.create({
-  card: { padding: Spacing.lg, gap: Spacing.md },
+  card: { padding: Spacing.md + 4, gap: Spacing.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   flame: {
-    width: 76,
-    height: 76,
+    width: 64,
+    height: 64,
     borderRadius: Radius.lg,
     borderCurve: 'continuous',
     alignItems: 'center',

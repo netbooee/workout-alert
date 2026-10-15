@@ -300,6 +300,7 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   with a push notification and a place to see it (Home banner or the daily greeting).
 - **Hide Lotl.** A setting for people who'd rather not have a character: Home shows a plain
   header and the daily greeting becomes a simple summary card (or turns off).
-- **More characters.** Two or three alternatives to Lotl with the same six moods, picked on
-  the Me tab. `LOTL_LOOKS` / `lotlMood` already separate the mood logic from the drawing, so
-  each character is a new drawing plus its own copy for the greeting.
+- **More characters.** Drawn, in all six moods with the same face signatures as Lotl:
+  Capi the capybara, Lento the sloth, and Canela the red panda (`src/components/mascots/`,
+  names in `src/lib/mascots.ts`). Still to do: a picker on the Me tab, saving the choice on
+  the profile, showing it to partners, greeting copy per character, and the widget.

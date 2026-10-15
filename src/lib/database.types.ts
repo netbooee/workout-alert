@@ -73,6 +73,8 @@ export type Database = {
           note: string | null;
           photo_paths: string[];
           source_name: string | null;
+          /** Set when another device recorded the same workout; points at the copy that counts. */
+          duplicate_of: string | null;
           created_at: string;
         };
         Insert: {

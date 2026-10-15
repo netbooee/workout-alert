@@ -8,10 +8,10 @@ import { evidenceBadges } from '@/lib/evidence-badges';
 
 const STRENGTH_COLOR = { strong: Colors.success, medium: Colors.freeze, weak: Colors.textSecondary };
 
-export function EvidenceBadges({ workout }: { workout: Workout }) {
+export function EvidenceBadges({ workout, alsoRecordedBy }: { workout: Workout; alsoRecordedBy?: string[] }) {
   return (
     <View style={styles.row}>
-      {evidenceBadges(workout).map((b) => (
+      {evidenceBadges(workout, alsoRecordedBy).map((b) => (
         <View key={b.label} style={styles.badge}>
           <SymbolView name={b.icon} size={12} tintColor={STRENGTH_COLOR[b.strength]} />
           <AppText variant="caption" color={STRENGTH_COLOR[b.strength]} style={{ fontSize: 12 }}>

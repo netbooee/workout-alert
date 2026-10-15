@@ -12,6 +12,13 @@ from Apple Health, and a **weekly streak** grows every week you hit your goal.
 - Hit your goal and the streak grows by one week. The current week never breaks your streak while it's still in progress.
 - Every **4 weeks hit** earns a **streak freeze** (max 2). A missed week automatically spends a freeze instead of resetting the streak.
 - The first sync looks back 12 weeks, so an existing habit shows up as a streak on day one.
+- **Two trackers, one workout.** Wearing more than one device (say an Apple Watch and a Whoop)
+  records most workouts twice in Apple Health. Overlapping workouts from different devices
+  (overlapping by at least half of the shorter one) count once: the richest copy stays (heart
+  rate, then longest), the others are folded into it (`workouts.duplicate_of`) and show as
+  "Also recorded by …". A workout only one device caught still counts. Folded copies earn no
+  XP, don't count toward incentives, and don't trigger a second partner notification;
+  reactions, comments, and photos on them move to the copy that counts.
 - Changing your goal applies to the current week and to the **weeks from before you joined**
   (your imported history), so picking a realistic goal on day one counts your past. Weeks since
   you joined keep the goal they had, so lowering it later can't rewrite them.

@@ -84,7 +84,7 @@ export default function WorkoutScreen() {
 
         <Card>
           <AppText variant="label">Check-in</AppText>
-          <EvidenceBadges workout={w} />
+          <EvidenceBadges workout={w} alsoRecordedBy={data.alsoRecordedBy} />
           <Photos workout={w} editable={isOwner} />
           <Note workout={w} editable={isOwner} />
         </Card>

@@ -64,7 +64,7 @@ export function FeedCard({ item, name }: { item: FeedItem; name: string }) {
       ) : null}
       <Link href={{ pathname: '/workout/[id]', params: { id: w.id } }} asChild>
         <Pressable>
-          <EvidenceBadges workout={w} />
+          <EvidenceBadges workout={w} alsoRecordedBy={item.alsoRecordedBy} />
         </Pressable>
       </Link>
       <ReactionBar workoutId={w.id} ownerId={w.user_id} reactions={item.reactions} />

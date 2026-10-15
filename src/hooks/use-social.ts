@@ -45,22 +45,21 @@ export function useLeague() {
 export interface FeedItem {
   workout: Workout;
   reactions: { kind: ReactionKind; user_id: string }[];
+  /** Other devices whose copies of this workout were folded into it. */
+  alsoRecordedBy: string[];
 }
 
 async function withReactions(workouts: Workout[]): Promise<FeedItem[]> {
   if (!workouts.length) return [];
-  const reactions = unwrap(
-    await supabase
-      .from('reactions')
-      .select('workout_id, kind, user_id')
-      .in(
-        'workout_id',
-        workouts.map((w) => w.id),
-      ),
-  );
+  const ids = workouts.map((w) => w.id);
+  const [reactions, copies] = await Promise.all([
+    supabase.from('reactions').select('workout_id, kind, user_id').in('workout_id', ids).then(unwrap),
+    supabase.from('workouts').select('duplicate_of, source_name').in('duplicate_of', ids).then(unwrap),
+  ]);
   return workouts.map((workout) => ({
     workout,
     reactions: reactions.filter((r) => r.workout_id === workout.id),
+    alsoRecordedBy: copies.filter((c) => c.duplicate_of === workout.id).map((c) => c.source_name ?? ''),
   }));
 }
 
@@ -76,6 +75,7 @@ export function usePartnerFeed() {
           .from('workouts')
           .select('*')
           .neq('user_id', userId!)
+          .is('duplicate_of', null)
           .order('started_at', { ascending: false })
           .limit(30),
       );
@@ -88,7 +88,11 @@ export function useWorkout(id: string) {
   return useQuery({
     queryKey: ['social', 'workout', id],
     queryFn: async () => {
-      const workout = unwrap(await supabase.from('workouts').select('*').eq('id', id).single());
+      let workout = unwrap(await supabase.from('workouts').select('*').eq('id', id).single());
+      // A link to a copy another device's richer record replaced opens the one that counts.
+      if (workout.duplicate_of) {
+        workout = unwrap(await supabase.from('workouts').select('*').eq('id', workout.duplicate_of).single());
+      }
       const [item] = await withReactions([workout]);
       return item;
     },

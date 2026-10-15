@@ -2,11 +2,12 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, TextInput, View } from 'react-native';
 
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useKeyboardOverlap } from '@/hooks/use-keyboard-overlap';
 import { useProfile } from '@/lib/auth';
 import { showCelebrationIfEarned } from '@/lib/celebrate';
 import { addEvidencePhotos, MAX_PHOTOS, pickPhoto } from '@/lib/evidence';
@@ -30,6 +31,8 @@ const DURATIONS = [15, 30, 45, 60, 90];
 export default function LogWorkoutScreen() {
   const profile = useProfile();
   const queryClient = useQueryClient();
+  const { ref: screenRef, overlap: keyboardOverlap } = useKeyboardOverlap();
+  const scrollRef = useRef<ScrollView>(null);
   const [type, setType] = useState<(typeof TYPES)[number]>('traditionalStrengthTraining');
   const [minutes, setMinutes] = useState(45);
   const [photos, setPhotos] = useState<string[]>([]);
@@ -75,7 +78,7 @@ export default function LogWorkoutScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View ref={screenRef} style={[styles.container, { paddingBottom: keyboardOverlap }]}>
       <View style={styles.header}>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <AppText variant="heading" color={Colors.textSecondary}>
@@ -87,8 +90,8 @@ export default function LogWorkoutScreen() {
       </View>
 
       <ScrollView
+        ref={scrollRef}
         contentContainerStyle={styles.content}
-        automaticallyAdjustKeyboardInsets
         keyboardDismissMode="interactive"
         keyboardShouldPersistTaps="handled">
         <AppText variant="label">What did you do?</AppText>
@@ -153,11 +156,14 @@ export default function LogWorkoutScreen() {
             maxLength={500}
             value={note}
             onChangeText={setNote}
+            // The note is the last field; once the keyboard has shrunk the
+            // screen, scroll it into view above the Log button.
+            onFocus={() => setTimeout(() => scrollRef.current?.scrollToEnd(), 300)}
           />
         </Card>
       </ScrollView>
 
-      <View style={styles.footer}>
+      <View style={[styles.footer, keyboardOverlap > 0 && { paddingBottom: Spacing.md }]}>
         <Button title={`Log ${minutes} min ${workoutLabel(type)}`} loading={saving} onPress={save} />
       </View>
     </View>

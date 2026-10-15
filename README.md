@@ -170,8 +170,8 @@ Apple both require one), and a Supabase project.
      The app asks for the 6-digit code rather than handling links.
 
 4. **Push notifications** (optional, but that's how nudges reach people):
-   - Run `npx eas-cli@latest init` once and put the printed project ID in `.env.local`
-     as `EAS_PROJECT_ID`.
+   - The EAS project ID is in `app.json` (`extra.eas.projectId`). For your own fork, run
+     `npx eas-cli@latest init` and replace it (or set `EAS_PROJECT_ID` in `.env.local`).
    - Let EAS set up Apple push credentials: `npx eas-cli@latest credentials` (or just run an
      `eas build`, which offers to create them). Push only works on a real iPhone.
    - `pg_net` and `pg_cron` are enabled by the migrations (the hourly reminder job is scheduled

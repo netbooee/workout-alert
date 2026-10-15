@@ -24,7 +24,7 @@
         {
           "photosPermission": "Sigamos uses your photos so you can share workout check-ins with your accountability partners.",
           "cameraPermission": "Sigamos uses the camera so you can snap workout check-ins for your accountability partners.",
-          "microphonePermission": false
+          "microphonePermission": "Sigamos uses the microphone so you can record voice messages for your accountability partners."
         }
       ],
       "expo-notifications",

@@ -16,6 +16,7 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
+import { Comments } from '@/components/comments';
 import { EvidenceBadges } from '@/components/evidence-badges';
 import { ReactionBar, REACTIONS } from '@/components/reaction-bar';
 import { AppText, Button, Card } from '@/components/ui';
@@ -97,6 +98,8 @@ export default function WorkoutScreen() {
             </AppText>
           )}
         </Card>
+
+        <Comments workout={w} />
 
         {isOwner && <DeleteWorkout workout={w} />}
       </ScrollView>

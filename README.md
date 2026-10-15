@@ -29,6 +29,10 @@ they're consistent across devices and can't be edited by the client.
 - Partners react 🔥 💪 👏 or ✅ **Verify** (you can't verify your own).
 - **Delete** a hand-logged workout from its detail screen (its photos, reactions, and XP go
   with it). Apple Health workouts are deleted in the Health app and disappear on the next sync.
+- **Comments and voice messages** on any workout you can see: type encouragement or tap the mic
+  for a voice note (up to 30 seconds, recorded in the app). You see comments from yourself and
+  your partners; the workout owner sees them all and can reply. Long-press a comment to delete
+  it (your own, or any on your workout).
 - **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
 - Long-press a partner card to remove them.
 
@@ -78,6 +82,8 @@ styles re-color instantly; React Navigation gets plain hex values via `Palettes`
   remaining day this week: "Your 2-week streak is on the line 🔥 · You need a workout every day
   left this week: 3 to go." On Sunday: "Last chance to keep your 5-week streak 🔥". At most once a
   day, only if you have a streak, and never once the week is already out of reach.
+- **Comments**: "Sam commented on your run 💬 · “Hill repeats on a Friday?!”" or "Sam sent you
+  a voice message 🎙️". Replies notify the people already in the conversation.
 - Tapping opens the relevant screen. Each kind can be switched off on the Me tab.
 - How it works: database triggers write to `notifications` and send to the recipient's
   devices through Expo's push service using `pg_net`. No separate server is needed.

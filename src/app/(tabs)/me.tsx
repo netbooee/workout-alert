@@ -125,6 +125,11 @@ export default function MeScreen() {
             onChange={(v) => updateProfile({ notify_verifications: v })}
           />
           <Toggle
+            label="Comments and voice messages"
+            value={profile.notify_comments}
+            onChange={(v) => updateProfile({ notify_comments: v })}
+          />
+          <Toggle
             label="Partner requests"
             value={profile.notify_partner_requests}
             onChange={(v) => updateProfile({ notify_partner_requests: v })}

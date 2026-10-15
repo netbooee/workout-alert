@@ -21,6 +21,7 @@ export type Database = {
           notify_partner_workouts: boolean;
           notify_partner_requests: boolean;
           notify_verifications: boolean;
+          notify_comments: boolean;
           notify_streak_reminders: boolean;
           resting_since: string | null;
           created_at: string;
@@ -31,6 +32,7 @@ export type Database = {
           notify_partner_workouts?: boolean;
           notify_partner_requests?: boolean;
           notify_verifications?: boolean;
+          notify_comments?: boolean;
           notify_streak_reminders?: boolean;
           display_name?: string | null;
           avatar_url?: string | null;
@@ -153,6 +155,26 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      workout_comments: {
+        Row: {
+          id: string;
+          workout_id: string;
+          user_id: string;
+          body: string | null;
+          audio_path: string | null;
+          audio_duration_ms: number | null;
+          created_at: string;
+        };
+        Insert: {
+          workout_id: string;
+          user_id?: string;
+          body?: string | null;
+          audio_path?: string | null;
+          audio_duration_ms?: number | null;
+        };
+        Update: never;
+        Relationships: [];
+      };
       nudges: {
         Row: {
           id: string;
@@ -188,7 +210,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          kind: 'nudge' | 'partner_workout' | 'partner_request' | 'partner_accepted' | 'verified' | 'streak_risk';
+          kind: 'nudge' | 'partner_workout' | 'partner_request' | 'partner_accepted' | 'verified' | 'streak_risk' | 'comment';
           title: string;
           body: string;
           url: string | null;
@@ -269,6 +291,7 @@ export type DailyActivity = PublicTables['daily_activity']['Row'];
 export type Streak = PublicTables['streaks']['Row'];
 export type StreakWeek = PublicTables['streak_weeks']['Row'];
 export type Reaction = PublicTables['reactions']['Row'];
+export type WorkoutComment = PublicTables['workout_comments']['Row'];
 export type Nudge = PublicTables['nudges']['Row'];
 export type XpEvent = PublicTables['xp_events']['Row'];
 export type Partner = Database['public']['Functions']['my_partners']['Returns'][number];

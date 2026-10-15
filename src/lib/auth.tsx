@@ -80,6 +80,7 @@ export function useUpdateProfile() {
         | 'notify_partner_requests'
         | 'notify_verifications'
         | 'notify_streak_reminders'
+        | 'notify_comments'
       >
     >,
   ) => {

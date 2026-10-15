@@ -283,6 +283,20 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
       pushes when a partner acts. Mood logic and copy already live in `src/lib/lotl.ts`
       (`lotlMood`, `LOTL_LOOKS`) and should be shared, not duplicated.
 
+### Beta and website launch
+
+- **Public TestFlight link.** Turn on a public link (App Store Connect → TestFlight → External
+  Testing) and replace the `https://testflight.apple.com/join/REPLACE_ME` placeholder in
+  `website/index.html` (two buttons) and `website/invite/index.html`.
+- **External TestFlight testing.** Testers outside the team need Apple's Beta App Review:
+  fill in the beta description, feedback email, and a demo sign-in for the reviewer, then add
+  an external group.
+- **Legal review.** Have a lawyer review `website/privacy/` and `website/terms/` before the
+  App Store launch (they were written as a starting point, not legal advice).
+- **Real screenshots.** The website images (`website/img/*.webp`) come from a web preview with
+  sample data. Replace them with screenshots from a real iPhone (light and dark) once the
+  TestFlight build is in use.
+
 ### Queued ideas (not started)
 
 - **Short video check-ins.** Recorded only inside the app (no uploads from the library) and

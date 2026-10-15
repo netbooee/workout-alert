@@ -40,6 +40,23 @@ export default function MeScreen() {
     }
   };
 
+  const editName = () =>
+    Alert.prompt(
+      'Your name',
+      'This is how partners see you.',
+      async (value) => {
+        const name = value.trim().slice(0, 40);
+        if (!name || name === profile.display_name) return;
+        try {
+          await updateProfile({ display_name: name });
+        } catch (e) {
+          Alert.alert('Could not save your name', e instanceof Error ? e.message : String(e));
+        }
+      },
+      'plain-text',
+      profile.display_name ?? '',
+    );
+
   const resync = async () => {
     setResyncing(true);
     try {
@@ -56,7 +73,14 @@ export default function MeScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <AppText variant="title">{profile.display_name ?? 'You'}</AppText>
+        <Pressable onPress={editName} accessibilityRole="button" accessibilityHint="Change the name partners see" style={styles.nameRow}>
+          <AppText variant="title" style={{ flexShrink: 1 }} numberOfLines={1}>
+            {profile.display_name ?? 'Add your name'}
+          </AppText>
+          <AppText variant="caption" color={Colors.flame}>
+            Edit
+          </AppText>
+        </Pressable>
         <Card>
           <LevelBar xp={xp ?? 0} />
           <AppText variant="caption">
@@ -231,6 +255,7 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
 }
 
 const styles = StyleSheet.create({
+  nameRow: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.sm },
   appearanceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },

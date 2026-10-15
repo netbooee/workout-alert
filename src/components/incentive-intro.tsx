@@ -51,15 +51,15 @@ export function IncentiveIntro({ partners }: { partners: PartnerState[] }) {
           </AppText>
         </View>
       </View>
-      <View style={styles.row}>
-        <Pressable onPress={dismiss} hitSlop={8} style={{ paddingHorizontal: Spacing.sm }}>
-          <AppText variant="caption">Not now</AppText>
-        </Pressable>
+      <View style={{ gap: Spacing.sm }}>
         <Button
           title={`Offer ${name} an incentive`}
-          style={{ flex: 1, height: 44 }}
+          style={{ height: 48 }}
           onPress={() => router.push({ pathname: '/incentive/new', params: { to: pick.partner_id } })}
         />
+        <Pressable onPress={dismiss} hitSlop={8} style={styles.notNow}>
+          <AppText variant="caption">Not now</AppText>
+        </Pressable>
       </View>
     </Card>
   );
@@ -68,4 +68,5 @@ export function IncentiveIntro({ partners }: { partners: PartnerState[] }) {
 const styles = StyleSheet.create({
   card: { borderColor: Colors.flame, backgroundColor: Colors.flameSoft, gap: Spacing.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  notNow: { alignSelf: 'center', paddingVertical: 4, paddingHorizontal: Spacing.md },
 });

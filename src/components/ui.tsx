@@ -58,7 +58,14 @@ export function Button({
       {loading ? (
         <ActivityIndicator color={primary ? '#000' : Colors.text} />
       ) : (
-        <AppText variant="heading" color={primary ? '#000' : Colors.text}>
+        // One line that shrinks to fit, so long labels and large text sizes never get
+        // clipped by the button's fixed height.
+        <AppText
+          variant="heading"
+          color={primary ? '#000' : Colors.text}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.7}>
           {title}
         </AppText>
       )}

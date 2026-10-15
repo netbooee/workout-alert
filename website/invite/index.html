@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>You’re invited · Sigamos</title>
+  <meta name="description" content="A friend invited you to be their accountability partner on Sigamos.">
+  <meta property="og:title" content="Join me on Sigamos 🔥">
+  <meta property="og:description" content="Be my accountability partner: we keep a weekly workout streak going together.">
+  <meta property="og:image" content="https://sigamos.cloud/img/home.webp">
+  <link rel="icon" href="/img/lotl-happy.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap">
+      <a class="brand" href="/"><img src="/img/lotl-happy.svg" alt="">Sigamos</a>
+      <nav class="nav"><a href="/support/">Support</a></nav>
+    </div>
+  </header>
+
+  <!-- Served for every /invite/<CODE> path (see netlify.toml). -->
+  <main class="wrap invite">
+    <div>
+      <img src="/img/lotl-blazing.svg" alt="">
+      <h1>You’re invited to Sigamos</h1>
+      <p>A friend wants you as their accountability partner: you’ll keep a weekly workout streak going and cheer each other on.</p>
+      <div class="code" id="code" hidden></div>
+      <div class="btn-row">
+        <a class="btn btn-primary" id="open" href="sigamos://">Open in Sigamos</a>
+        <a class="btn btn-secondary" href="https://testflight.apple.com/join/REPLACE_ME">Get the iPhone beta</a>
+      </div>
+      <ol class="steps">
+        <li>Install TestFlight and the Sigamos beta on your iPhone.</li>
+        <li>Sign in, then come back and tap <strong>Open in Sigamos</strong>, or go to <strong>Partners → add</strong> and type the code above.</li>
+      </ol>
+    </div>
+  </main>
+
+  <script>
+    // /invite/AB12CD → show the code and deep-link into the app.
+    const code = (location.pathname.split('/')[2] || '').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+    if (code) {
+      const el = document.getElementById('code');
+      el.textContent = code;
+      el.hidden = false;
+      document.getElementById('open').href = 'sigamos://invite/' + code;
+    }
+  </script>
+</body>
+</html>

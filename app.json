@@ -1,0 +1,63 @@
+{
+  "expo": {
+    "name": "Sigamos",
+    "slug": "sigamos",
+    "owner": "netbooees-team",
+    "version": "0.1.0",
+    "orientation": "portrait",
+    "icon": "./assets/images/icon.png",
+    "scheme": "sigamos",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "bundleIdentifier": "com.netbooee.sigamos",
+      "appleTeamId": "GB8H6683BF",
+      "supportsTablet": false,
+      "usesAppleSignIn": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "plugins": [
+      "expo-router",
+      "expo-apple-authentication",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Sigamos uses your photos so you can share workout check-ins with your accountability partners.",
+          "cameraPermission": "Sigamos uses the camera so you can snap workout check-ins for your accountability partners.",
+          "microphonePermission": "Sigamos uses the microphone so you can record voice messages for your accountability partners."
+        }
+      ],
+      "expo-notifications",
+      [
+        "@kingstinct/react-native-healthkit",
+        {
+          "NSHealthShareUsageDescription": "Sigamos reads your workouts, steps, and heart rate to keep your weekly streak up to date and share progress with your crew.",
+          "NSHealthUpdateUsageDescription": false
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#F2F2F7",
+          "image": "./assets/images/splash-icon.png",
+          "imageWidth": 76,
+          "dark": {
+            "backgroundColor": "#0B0B0F",
+            "image": "./assets/images/splash-icon.png"
+          }
+        }
+      ],
+      "./plugins/with-scene-lifecycle"
+    ],
+    "experiments": {
+      "typedRoutes": true,
+      "reactCompiler": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "7a419561-617a-4816-97ea-3da3a2ebbb80"
+      }
+    }
+  }
+}

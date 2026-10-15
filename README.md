@@ -205,3 +205,19 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 10. ~~Lotl mascot, daily greeting, rest mode~~
 11. **Home-screen widget with Lotl** (same faces and moods; needs a native WidgetKit
     extension, and the mood data is already shared in `LOTL_LOOKS` / `lotlMood`)
+
+### Queued ideas (not started)
+
+- **Light mode.** The app is dark-only today (`userInterfaceStyle: "dark"` in `app.json`, one
+  palette in `src/constants/theme.ts` used by ~30 files). Plan: a light palette alongside the
+  dark one, follow the iPhone's setting (with an override on Me), and read colors through a
+  hook instead of static styles. Native build needed for the `app.json` change.
+- **Short video check-ins.** Recorded only inside the app (no uploads from the library) and
+  capped at 30 seconds to keep storage small. Needs the camera in video mode, compression
+  before upload, a size limit on the `evidence` bucket, and a player on the workout screen.
+  Confirm before building: the cap is a 30-second *maximum*, not a minimum.
+- **Hide Lotl.** A setting for people who'd rather not have a character: Home shows a plain
+  header and the daily greeting becomes a simple summary card (or turns off).
+- **More characters.** Two or three alternatives to Lotl with the same six moods, picked on
+  the Me tab. `LOTL_LOOKS` / `lotlMood` already separate the mood logic from the drawing, so
+  each character is a new drawing plus its own copy for the greeting.

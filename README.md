@@ -168,6 +168,11 @@ Apple both require one), and a Supabase project.
    - **Email codes**: in *Email Templates*, edit **Magic Link** and **Confirm signup**
      so the body includes `{{ .Token }}` (see `supabase/templates/magic_link.html`).
      The app asks for the 6-digit code rather than handling links.
+   - **Email sending** goes through [Resend](https://resend.com) over SMTP so sign-in codes
+     aren't capped at Supabase's built-in 2/hour. Sender: `Sigamos <noreply@mail.sigamos.cloud>`
+     (domain `mail.sigamos.cloud`, DNS at Hover). Supabase → Authentication → Emails → SMTP:
+     host `smtp.resend.com`, port 465, user `resend`, password = a Resend API key with sending
+     access. Auth rate limit for emails raised to 30/hour.
 
 4. **Push notifications** (optional, but that's how nudges reach people):
    - The EAS project ID is in `app.json` (`extra.eas.projectId`). For your own fork, run

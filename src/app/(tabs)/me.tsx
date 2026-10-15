@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'expo-router';
 import { useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
+import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LevelBar } from '@/components/level-bar';
@@ -180,6 +180,19 @@ export default function MeScreen() {
             the last 12 weeks.
           </AppText>
           <Button title="Re-sync health data" variant="secondary" loading={resyncing} onPress={resync} />
+        </Card>
+
+        <Card>
+          <AppText variant="label">Help</AppText>
+          <AppText variant="caption">A quick tour of streaks, partners, incentives, and your buddy.</AppText>
+          <Link href="/welcome" asChild>
+            <Button title="Show the welcome tour" variant="secondary" />
+          </Link>
+          <Button
+            title="Help and support"
+            variant="secondary"
+            onPress={() => Linking.openURL('https://sigamos.cloud/support/')}
+          />
         </Card>
 
         <Button title="Sign out" variant="secondary" onPress={signOut} />

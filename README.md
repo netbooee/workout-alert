@@ -92,6 +92,14 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   (never fired up; asleep in rest mode, which is only shared once you're partners).
 - Drawings live in `src/components/mascots/` (shared face and motion, one file per animal).
 
+## Welcome tour
+
+The first time someone opens the app (after onboarding) they get a five-page swipeable tour:
+what Sigamos is, how the weekly streak works, partners, incentives and XP, and picking a
+buddy plus the widget. **Skip** works on every page, and it takes the place of that day's
+greeting so two pop-ups never stack. Reopen it any time from **Me → Help → Show the welcome
+tour** (`src/app/welcome.tsx`; seen-state is per account in AsyncStorage).
+
 ## Rest mode
 
 Sick, injured, or traveling? Turn on Rest mode (Me tab). Weeks you don't hit are marked

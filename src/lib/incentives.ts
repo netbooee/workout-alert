@@ -47,7 +47,7 @@ export const WINDOW_OPTIONS = [
 
 export const REWARD_PRESETS = [
   { emoji: '🎁', label: 'Surprise', reward: 'A surprise' },
-  { emoji: '🤳', label: 'Special Selfie', reward: 'A special selfie' },
+  { emoji: '🤳', label: 'Selfie', reward: 'A selfie' },
   { emoji: '☕', label: 'Coffee', reward: 'Coffee on me' },
   { emoji: '🍕', label: 'Pizza', reward: 'Pizza night on me' },
   { emoji: '🍦', label: 'Ice cream', reward: 'Ice cream on me' },

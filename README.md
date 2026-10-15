@@ -73,6 +73,14 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   the daily greeting (the header calms down to worried).
 - Mood rules and copy live in `src/lib/lotl.ts` (unit-tested); the drawing is
   `src/components/lotl.tsx`. The mood → color/scale table is shared so a widget can match.
+- **Pick your buddy** on the Me tab, free to switch any time: Lotl, **Capi** the capybara,
+  **Lento** the sloth, or **Canela** the red panda (`profiles.mascot`). All four show the
+  same six moods with the same signature on the face (sunglasses, ^ ^ eyes, sweatband,
+  sweat drop, gritted teeth, sleep bubble); ears and arms stand in for Lotl's gills. Each
+  has its own voice mixed into the shared greeting lines.
+- **Partners see your buddy** on your partner card, in a mood that matches your week
+  (never fired up; asleep in rest mode, which is only shared once you're partners).
+- Drawings live in `src/components/mascots/` (shared face and motion, one file per animal).
 
 ## Rest mode
 
@@ -300,7 +308,7 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   with a push notification and a place to see it (Home banner or the daily greeting).
 - **Hide Lotl.** A setting for people who'd rather not have a character: Home shows a plain
   header and the daily greeting becomes a simple summary card (or turns off).
-- **More characters.** Drawn, in all six moods with the same face signatures as Lotl:
-  Capi the capybara, Lento the sloth, and Canela the red panda (`src/components/mascots/`,
-  names in `src/lib/mascots.ts`). Still to do: a picker on the Me tab, saving the choice on
-  the profile, showing it to partners, greeting copy per character, and the widget.
+- **Special characters (one-time purchases).** Extra characters beyond the free four, bought
+  once (no subscription). To be designed later: which characters, pricing, App Store in-app
+  purchases (StoreKit, e.g. via `expo-iap` or RevenueCat), restoring purchases, and how
+  partners see a bought character.

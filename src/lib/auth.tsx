@@ -82,6 +82,7 @@ export function useUpdateProfile() {
         | 'notify_streak_reminders'
         | 'notify_comments'
         | 'notify_incentives'
+        | 'mascot'
       >
     >,
   ) => {

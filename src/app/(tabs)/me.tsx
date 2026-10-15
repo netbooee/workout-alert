@@ -5,8 +5,9 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
+import { MascotPicker } from '@/components/mascot-picker';
+import { Mascot } from '@/components/mascots';
 import { ProgressChart } from '@/components/progress-chart';
 import { PushPrompt } from '@/components/push-prompt';
 import { RewardShelf } from '@/components/reward-shelf';
@@ -18,6 +19,7 @@ import { useXpTotal } from '@/hooks/use-social';
 import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
+import { mascotKind } from '@/lib/mascots';
 import { supabase } from '@/lib/supabase';
 
 export default function MeScreen() {
@@ -87,6 +89,8 @@ export default function MeScreen() {
             Changes apply to this week right away. Past weeks keep the goal they had.
           </AppText>
         </Card>
+
+        <MascotPicker />
 
         <RestModeCard resting={!!profile.resting_since} />
 
@@ -172,6 +176,7 @@ function Stat({ label, value, unit, color }: { label: string; value: number; uni
 }
 
 function RestModeCard({ resting }: { resting: boolean }) {
+  const { mascot } = useProfile();
   const queryClient = useQueryClient();
   const [saving, setSaving] = useState(false);
 
@@ -186,7 +191,7 @@ function RestModeCard({ resting }: { resting: boolean }) {
   return (
     <Card>
       <View style={styles.restRow}>
-        <Lotl mood={resting ? 'sleepy' : 'ready'} size={40} />
+        <Mascot kind={mascotKind(mascot)} mood={resting ? 'sleepy' : 'ready'} size={40} />
         <View style={{ flex: 1 }}>
           <AppText variant="heading">Rest mode</AppText>
           <AppText variant="caption">

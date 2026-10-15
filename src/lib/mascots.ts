@@ -16,9 +16,14 @@ export const MASCOTS: Record<MascotKind, { name: string; species: string; vibe: 
 
 export const MASCOT_KINDS = Object.keys(MASCOTS) as MascotKind[];
 
+/** A known character, falling back to Lotl (e.g. before the database has the column). */
+export function mascotKind(kind: string | null | undefined): MascotKind {
+  return kind && kind in MASCOTS ? (kind as MascotKind) : 'lotl';
+}
+
 /**
- * How perky each mood is, from -1 (droopy) to 1 (all the way up). Lotl's gills,
- * the animals' ears, and the sloth's arms all follow it.
+ * How perky each mood is, from -1 (droopy) to 1 (all the way up). The animals' ears
+ * and the sloth's arms follow it, the way Lotl's gills follow LOTL_LOOKS.gillLift.
  */
 export const MOOD_LIFT: Record<LotlMood, number> = {
   blazing: 1,

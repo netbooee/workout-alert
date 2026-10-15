@@ -34,6 +34,7 @@ export type Database = {
           notify_incentives: boolean;
           notify_streak_reminders: boolean;
           resting_since: string | null;
+          mascot: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
           created_at: string;
         };
         Insert: never;
@@ -51,6 +52,7 @@ export type Database = {
           weekly_goal?: number;
           min_workout_minutes?: number;
           onboarded_at?: string | null;
+          mascot?: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
         };
         Relationships: [];
       };
@@ -327,6 +329,8 @@ export type Database = {
           this_week_goal: number;
           friend_streak: number;
           last_nudged_at: string | null;
+          mascot: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
+          resting: boolean;
         }[];
       };
       weekly_league: {

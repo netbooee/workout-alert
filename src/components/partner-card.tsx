@@ -1,14 +1,18 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
 import { Alert, Pressable, StyleSheet, View, type ColorValue } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
+import { Mascot } from '@/components/mascots';
 import { AppText, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useMyIncentives } from '@/hooks/use-incentives';
 import { useNudge, useRemovePartner, type PartnerState } from '@/hooks/use-social';
 import { isOpen } from '@/lib/incentives';
+import { partnerMood } from '@/lib/lotl';
+import { MASCOTS, mascotKind } from '@/lib/mascots';
 
 export function PartnerCard({ partner }: { partner: PartnerState }) {
   const nudge = useNudge();
@@ -16,6 +20,17 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
   const done = partner.this_week_days >= partner.this_week_goal;
   const recentlyNudged = partner.recently_nudged;
   const firstName = partner.display_name?.split(' ')[0] ?? '';
+  const [now] = useState(() => new Date());
+  // Their buddy, in a mood that matches their week.
+  const mood = partnerMood(
+    {
+      weekDays: partner.this_week_days,
+      weekGoal: partner.this_week_goal,
+      streakWeeks: partner.current_weeks,
+      resting: !!partner.resting,
+    },
+    now,
+  );
   // Your current incentive for them: open, or earned and waiting for you to deliver.
   const { given } = useMyIncentives();
   const incentive = given.find(
@@ -42,6 +57,9 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
               text={`${partner.this_week_days}/${partner.this_week_goal} this week`}
             />
           </View>
+        </View>
+        <View accessible accessibilityLabel={`${firstName}'s buddy, ${MASCOTS[mascotKind(partner.mascot)].name}`}>
+          <Mascot kind={mascotKind(partner.mascot)} mood={mood} size={40} />
         </View>
         <View style={styles.friendStreak}>
           <AppText variant="title" color={partner.friend_streak ? Colors.xp : Colors.textMuted} style={{ fontSize: 22 }}>

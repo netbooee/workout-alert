@@ -12,6 +12,7 @@ import {
 } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
 import { lotlMessage, type LotlMessage } from '@/lib/lotl';
+import { mascotKind } from '@/lib/mascots';
 import { buildWeek, dayKey, startOfDay } from '@/lib/week';
 
 const firstName = (name: string) => name.split(' ')[0] ?? name;
@@ -68,6 +69,7 @@ export function useLotl({ calm = true }: { calm?: boolean } = {}): LotlMessage |
           }
         : null,
     calm,
+    mascot: mascotKind(profile.mascot),
   });
 }
 

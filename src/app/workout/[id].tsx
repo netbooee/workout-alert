@@ -43,7 +43,12 @@ export default function WorkoutScreen() {
 
   return (
     <SafeAreaView edges={['bottom']} style={styles.container}>
-      <ScrollView contentContainerStyle={styles.content} contentInsetAdjustmentBehavior="automatic">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        contentInsetAdjustmentBehavior="automatic"
+        automaticallyAdjustKeyboardInsets
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled">
         <View style={styles.hero}>
           <View style={styles.icon}>
             <SymbolView name={workoutIcon(w.activity_type)} size={40} tintColor={Colors.flame} />

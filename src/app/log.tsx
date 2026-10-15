@@ -86,7 +86,11 @@ export default function LogWorkoutScreen() {
         <View style={{ width: 52 }} />
       </View>
 
-      <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
+      <ScrollView
+        contentContainerStyle={styles.content}
+        automaticallyAdjustKeyboardInsets
+        keyboardDismissMode="interactive"
+        keyboardShouldPersistTaps="handled">
         <AppText variant="label">What did you do?</AppText>
         <View style={styles.grid}>
           {TYPES.map((t) => (

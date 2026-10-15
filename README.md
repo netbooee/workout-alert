@@ -94,6 +94,29 @@ Light, dark, or **Automatic** (follows the iPhone), set on the Me tab. Theme col
 `src/constants/theme.ts` are iOS dynamic colors with a light and dark value each, so static
 styles re-color instantly; React Navigation gets plain hex values via `Palettes`.
 
+## Widget
+
+A home-screen and Lock Screen widget (iOS) built with `expo-widgets`, showing **your chosen
+buddy** in the mood that matches your week.
+
+- **Small:** your buddy, streak, one message, and the week's dots.
+- **Medium:** adds day letters and the one reminder that matters most: a partner request or
+  incentive offer waiting on you, today's nudge, an incentive you're close to earning, a
+  partner who already worked out today, or your league rank.
+- **Lock Screen:** a ring for this week's days with your streak, a three-line rectangle, and
+  an inline line above the clock. Lock Screen versions never show partners' names.
+- **Through the day:** the app hands the widget a timeline for the rest of the week, assuming
+  no new workouts, so it changes on its own: gentle in the morning, firmer at 1 PM, and
+  urgent (fired up) at 6 PM when today has to count. It calms down once you've worked out.
+- **Taps** open the right screen (an offer, Partners, Log a workout, or Home).
+- Refreshed whenever the app opens, syncs, comes back to the foreground, or you switch
+  buddies. Signing out clears it.
+- What it says lives in `src/lib/widget.ts` (unit-tested); the SwiftUI layout is
+  `src/widgets/streak-widget.tsx`. Buddy pictures are pre-rendered PNGs in `assets/mascots/`
+  (re-export them from `src/components/mascots/` when the drawings change, and bump
+  `VERSION` in `src/widgets/pictures.ts`); the app copies them into the shared App Group
+  (`group.com.netbooee.sigamos`) for the widget.
+
 ## Push notifications
 
 - **Nudges**: "Alex nudged you 👋 · You're at 2 of 4 days this week. Time to move!"
@@ -268,20 +291,9 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 8. Achievements/badges, self-set rewards, challenges
 9. Background HealthKit delivery
 10. ~~Lotl mascot, daily greeting, rest mode~~
-11. **Duolingo-style home-screen widget with Lotl.** Lotl's face changes with your mood
-    (blazing → fired up → sleepy) and the widget nudges you like Duolingo's does:
-    - **Small:** Lotl plus one line, e.g. "2 more days to keep your 6-week streak 🔥".
-    - **Medium:** Lotl, this week's dots, and the most important reminder.
-    - **Lock screen:** a streak count / days-left circle.
-    - **Reminders it surfaces:** streak at risk (with days left), "last chance" on Sunday,
-      a partner's nudge, an incentive close to done ("1 workout from Sam's ☕"), unanswered
-      incentive offers or partner requests, and Rest mode.
-    - Gets more urgent through the day when a workout is still needed, calms down once you've
-      worked out, and taps open the right screen.
-    - Needs a native WidgetKit extension (SwiftUI) plus an App Group so the app can hand it the
-      latest state; refreshed when the app syncs, on a timeline through the day, and via silent
-      pushes when a partner acts. Mood logic and copy already live in `src/lib/lotl.ts`
-      (`lotlMood`, `LOTL_LOOKS`) and should be shared, not duplicated.
+11. ~~Home-screen and Lock Screen widget with your buddy~~ (see "Widget" above). Next:
+    refresh it in the background (background task or silent pushes when a partner acts),
+    since today it updates when the app opens, syncs, or comes back to the foreground.
 
 ### Beta and website launch
 

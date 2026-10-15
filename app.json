@@ -48,7 +48,28 @@
           }
         }
       ],
-      "./plugins/with-scene-lifecycle"
+      "./plugins/with-scene-lifecycle",
+      [
+        "expo-widgets",
+        {
+          "widgets": [
+            {
+              "name": "StreakWidget",
+              "displayName": "Sigamos",
+              "description": "Your buddy, your streak, and what matters today.",
+              "ios": {
+                "supportedFamilies": [
+                  "systemSmall",
+                  "systemMedium",
+                  "accessoryCircular",
+                  "accessoryRectangular",
+                  "accessoryInline"
+                ]
+              }
+            }
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true,

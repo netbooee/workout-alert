@@ -3,6 +3,7 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Colors } from '@/constants/theme';
 import { useDailyGreeting } from '@/hooks/use-lotl';
 import { usePushLifecycle } from '@/hooks/use-push';
+import { useWidgetSync } from '@/hooks/use-widget-sync';
 import { useAuth } from '@/lib/auth';
 
 export default function TabsLayout() {
@@ -17,6 +18,7 @@ export default function TabsLayout() {
 
 function Tabs() {
   useDailyGreeting();
+  useWidgetSync();
 
   return (
     <NativeTabs tintColor={Colors.flame}>

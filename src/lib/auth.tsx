@@ -6,6 +6,7 @@ import type { Profile } from '@/lib/database.types';
 import { signOutOfGoogle } from '@/lib/google-auth';
 import { unregisterDevice } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
+import { resetWidget } from '@/widgets/sync';
 
 interface AuthState {
   /** False until the stored session has been read from disk. */
@@ -103,6 +104,7 @@ export function useUpdateProfile() {
 }
 
 export async function signOut() {
+  resetWidget();
   // Best effort: a failure here shouldn't block signing out.
   await unregisterDevice().catch(() => {});
   await signOutOfGoogle();

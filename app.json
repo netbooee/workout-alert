@@ -10,7 +10,10 @@
     "ios": {
       "bundleIdentifier": "com.netbooee.sigamos",
       "supportsTablet": false,
-      "usesAppleSignIn": true
+      "usesAppleSignIn": true,
+      "config": {
+        "usesNonExemptEncryption": false
+      }
     },
     "plugins": [
       "expo-router",

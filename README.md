@@ -163,6 +163,15 @@ Apple both require one), and a Supabase project.
    The simulator works for UI, but it has no Health data unless you add some in the
    simulator's Health app.
 
+6. **TestFlight**: a production build with the JavaScript bundled in (no Mac needed to run it).
+   `eas.json` carries the Supabase URL and publishable key for cloud builds, since `.env.local`
+   isn't uploaded.
+   ```sh
+   npx eas-cli@latest build --platform ios --profile production --auto-submit
+   ```
+   EAS creates the signing certificate, provisioning profile, and App Store Connect record,
+   then uploads the build to TestFlight.
+
 ## Checks
 
 ```sh

@@ -95,8 +95,10 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
                 onError: (e) => Alert.alert('Could not nudge', e instanceof Error ? e.message : String(e)),
               });
             }}
+            accessibilityRole="button"
+            accessibilityLabel={recentlyNudged ? `Nudged ${firstName}` : `Nudge ${firstName}`}
             style={[styles.action, recentlyNudged && { opacity: 0.5 }]}>
-            <AppText variant="caption" color={Colors.text}>
+            <AppText variant="heading" style={styles.actionText} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.75}>
               {recentlyNudged ? 'Nudged 👋' : `👋 Nudge ${firstName}`}
             </AppText>
           </Pressable>
@@ -107,10 +109,17 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
               Haptics.selectionAsync();
               router.push({ pathname: '/incentive/new', params: { to: partner.partner_id } });
             }}
+            accessibilityRole="button"
             accessibilityLabel={`Offer ${firstName} an incentive`}
             style={[styles.action, styles.offer]}>
-            <AppText variant="caption" color={Colors.flame}>
-              🎁 Offer an incentive
+            <AppText
+              variant="heading"
+              color={Colors.flame}
+              style={styles.actionText}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.75}>
+              🎁 Incentive
             </AppText>
           </Pressable>
         )}
@@ -139,7 +148,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
     backgroundColor: Colors.xpSoft,
   },
-  actions: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  actions: { flexDirection: 'row', gap: Spacing.sm },
   offer: { backgroundColor: Colors.flameSoft },
   incentive: {
     flexDirection: 'row',
@@ -151,11 +160,15 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.flameSoft,
   },
   incentiveEarned: { backgroundColor: Colors.xpSoft, borderWidth: 1, borderColor: Colors.success },
+  // Big, equal-width buttons that are easy to hit (Apple's minimum is 44pt tall).
   action: {
-    paddingHorizontal: 14,
-    height: 32,
+    flex: 1,
+    minHeight: 48,
+    paddingHorizontal: Spacing.md,
+    alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: Radius.pill,
+    borderRadius: Radius.md,
     backgroundColor: Colors.cardRaised,
   },
+  actionText: { fontSize: 16 },
 });

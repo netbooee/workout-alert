@@ -64,6 +64,15 @@ function RootNavigator() {
           name="workout/[id]"
           options={{ headerShown: true, title: '', headerBackTitle: 'Back', headerTransparent: true }}
         />
+        <Stack.Screen
+          name="week/[start]"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.flame,
+            headerTitleStyle: { color: Colors.text },
+          }}
+        />
         <Stack.Screen name="log" options={{ presentation: 'modal' }} />
         <Stack.Screen name="add-partner" options={{ presentation: 'modal' }} />
         <Stack.Screen name="invite/[code]" options={{ presentation: 'modal' }} />

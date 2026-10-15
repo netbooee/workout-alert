@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Lotl } from '@/components/lotl';
 import { LevelBar } from '@/components/level-bar';
+import { ProgressChart } from '@/components/progress-chart';
 import { PushPrompt } from '@/components/push-prompt';
 import { StreakHistory } from '@/components/streak-history';
 import { AppText, Button, Card } from '@/components/ui';
@@ -67,6 +68,7 @@ export default function MeScreen() {
         </View>
 
         <StreakHistory weeks={history ?? []} />
+        <ProgressChart />
 
         <Card>
           <AppText variant="label">Weekly goal</AppText>

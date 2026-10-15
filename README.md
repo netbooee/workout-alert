@@ -32,6 +32,13 @@ they're consistent across devices and can't be edited by the client.
 - **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
 - Long-press a partner card to remove them.
 
+## Progress
+
+The Me tab has a **Progress** chart: weekly active minutes or workout count for the last
+12 weeks, 6 months, or year, with a dashed line for your weekly average (counted from your
+first active week, current week excluded). Tap a bar to see that week's totals, streak
+status, and workouts by day. The math is in `src/lib/progress.ts` (unit-tested).
+
 ## Lotl, the streak mascot
 
 - A pink axolotl whose face, color, and gills reflect how your week is going (gills
@@ -100,7 +107,8 @@ src/app/                 Screens (Expo Router)
   onboarding.tsx         Weekly goal + Apple Health permission
   (tabs)/index.tsx       Home: streak, week dots, rings, recent workouts
   (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
-  (tabs)/me.tsx          Level, stats, 12-week history, goal, invite code, sign out
+  (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code
+  week/[start].tsx       One week from the progress chart: totals and workouts by day
   workout/[id].tsx       Workout detail: check-in photos, note, reactions
   log.tsx                Log a workout by hand with a check-in photo
   add-partner.tsx        Share your code / enter someone else's

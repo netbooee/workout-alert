@@ -249,14 +249,6 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   account and cascades their data, and removes their photos and voice messages from storage.
   Then update `website/privacy/` and `website/support/`, which currently say "email us" and
   "coming soon".
-- **Make Lotl's six faces clearly different.** At a glance several moods read as the same
-  face, mostly told apart only by color and gill angle: **worried** looks like **happy** (both
-  smile), and **fired up** looks like **ready** (same eyes, brows, and dots above the head).
-  Give each mood its own eyes, brows, and mouth, e.g. worried: raised, slanted brows and a
-  wobbly frown; ready: bright open eyes and a small determined smile, no angry brows; fired up:
-  keep the angry brows with flared gills and a steam puff. Update `src/components/lotl.tsx`
-  and the website art (`website/img/lotl-*.svg`) together, then check all six side by side at
-  small (Home header) and large (daily greeting) sizes in light and dark mode.
 
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~

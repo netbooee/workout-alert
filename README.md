@@ -249,8 +249,20 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 8. Achievements/badges, self-set rewards, challenges
 9. Background HealthKit delivery
 10. ~~Lotl mascot, daily greeting, rest mode~~
-11. **Home-screen widget with Lotl** (same faces and moods; needs a native WidgetKit
-    extension, and the mood data is already shared in `LOTL_LOOKS` / `lotlMood`)
+11. **Duolingo-style home-screen widget with Lotl.** Lotl's face changes with your mood
+    (blazing → fired up → sleepy) and the widget nudges you like Duolingo's does:
+    - **Small:** Lotl plus one line, e.g. "2 more days to keep your 6-week streak 🔥".
+    - **Medium:** Lotl, this week's dots, and the most important reminder.
+    - **Lock screen:** a streak count / days-left circle.
+    - **Reminders it surfaces:** streak at risk (with days left), "last chance" on Sunday,
+      a partner's nudge, an incentive close to done ("1 workout from Sam's ☕"), unanswered
+      incentive offers or partner requests, and Rest mode.
+    - Gets more urgent through the day when a workout is still needed, calms down once you've
+      worked out, and taps open the right screen.
+    - Needs a native WidgetKit extension (SwiftUI) plus an App Group so the app can hand it the
+      latest state; refreshed when the app syncs, on a timeline through the day, and via silent
+      pushes when a partner acts. Mood logic and copy already live in `src/lib/lotl.ts`
+      (`lotlMood`, `LOTL_LOOKS`) and should be shared, not duplicated.
 
 ### Queued ideas (not started)
 

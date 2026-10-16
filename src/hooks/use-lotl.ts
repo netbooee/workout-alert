@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { router } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { router, useSegments } from 'expo-router';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { AppState } from 'react-native';
 
 import { useHomeData } from '@/hooks/use-home-data';
 import {
@@ -83,31 +84,53 @@ const welcomedKey = (userId: string) => `welcome:seen:${userId}`;
 export function useDailyGreeting() {
   const profile = useProfile();
   const { isSuccess } = useHomeData();
+  // Only greet over the tabs, never on top of a screen someone opened on purpose
+  // (logging a workout, or a notification that deep-linked somewhere).
+  const segments = useSegments();
+  const tabsShowing = segments[0] === '(tabs)';
+  const onTabs = useRef(tabsShowing);
+  useEffect(() => {
+    onTabs.current = tabsShowing;
+  }, [tabsShowing]);
 
   useEffect(() => {
     if (!isSuccess) return;
     let cancelled = false;
-    (async () => {
-      const today = dayKey(new Date());
-      const [welcomed, greeted] = await Promise.all([
-        AsyncStorage.getItem(welcomedKey(profile.id)),
-        AsyncStorage.getItem(greetedKey(profile.id)),
-      ]);
-      if (cancelled) return;
-      if (!welcomed) {
-        await AsyncStorage.multiSet([
-          [welcomedKey(profile.id), '1'],
-          [greetedKey(profile.id), today],
+    let checking = false;
+
+    const check = async () => {
+      if (checking || !onTabs.current) return;
+      checking = true;
+      try {
+        const today = dayKey(new Date());
+        const [welcomed, greeted] = await Promise.all([
+          AsyncStorage.getItem(welcomedKey(profile.id)),
+          AsyncStorage.getItem(greetedKey(profile.id)),
         ]);
-        router.push('/welcome');
-        return;
+        if (cancelled || !onTabs.current) return;
+        if (!welcomed) {
+          await AsyncStorage.multiSet([
+            [welcomedKey(profile.id), '1'],
+            [greetedKey(profile.id), today],
+          ]);
+          router.push('/welcome');
+          return;
+        }
+        if (greeted === today) return;
+        await AsyncStorage.setItem(greetedKey(profile.id), today);
+        router.push('/greeting');
+      } finally {
+        checking = false;
       }
-      if (greeted === today) return;
-      await AsyncStorage.setItem(greetedKey(profile.id), today);
-      router.push('/greeting');
-    })();
+    };
+
+    check();
+    // iOS usually resumes the app rather than relaunching it, so check again each
+    // time it comes to the foreground: the first open of the day gets the greeting.
+    const sub = AppState.addEventListener('change', (state) => state === 'active' && check());
     return () => {
       cancelled = true;
+      sub.remove();
     };
   }, [isSuccess, profile.id]);
 }

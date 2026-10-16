@@ -79,7 +79,9 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week â†’ â
   (4+ idle days, or the week is lost with no freeze), and **sleepy** (rest mode).
 - The first time you open the app each day, Lotl greets you full-screen with one headline,
   up to three facts (streak, nudges, verifications, partners, league) and one action.
-  After that it lives in the Home header; tap it to see the greeting again.
+  After that it lives in the Home header; tap it to see the greeting again. "First open"
+  includes resuming the app from the background, but the greeting never covers a screen you
+  opened on purpose (logging a workout, or one a notification took you to).
 - Playful, never shaming: never angry when a freeze covers the week, and "fired up" only on
   the daily greeting (the header calms down to worried).
 - Mood rules and copy live in `src/lib/lotl.ts` (unit-tested); the drawing is

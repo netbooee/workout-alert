@@ -62,6 +62,11 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   on the Partners tab. Goals: workout days, active minutes, a number of workouts (optionally one
   type, e.g. 3 runs), or reaching a streak length; over 1, 2, or 4 weeks counted from this Sunday
   in the recipient's timezone. Rewards are real-world text (no money in the app).
+- **Rewards**: eight favorite tiles plus **More…**, a searchable sheet of about 50 suggestions
+  in groups (food, time together, pampering, chores, fitness, bigger stakes). Any pick is just
+  editable text; Custom, Cash prize and Gift card jump straight into it. No alcohol suggestions,
+  to keep the App Store age rating simple. The library is `REWARD_LIBRARY` in
+  `src/lib/incentives.ts`.
 - **Verified only** (off by default) counts only Apple Health workouts or ones a partner verified.
 - The recipient accepts or passes. Progress updates automatically from workouts (computed in
   Postgres). Hitting the goal earns it: **+100 XP**, a celebration, and pushes to both people.

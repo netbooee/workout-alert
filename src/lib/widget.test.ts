@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { signedOutWidget, widgetProps, widgetTimeline, type WidgetInput } from './widget';
+import { signedOutWidget, toWidgetPayload, widgetProps, widgetTimeline, type WidgetInput } from './widget';
 
 // Week of Mon 2026-10-12 … Sun 2026-10-18.
 const at = (day: number, hour: number) => new Date(2026, 9, 12 + day, hour);
@@ -120,3 +120,15 @@ describe('widgetTimeline', () => {
     expect(moods).toContain('worried');
   });
 });
+
+describe('toWidgetPayload', () => {
+  it('drops nulls everywhere, since the widget\'s storage cannot hold them', () => {
+    const payload = toWidgetPayload(widgetTimeline(base).at(-1)!.props);
+    expect(JSON.stringify(payload)).not.toContain('null');
+    expect(payload).not.toHaveProperty('streak');
+    expect(payload).not.toHaveProperty('reminder');
+    expect(payload.headline).toBe('New week!');
+    expect(toWidgetPayload({ a: { b: null, c: [1, null] } })).toEqual({ a: { c: [1, null] } });
+  });
+});
+

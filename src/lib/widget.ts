@@ -263,3 +263,12 @@ export function signedOutWidget(): WidgetProps {
     url: HOME_URL,
   };
 }
+
+/**
+ * The widget's data is stored in the shared App Group's UserDefaults, which can't hold
+ * null (iOS refuses the whole timeline and the widget renders blank). Drop null fields,
+ * deeply; the widget treats a missing field the same as null.
+ */
+export function toWidgetPayload<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value, (_key, v) => (v === null ? undefined : v))) as T;
+}

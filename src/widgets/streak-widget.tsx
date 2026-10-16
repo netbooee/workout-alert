@@ -47,9 +47,9 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
           image: null,
           streak: 6,
           headline: '2 more days',
-          detail: 'by Sunday to keep 6 weeks',
+          detail: 'by Saturday to keep 6 weeks',
           urgent: false,
-          dots: ['done', 'missed', 'done', 'missed', 'today', 'future', 'future'],
+          dots: ['missed', 'done', 'missed', 'done', 'today', 'future', 'future'],
           weekDays: 2,
           weekGoal: 4,
           resting: false,
@@ -76,7 +76,7 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
     eyes: 'eyes',
     trophy: 'trophy.fill',
   } as const;
-  const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const dot = (state: WidgetProps['dots'][number], size: number) =>
     state === 'today' ? (

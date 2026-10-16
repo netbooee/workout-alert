@@ -5,12 +5,12 @@ set search_path = public, extensions;
 
 select plan(13);
 
--- Chicago is UTC-5 in September, Los Angeles UTC-7. The current week starts Mon 09-21.
+-- Chicago is UTC-5 in September, Los Angeles UTC-7. The current week starts Sun 09-20.
 create temp table t as select
-  '2026-09-25 22:00+00'::timestamptz as fri_5pm_chi,
-  '2026-09-25 23:00+00'::timestamptz as fri_6pm_chi,
-  '2026-09-26 01:00+00'::timestamptz as fri_6pm_la,
-  '2026-09-27 23:00+00'::timestamptz as sun_6pm_chi;
+  '2026-09-24 22:00+00'::timestamptz as thu_5pm_chi,
+  '2026-09-24 23:00+00'::timestamptz as thu_6pm_chi,
+  '2026-09-25 01:00+00'::timestamptz as thu_6pm_la,
+  '2026-09-26 23:00+00'::timestamptz as sat_6pm_chi;
 
 create function pg_temp.user(p_id uuid, p_name text, p_goal int, p_tz text default 'America/Chicago')
 returns void language sql as $$
@@ -62,11 +62,11 @@ values ('ExponentPushToken[ava]', '00000000-0000-0000-0000-00000000000a');
 delete from public.notifications;
 delete from net.http_request_queue;
 
--- ─── Friday ──────────────────────────────────────────────────────────────────
+-- ─── Thursday ────────────────────────────────────────────────────────────────
 
-select is(public.send_streak_reminders((select fri_5pm_chi from t)), 0, 'nothing is sent before 6pm local');
+select is(public.send_streak_reminders((select thu_5pm_chi from t)), 0, 'nothing is sent before 6pm local');
 
-select is(public.send_streak_reminders((select fri_6pm_chi from t)), 2, 'Friday 6pm sends reminders');
+select is(public.send_streak_reminders((select thu_6pm_chi from t)), 2, 'Thursday 6pm sends reminders');
 select set_eq($$select * from pg_temp.reminders()$$,
   $$values ('00000000-0000-0000-0000-00000000000a'::uuid), ('00000000-0000-0000-0000-00000000000f'::uuid)$$,
   'only at-risk streaks are reminded (not on-track, done, no-streak, or other timezones)');
@@ -83,16 +83,16 @@ select is(
   (select jsonb_array_elements(convert_from(body, 'utf8')::jsonb) ->> 'to' from net.http_request_queue),
   'ExponentPushToken[ava]', 'reminders are pushed to devices');
 
-select is(public.send_streak_reminders((select fri_6pm_chi from t)), 0, 'running again the same day sends nothing new');
+select is(public.send_streak_reminders((select thu_6pm_chi from t)), 0, 'running again the same day sends nothing new');
 
-select is(public.send_streak_reminders((select fri_6pm_la from t)), 1, '6pm in Los Angeles is later in UTC');
+select is(public.send_streak_reminders((select thu_6pm_la from t)), 1, '6pm in Los Angeles is later in UTC');
 select ok('00000000-0000-0000-0000-00000000000e' in (select * from pg_temp.reminders()),
   'reminders follow each person''s timezone');
 
--- ─── Sunday ──────────────────────────────────────────────────────────────────
+-- ─── Saturday ────────────────────────────────────────────────────────────────
 
 delete from public.notifications;
-select public.send_streak_reminders((select sun_6pm_chi from t));
+select public.send_streak_reminders((select sat_6pm_chi from t));
 select results_eq(
   $$select user_id, title, body from public.notifications order by title, user_id$$,
   $$values
@@ -100,11 +100,11 @@ select results_eq(
      'One workout today keeps it alive.'::text),
     ('00000000-0000-0000-0000-000000000001'::uuid, 'Last chance to keep your 5-week streak 🔥'::text,
      'One workout today keeps it alive. (A freeze has your back if needed.)'::text)$$,
-  'Sunday is the last chance, mentioning a banked freeze; out-of-reach weeks are not nagged');
+  'Saturday is the last chance, mentioning a banked freeze; out-of-reach weeks are not nagged');
 
 delete from public.notifications;
 update public.profiles set notify_streak_reminders = false where id = '00000000-0000-0000-0000-00000000000b';
-select public.send_streak_reminders((select sun_6pm_chi from t));
+select public.send_streak_reminders((select sat_6pm_chi from t));
 select ok('00000000-0000-0000-0000-00000000000b' not in (select * from pg_temp.reminders()),
   'reminders can be turned off');
 
@@ -116,7 +116,7 @@ select throws_ok($$select public.send_streak_reminders()$$, '42501', null,
   'users cannot trigger reminders themselves');
 reset role;
 
-select ok(public.send_streak_reminders((select fri_5pm_chi from t)) = 0, 'the job is safe to run at any hour');
+select ok(public.send_streak_reminders((select thu_5pm_chi from t)) = 0, 'the job is safe to run at any hour');
 
 select * from finish();
 rollback;

@@ -67,8 +67,8 @@ select results_eq(
             'Hit 3 workout days this week → ☕ Coffee on me · Gym sessions count double. You pick the café!'::text)$$,
   'the recipient is notified of the offer');
 select is(
-  (select extract(isodow from starts_at at time zone 'UTC')::int from offer), 1,
-  'the window starts on Monday in the recipient''s timezone');
+  (select extract(dow from starts_at at time zone 'UTC')::int from offer), 0,
+  'the window starts on Sunday in the recipient''s timezone');
 
 -- ─── Visibility ──────────────────────────────────────────────────────────────
 

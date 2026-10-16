@@ -74,18 +74,17 @@ const CHECKPOINTS = [6, 13, 18];
 
 const plural = (n: number, word: string) => `${n} ${word}${n === 1 ? '' : 's'}`;
 
-/** The widget's timeline: now, then each checkpoint through Sunday, then Monday 00:00. */
+/** The widget's timeline: now, then each checkpoint through Saturday, then Sunday 00:00. */
 export function widgetTimeline(i: WidgetInput): WidgetEntry[] {
-  const monday = startOfWeek(i.now);
-  const nextMonday = addDays(monday, 7);
+  const nextWeek = addDays(startOfWeek(i.now), 7);
   const dates = [i.now];
-  for (let d = startOfDay(i.now); d < nextMonday; d = addDays(d, 1)) {
+  for (let d = startOfDay(i.now); d < nextWeek; d = addDays(d, 1)) {
     for (const h of CHECKPOINTS) {
       const t = new Date(d.getFullYear(), d.getMonth(), d.getDate(), h);
       if (t > i.now) dates.push(t);
     }
   }
-  dates.push(nextMonday);
+  dates.push(nextWeek);
   return dates.map((date) => ({ date, props: widgetProps(i, date) }));
 }
 
@@ -94,10 +93,10 @@ export function widgetProps(i: WidgetInput, at: Date): WidgetProps {
   const sameDay = dayKey(at) === dayKey(i.now);
   const newWeek = startOfWeek(at).getTime() !== startOfWeek(i.now).getTime();
   const done = new Set(newWeek ? [] : i.workoutDays);
-  const monday = startOfWeek(at);
-  const todayIndex = (at.getDay() + 6) % 7;
+  const sunday = startOfWeek(at);
+  const todayIndex = at.getDay();
   const dots: WidgetDot[] = Array.from({ length: 7 }, (_, d) => {
-    if (done.has(dayKey(addDays(monday, d)))) return 'done';
+    if (done.has(dayKey(addDays(sunday, d)))) return 'done';
     if (d === todayIndex) return 'today';
     return d < todayIndex ? 'missed' : 'future';
   });
@@ -146,7 +145,7 @@ export function widgetProps(i: WidgetInput, at: Date): WidgetProps {
     detail = i.freezes > 0 ? 'A freeze will cover it' : 'Next week is a fresh start';
   } else if (doneToday) {
     headline = 'Done for today!';
-    detail = `${needed} more by Sunday`;
+    detail = `${needed} more by Saturday`;
   } else if (lastChance) {
     urgent = hour >= 18;
     if (needed === 1 && todayIndex === 6) {
@@ -167,7 +166,7 @@ export function widgetProps(i: WidgetInput, at: Date): WidgetProps {
     detail = `${plural(i.weekGoal, 'day')} to go`;
   } else if (needed >= available - 1) {
     headline = `${plural(needed, 'more day')}`;
-    detail = `by Sunday${keep}`;
+    detail = `by Saturday${keep}`;
   } else {
     headline = `${weekDays} of ${i.weekGoal} days`;
     detail = needed === 1 ? 'Nice pace. One to go.' : `Nice pace. ${needed} to go.`;

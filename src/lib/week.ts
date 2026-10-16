@@ -1,8 +1,8 @@
-// Week math for the UI. Weeks run Monday–Sunday in the device's local time,
+// Week math for the UI. Weeks run Sunday–Saturday in the device's local time,
 // matching the server's streak engine (which uses the profile timezone, kept
 // in sync with the device on every health sync).
 
-export const DAY_LABELS = ['M', 'T', 'W', 'T', 'F', 'S', 'S'] as const;
+export const DAY_LABELS = ['S', 'M', 'T', 'W', 'T', 'F', 'S'] as const;
 
 /** Local calendar day as YYYY-MM-DD. */
 export function dayKey(date: Date): string {
@@ -20,10 +20,9 @@ export function addDays(date: Date, days: number): Date {
   return new Date(date.getFullYear(), date.getMonth(), date.getDate() + days);
 }
 
-/** Monday 00:00 local time of the week containing `date`. */
+/** Sunday 00:00 local time of the week containing `date`. */
 export function startOfWeek(date: Date): Date {
-  const mondayOffset = (date.getDay() + 6) % 7; // Sun=0 → 6, Mon=1 → 0
-  return addDays(startOfDay(date), -mondayOffset);
+  return addDays(startOfDay(date), -date.getDay()); // Sun=0
 }
 
 export interface WorkoutLike {
@@ -50,11 +49,11 @@ export function buildWeek(
       .filter((w) => w.duration_s >= minWorkoutMinutes * 60)
       .map((w) => dayKey(new Date(w.started_at))),
   );
-  const monday = startOfWeek(now);
+  const sunday = startOfWeek(now);
   const todayKey = dayKey(now);
 
   return DAY_LABELS.map((label, i) => {
-    const day = addDays(monday, i);
+    const day = addDays(sunday, i);
     const key = dayKey(day);
     return {
       key,
@@ -80,7 +79,7 @@ export function weekState(activeDays: number, goal: number, now: Date = new Date
   const needed = Math.max(goal - activeDays, 0);
   if (needed === 0) return { kind: 'done' };
 
-  const daysLeft = 7 - ((now.getDay() + 6) % 7);
+  const daysLeft = 7 - now.getDay();
   if (needed > daysLeft) return { kind: 'out-of-reach', needed, daysLeft };
   if (daysLeft - needed <= 1) return { kind: 'at-risk', needed, daysLeft };
   return { kind: 'on-track', needed, daysLeft };

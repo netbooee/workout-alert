@@ -7,7 +7,8 @@ from Apple Health, and a **weekly streak** grows every week you hit your goal.
 
 ## How streaks work
 
-- You pick a goal of **1–7 workout days per week** (weeks run Monday–Sunday in your timezone).
+- You pick a goal of **1–7 workout days per week** (weeks run Sunday–Saturday in your timezone, shown as S M T W T F S).
+  Weeks hit back when weeks started on Monday stay hit after the switch.
 - A day counts when it has at least one workout of **15+ minutes**. Two workouts on one day still count as one day.
 - Hit your goal and the streak grows by one week. The current week never breaks your streak while it's still in progress.
 - Every **4 weeks hit** earns a **streak freeze** (max 2). A missed week automatically spends a freeze instead of resetting the streak.
@@ -59,7 +60,7 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
 
 - **Offer** from a partner's card (🎁 Offer an incentive), a partner's workout, or the intro card
   on the Partners tab. Goals: workout days, active minutes, a number of workouts (optionally one
-  type, e.g. 3 runs), or reaching a streak length; over 1, 2, or 4 weeks counted from this Monday
+  type, e.g. 3 runs), or reaching a streak length; over 1, 2, or 4 weeks counted from this Sunday
   in the recipient's timezone. Rewards are real-world text (no money in the app).
 - **Verified only** (off by default) counts only Apple Health workouts or ones a partner verified.
 - The recipient accepts or passes. Progress updates automatically from workouts (computed in
@@ -146,7 +147,7 @@ buddy** in the mood that matches your week.
   (once per partner per workout, even if they toggle Verify off and on).
 - **Streak at risk**: at 6pm local time, if your streak needs a workout on (almost) every
   remaining day this week: "Your 2-week streak is on the line 🔥 · You need a workout every day
-  left this week: 3 to go." On Sunday: "Last chance to keep your 5-week streak 🔥". At most once a
+  left this week: 3 to go." On Saturday: "Last chance to keep your 5-week streak 🔥". At most once a
   day, only if you have a streak, and never once the week is already out of reach.
 - **Comments**: "Sam commented on your run 💬 · “Hill repeats on a Friday?!”" or "Sam sent you
   a voice message 🎙️". Replies notify the people already in the conversation.

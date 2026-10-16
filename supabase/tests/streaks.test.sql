@@ -5,7 +5,7 @@ set search_path = public, extensions;
 
 select plan(26);
 
--- Fixed clock: Thursday 2026-09-24 12:00 UTC. Current week starts Mon 09-21.
+-- Fixed clock: Thursday 2026-09-24 12:00 UTC. Current week starts Sun 09-20.
 create temp table t_now as select '2026-09-24 12:00:00+00'::timestamptz as ts;
 
 create function pg_temp.add_workout(p_user uuid, p_start timestamptz, p_minutes int)
@@ -51,7 +51,7 @@ select pg_temp.add_workout('00000000-0000-0000-0000-00000000000a', '2026-09-22 0
 
 select is((pg_temp.recompute('00000000-0000-0000-0000-00000000000a')).this_week_days, 1::smallint,
   'multiple workouts on one day count once; short workouts do not count');
-select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000a', '2026-09-21'), 'in_progress',
+select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000a', '2026-09-20'), 'in_progress',
   'current week below goal is in progress');
 select is((pg_temp.recompute('00000000-0000-0000-0000-00000000000a')).current_weeks, 0,
   'in-progress week does not add to the streak yet');
@@ -61,7 +61,7 @@ select pg_temp.add_workout('00000000-0000-0000-0000-00000000000a', '2026-09-24 0
 
 select is((pg_temp.recompute('00000000-0000-0000-0000-00000000000a')).current_weeks, 1,
   'hitting the goal this week starts the streak');
-select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000a', '2026-09-21'), 'hit',
+select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000a', '2026-09-20'), 'hit',
   'current week is marked hit');
 
 -- ─── Workouts from the trigger path ──────────────────────────────────────────
@@ -71,8 +71,8 @@ select ok(exists(select 1 from public.streaks where user_id = '00000000-0000-000
   'inserting a workout recomputes the streak via trigger');
 
 -- ─── Freezes ─────────────────────────────────────────────────────────────────
--- Sam: goal 1/week. Hit 4 weeks (08-10 .. 08-31) which earns a freeze,
--- miss 09-07, hit 09-14; the current week (09-21) has nothing yet.
+-- Sam: goal 1/week. Hit 4 weeks (Sundays 08-09 .. 08-30) which earns a freeze,
+-- miss 09-06, hit 09-13; the current week (09-20) has nothing yet.
 delete from public.workouts where user_id = '00000000-0000-0000-0000-00000000000b';
 update public.profiles set weekly_goal = 1 where id = '00000000-0000-0000-0000-00000000000b';
 
@@ -82,11 +82,11 @@ from unnest(array['2026-08-10 12:00Z', '2026-08-17 12:00Z', '2026-08-24 12:00Z',
 
 select is((pg_temp.recompute('00000000-0000-0000-0000-00000000000b')).current_weeks, 5,
   'a missed week is covered by an earned freeze (4 hits + 1 after the freeze)');
-select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000b', '2026-09-07'), 'frozen',
+select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000b', '2026-09-06'), 'frozen',
   'the missed week is marked frozen');
 select is((pg_temp.recompute('00000000-0000-0000-0000-00000000000b')).freezes_banked, 0::smallint,
   'the freeze was spent');
-select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000b', '2026-09-21'), 'in_progress',
+select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000b', '2026-09-20'), 'in_progress',
   'current week with no workouts is in progress, not missed');
 
 -- Without the freeze (only 3 hits before the gap) the streak resets.
@@ -96,21 +96,21 @@ select is((pg_temp.recompute('00000000-0000-0000-0000-00000000000b')).current_we
   'a missed week without a freeze resets the streak');
 select is((pg_temp.recompute('00000000-0000-0000-0000-00000000000b')).longest_weeks, 3,
   'longest streak is remembered');
-select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000b', '2026-09-07'), 'missed',
+select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000b', '2026-09-06'), 'missed',
   'the gap week is marked missed');
 select is((select min(week_start) from public.streak_weeks
-           where user_id = '00000000-0000-0000-0000-00000000000b'), '2026-08-17'::date,
+           where user_id = '00000000-0000-0000-0000-00000000000b'), '2026-08-16'::date,
   'weeks before the earliest workout are dropped after a delete');
 
 -- ─── Timezones ───────────────────────────────────────────────────────────────
--- Monday 02:00 UTC is still Sunday evening in Los Angeles.
+-- Sunday 02:00 UTC is still Saturday evening in Los Angeles: the week before.
 delete from public.workouts where user_id = '00000000-0000-0000-0000-00000000000b';
-select pg_temp.add_workout('00000000-0000-0000-0000-00000000000b', '2026-09-21 02:00Z', 30);
+select pg_temp.add_workout('00000000-0000-0000-0000-00000000000b', '2026-09-20 02:00Z', 30);
 update public.profiles set timezone = 'America/Los_Angeles'
 where id = '00000000-0000-0000-0000-00000000000b';
 select pg_temp.recompute('00000000-0000-0000-0000-00000000000b');
 
-select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000b', '2026-09-14'), 'hit',
+select is(pg_temp.week_status('00000000-0000-0000-0000-00000000000b', '2026-09-13'), 'hit',
   'workouts are bucketed into weeks by the user''s local time');
 select throws_ok(
   $$update public.profiles set timezone = 'Mars/Olympus' where id = '00000000-0000-0000-0000-00000000000b'$$,

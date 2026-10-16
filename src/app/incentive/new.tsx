@@ -150,7 +150,7 @@ export default function NewIncentiveScreen() {
           ))}
         </View>
         <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
-          Counts from this Monday, so workouts they’ve already done this week count.
+          Counts from this Sunday, so workouts they’ve already done this week count.
         </AppText>
 
         <AppText variant="label">Reward</AppText>

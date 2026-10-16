@@ -2,18 +2,18 @@ import { describe, expect, it } from 'vitest';
 
 import { signedOutWidget, toWidgetPayload, widgetProps, widgetTimeline, type WidgetInput } from './widget';
 
-// Week of Mon 2026-10-12 … Sun 2026-10-18.
-const at = (day: number, hour: number) => new Date(2026, 9, 12 + day, hour);
+// Week of Sun 2026-10-11 … Sat 2026-10-17; `day` counts from Sunday.
+const at = (day: number, hour: number) => new Date(2026, 9, 11 + day, hour);
 
 const base: WidgetInput = {
-  now: at(3, 9), // Thursday morning
+  now: at(3, 9), // Wednesday morning
   mascot: 'capybara',
   imageDir: 'file:///group/widgets/',
   streakWeeks: 6,
   freezes: 0,
   weekGoal: 4,
   minWorkoutMinutes: 15,
-  workoutDays: ['2026-10-12', '2026-10-14'], // Mon, Wed
+  workoutDays: ['2026-10-11', '2026-10-13'], // Sun, Tue
   lastWorkoutAt: at(2, 7),
   resting: false,
 };
@@ -24,30 +24,30 @@ describe('widgetProps', () => {
   });
 
   it('counts down when the streak is at risk', () => {
-    const p = widgetProps({ ...base, now: at(4, 9) }, at(4, 9)); // Friday: 2 needed, 3 days left
-    expect(p).toMatchObject({ headline: '2 more days', detail: 'by Sunday to keep 6 weeks', mood: 'worried' });
+    const p = widgetProps({ ...base, now: at(4, 9) }, at(4, 9)); // Thursday: 2 needed, 3 days left
+    expect(p).toMatchObject({ headline: '2 more days', detail: 'by Saturday to keep 6 weeks', mood: 'worried' });
   });
 
   it('cheers when on pace', () => {
-    const p = widgetProps({ ...base, workoutDays: [...base.workoutDays, '2026-10-13'] }, base.now);
+    const p = widgetProps({ ...base, workoutDays: [...base.workoutDays, '2026-10-12'] }, base.now);
     expect(p).toMatchObject({ headline: '3 of 4 days', detail: 'Nice pace. One to go.', mood: 'happy' });
   });
 
   it('gets more urgent through a day that has to count, and only fires up in the evening', () => {
-    const sat = { ...base, now: at(5, 7) }; // Saturday: 2 needed, Sat + Sun left
-    expect(widgetProps(sat, at(5, 8))).toMatchObject({ headline: 'Today counts', urgent: false, mood: 'worried' });
-    expect(widgetProps(sat, at(5, 14))).toMatchObject({ headline: 'Still time today', detail: 'Even 15 minutes counts' });
-    expect(widgetProps(sat, at(5, 19))).toMatchObject({ headline: "Tonight's the night", urgent: true, mood: 'fired_up' });
+    const fri = { ...base, now: at(5, 7) }; // Friday: 2 needed, Fri + Sat left
+    expect(widgetProps(fri, at(5, 8))).toMatchObject({ headline: 'Today counts', urgent: false, mood: 'worried' });
+    expect(widgetProps(fri, at(5, 14))).toMatchObject({ headline: 'Still time today', detail: 'Even 15 minutes counts' });
+    expect(widgetProps(fri, at(5, 19))).toMatchObject({ headline: "Tonight's the night", urgent: true, mood: 'fired_up' });
   });
 
-  it('calls Sunday with one to go the last chance', () => {
-    const sun = { ...base, now: at(6, 9), workoutDays: [...base.workoutDays, '2026-10-16'] };
-    expect(widgetProps(sun, at(6, 9))).toMatchObject({ headline: 'Last chance!', detail: 'One today to keep 6 weeks' });
+  it('calls Saturday with one to go the last chance', () => {
+    const sat = { ...base, now: at(6, 9), workoutDays: [...base.workoutDays, '2026-10-15'] };
+    expect(widgetProps(sat, at(6, 9))).toMatchObject({ headline: 'Last chance!', detail: 'One today to keep 6 weeks' });
   });
 
   it('calms down once today is done', () => {
-    const sat = { ...base, now: at(5, 19), workoutDays: [...base.workoutDays, '2026-10-17'] };
-    expect(widgetProps(sat, sat.now)).toMatchObject({ headline: 'Done for today!', detail: '1 more by Sunday', urgent: false });
+    const fri = { ...base, now: at(5, 19), workoutDays: [...base.workoutDays, '2026-10-16'] };
+    expect(widgetProps(fri, fri.now)).toMatchObject({ headline: 'Done for today!', detail: '1 more by Saturday', urgent: false });
   });
 
   it('celebrates a finished week with the blazing picture of the chosen character', () => {
@@ -106,11 +106,11 @@ describe('widgetTimeline', () => {
   it('starts now, steps through each remaining checkpoint, and ends at the new week', () => {
     const t = widgetTimeline(base);
     expect(t[0]!.date).toEqual(base.now);
-    // Thu 13:00 and 18:00, then 3 checkpoints each for Fri, Sat, Sun, then Monday.
+    // Wed 13:00 and 18:00, then 3 checkpoints each for Thu, Fri, Sat, then Sunday.
     expect(t).toHaveLength(1 + 2 + 9 + 1);
     expect(t.map((e) => e.date.getTime())).toEqual([...t.map((e) => e.date.getTime())].sort((a, b) => a - b));
     const last = t.at(-1)!;
-    expect(last.date).toEqual(new Date(2026, 9, 19));
+    expect(last.date).toEqual(new Date(2026, 9, 18));
     expect(last.props).toMatchObject({ headline: 'New week!', streak: null, dots: Array(7).fill('future').fill('today', 0, 1) });
   });
 

@@ -84,8 +84,7 @@ export default function MeScreen() {
         <Card>
           <LevelBar xp={xp ?? 0} />
           <AppText variant="caption">
-            {xp ?? 0} XP total · Earn XP for every workout, check-in photo, and each week you hit
-            your goal.
+            {xp ?? 0} XP total · Tap the bar to see how XP works.
           </AppText>
         </Card>
 

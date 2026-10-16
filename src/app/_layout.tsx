@@ -88,6 +88,7 @@ function RootNavigator() {
         <Stack.Screen name="incentive/[id]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="add-partner" options={{ presentation: 'modal' }} />
         <Stack.Screen name="invite/[code]" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="xp" options={{ presentation: 'modal' }} />
         <Stack.Screen
           name="welcome"
           options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}

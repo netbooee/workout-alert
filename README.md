@@ -97,11 +97,15 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
 
 ## Welcome tour
 
-The first time someone opens the app (after onboarding) they get a five-page swipeable tour:
-what Sigamos is, how the weekly streak works, partners, incentives and XP, and picking a
-buddy plus the widget. **Skip** works on every page, and it takes the place of that day's
+The first time someone opens the app (after onboarding) they get a six-page swipeable tour:
+what Sigamos is, how the weekly streak works, partners, incentives, XP and levels, and picking
+a buddy plus the widget. **Skip** works on every page, and it takes the place of that day's
 greeting so two pop-ups never stack. Reopen it any time from **Me → Help → Show the welcome
 tour** (`src/app/welcome.tsx`; seen-state is per account in AsyncStorage).
+
+Tapping the level bar (Home, Me) opens **How XP works** (`src/app/xp.tsx`): what earns XP,
+what resets (XP never does; the league restarts every Sunday), and the level titles. The
+rules live in `src/lib/xp-rules.ts` and must match the amounts in the migrations.
 
 ## Rest mode
 

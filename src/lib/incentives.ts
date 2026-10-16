@@ -47,8 +47,8 @@ export const WINDOW_OPTIONS = [
 
 // `edit` tiles jump into the reward text so it can be changed right away.
 export const REWARD_PRESETS: readonly { emoji: string; label: string; reward: string; edit?: boolean }[] = [
-  // Also the "custom" tile: keep it a surprise or type your own reward over it.
-  { emoji: '🎁', label: 'Surprise or custom', reward: 'A surprise', edit: true },
+  // Custom: starts as "A surprise"; keep it, or type your own reward over it.
+  { emoji: '🎁', label: 'Custom', reward: 'A surprise', edit: true },
   { emoji: '🤳', label: 'Selfie', reward: 'A selfie' },
   { emoji: '☕', label: 'Coffee', reward: 'Coffee on me' },
   { emoji: '🍷', label: 'Date night', reward: 'Date night, my treat' },

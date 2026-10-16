@@ -316,6 +316,11 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   account and cascades their data, and removes their photos and voice messages from storage.
   Then update `website/privacy/` and `website/support/`, which currently say "email us" and
   "coming soon".
+- **Voice messages are silent in silent mode.** With the ring/silent switch on silent, a voice
+  message plays with no sound. Playback in `src/components/voice-message.tsx` never sets the
+  audio mode, and after recording `src/components/comments.tsx` resets it without
+  `playsInSilentMode`, so iOS mutes it. Fix: set `playsInSilentMode: true` for playback too
+  (via `setAudioModeAsync` from `expo-audio`), the same way Messages plays voice notes.
 
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~
@@ -355,6 +360,14 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   with a push notification and a place to see it (Home banner or the daily greeting).
 - **Hide Lotl.** A setting for people who'd rather not have a character: Home shows a plain
   header and the daily greeting becomes a simple summary card (or turns off).
+- **Live Activities on the Lock Screen and Dynamic Island.** Look into a live, glanceable
+  view while something is in progress, e.g. a workout underway ("32 min · day 3 of 4"), the
+  last day of a week that still needs a workout ("Tonight's the night 🔥"), or an incentive
+  close to done. Questions to settle: what's worth showing live (Apple limits Live Activities
+  to things with a clear start and end, up to 8 hours active), whether `expo-widgets` (already
+  used for the widget) supports Live Activities in SDK 57 or a config plugin is needed, and
+  whether updates need push notifications through APNs (ActivityKit push tokens) since the
+  app can't update them in the background on its own.
 - **Special characters (one-time purchases).** Extra characters beyond the free four, bought
   once (no subscription). To be designed later: which characters, pricing, App Store in-app
   purchases (StoreKit, e.g. via `expo-iap` or RevenueCat), restoring purchases, and how

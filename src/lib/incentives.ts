@@ -45,18 +45,20 @@ export const WINDOW_OPTIONS = [
   { weeks: 4, label: '4 weeks' },
 ] as const;
 
-export const REWARD_PRESETS = [
+// `edit` tiles jump into the reward text so it can be changed right away.
+export const REWARD_PRESETS: readonly { emoji: string; label: string; reward: string; edit?: boolean }[] = [
   // Also the "custom" tile: keep it a surprise or type your own reward over it.
-  { emoji: '🎁', label: 'Surprise or custom', reward: 'A surprise' },
+  { emoji: '🎁', label: 'Surprise or custom', reward: 'A surprise', edit: true },
   { emoji: '🤳', label: 'Selfie', reward: 'A selfie' },
   { emoji: '☕', label: 'Coffee', reward: 'Coffee on me' },
-  { emoji: '🍕', label: 'Pizza', reward: 'Pizza night on me' },
-  { emoji: '🍦', label: 'Ice cream', reward: 'Ice cream on me' },
-  { emoji: '🎬', label: 'Movie', reward: 'Movie night, my treat' },
+  { emoji: '🍷', label: 'Date night', reward: 'Date night, my treat' },
+  { emoji: '🍝', label: 'Cook for you', reward: 'I’ll cook your favorite meal' },
   { emoji: '💆', label: 'Massage', reward: 'A massage on me' },
-  { emoji: '👟', label: 'Socks', reward: 'New running socks' },
+  // Paid in person: no money moves through Sigamos.
+  { emoji: '💵', label: 'Cash prize', reward: '$20 cash prize', edit: true },
+  { emoji: '👑', label: 'Your call', reward: 'You call the shots tonight' },
   { emoji: '🍽️', label: 'Dinner', reward: 'Dinner on me' },
-] as const;
+];
 
 /** Longest "rules and notes" a partner can add to an offer (matches the database). */
 export const NOTES_MAX = 500;

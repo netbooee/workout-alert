@@ -20,7 +20,8 @@ import {
   WINDOW_OPTIONS,
 } from '@/lib/incentives';
 
-const SURPRISE = REWARD_PRESETS[0].emoji;
+const SURPRISE = REWARD_PRESETS[0]!.emoji;
+const CASH = '💵';
 
 /** Offer a partner a real-world reward for a stretch goal. */
 export default function NewIncentiveScreen() {
@@ -35,8 +36,8 @@ export default function NewIncentiveScreen() {
   const [target, setTarget] = useState(goalOption('workout_days').defaultTarget);
   const [activity, setActivity] = useState<string | null>(null);
   const [weeks, setWeeks] = useState<number>(1);
-  const [emoji, setEmoji] = useState<string>(REWARD_PRESETS[0].emoji);
-  const [reward, setReward] = useState<string>(REWARD_PRESETS[0].reward);
+  const [emoji, setEmoji] = useState<string>(SURPRISE);
+  const [reward, setReward] = useState<string>(REWARD_PRESETS[0]!.reward);
   const [notes, setNotes] = useState('');
   const rewardInput = useRef<TextInput>(null);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
@@ -162,8 +163,8 @@ export default function NewIncentiveScreen() {
                 Haptics.selectionAsync();
                 setEmoji(p.emoji);
                 setReward(p.reward);
-                // The surprise tile doubles as "custom": jump into the text, ready to replace.
-                if (p.emoji === SURPRISE) rewardInput.current?.focus();
+                // Surprise doubles as "custom", and cash needs an amount: jump into the text.
+                if (p.edit) rewardInput.current?.focus();
               }}
               accessibilityRole="button"
               accessibilityState={{ selected: emoji === p.emoji }}
@@ -190,7 +191,7 @@ export default function NewIncentiveScreen() {
           value={reward}
           onChangeText={setReward}
           maxLength={80}
-          selectTextOnFocus={emoji === SURPRISE}
+          selectTextOnFocus={REWARD_PRESETS.some((p) => p.edit && p.emoji === emoji)}
           placeholder="What will you treat them to?"
           placeholderTextColor={Colors.textMuted}
           accessibilityLabel="Reward"
@@ -198,7 +199,9 @@ export default function NewIncentiveScreen() {
         <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
           {emoji === SURPRISE
             ? 'Keep it a surprise, or type your own reward here to replace it.'
-            : 'Real-world rewards only. You’ll mark it delivered once you’ve paid up.'}
+            : emoji === CASH
+              ? 'Set the amount. You pay them yourself; no money moves through Sigamos.'
+              : 'Real-world rewards only. You’ll mark it delivered once you’ve paid up.'}
         </AppText>
 
         <AppText variant="label">Rules and notes</AppText>

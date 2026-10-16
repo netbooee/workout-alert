@@ -205,21 +205,35 @@ export default function NewIncentiveScreen() {
             accessibilityLabel={fromLibrary ? `${picked.label}. More rewards` : 'More rewards'}
             style={[styles.preset, fromLibrary && styles.presetSelected]}>
             {fromLibrary ? (
-              <AppText variant="title" style={{ fontSize: 26 }}>
-                {picked.emoji}
-              </AppText>
+              <>
+                {/* Still the way into the library: keep saying so once it shows a pick. */}
+                <View style={styles.moreBadge}>
+                  <SymbolView name="square.grid.2x2.fill" size={11} tintColor={Colors.textSecondary} />
+                </View>
+                <AppText variant="title" style={{ fontSize: 22 }}>
+                  {picked.emoji}
+                </AppText>
+                <AppText
+                  variant="caption"
+                  color={Colors.text}
+                  style={styles.presetLabel}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}>
+                  {picked.label}
+                </AppText>
+                <AppText variant="caption" color={Colors.flame} style={styles.moreHint}>
+                  More…
+                </AppText>
+              </>
             ) : (
-              <SymbolView name="square.grid.2x2.fill" size={26} tintColor={Colors.textSecondary} />
+              <>
+                <SymbolView name="square.grid.2x2.fill" size={26} tintColor={Colors.textSecondary} />
+                <AppText variant="caption" color={Colors.textSecondary} style={styles.presetLabel}>
+                  More…
+                </AppText>
+              </>
             )}
-            <AppText
-              variant="caption"
-              color={fromLibrary ? Colors.text : Colors.textSecondary}
-              style={styles.presetLabel}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.8}>
-              {fromLibrary ? picked.label : 'More…'}
-            </AppText>
           </Pressable>
         </View>
         <RewardPicker
@@ -364,6 +378,8 @@ const styles = StyleSheet.create({
   },
   presetSelected: { borderColor: Colors.flame, backgroundColor: Colors.flameSoft },
   presetLabel: { fontWeight: '600', textAlign: 'center' },
+  moreBadge: { position: 'absolute', top: 6, right: 6 },
+  moreHint: { fontSize: 11, lineHeight: 13, fontWeight: '700' },
   notes: { height: undefined, minHeight: 96, paddingTop: 12, paddingBottom: 12, textAlignVertical: 'top' },
   input: {
     height: 48,

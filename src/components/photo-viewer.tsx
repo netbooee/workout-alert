@@ -13,7 +13,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { initialWindowMetrics, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '@/components/ui';
 import { savePhotoToLibrary } from '@/lib/save-photo';
@@ -46,6 +46,10 @@ export function PhotoViewer({
 
 function Viewer({ urls, start, onClose }: { urls: string[]; start: number; onClose: () => void }) {
   const { width, height } = useWindowDimensions();
+  // A Modal is its own native window, so SafeAreaView inside it measures zero insets and
+  // the buttons end up under the status bar, where iOS keeps the taps. Use the app's insets.
+  const insets = useSafeAreaInsets();
+  const top = Math.max(insets.top, initialWindowMetrics?.insets.top ?? 0, 20);
   const [page, setPage] = useState(start);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState<number | null>(null);
@@ -85,7 +89,7 @@ function Viewer({ urls, start, onClose }: { urls: string[]; start: number; onClo
         ))}
       </ScrollView>
 
-      <SafeAreaView edges={['top']} style={styles.bar} pointerEvents="box-none">
+      <View style={[styles.bar, { paddingTop: top + 8 }]} pointerEvents="box-none">
         <Pressable onPress={onClose} hitSlop={12} accessibilityLabel="Close photo" style={styles.round}>
           <SymbolView name="xmark" size={17} weight="bold" tintColor="#fff" />
         </Pressable>
@@ -106,7 +110,7 @@ function Viewer({ urls, start, onClose }: { urls: string[]; start: number; onClo
             <SymbolView name={saved === page ? 'checkmark' : 'square.and.arrow.down'} size={18} weight="bold" tintColor="#fff" />
           )}
         </Pressable>
-      </SafeAreaView>
+      </View>
     </View>
   );
 }
@@ -164,12 +168,11 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 16,
-    paddingTop: 8,
   },
   round: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.18)',

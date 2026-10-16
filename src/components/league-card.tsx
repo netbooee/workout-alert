@@ -8,7 +8,7 @@ import type { LeagueRow } from '@/lib/database.types';
 const MEDALS = ['🥇', '🥈', '🥉'];
 
 function daysLeftInWeek(now = new Date()) {
-  return 7 - ((now.getDay() + 6) % 7);
+  return 7 - now.getDay();
 }
 
 export function LeagueCard({ rows }: { rows: LeagueRow[] }) {

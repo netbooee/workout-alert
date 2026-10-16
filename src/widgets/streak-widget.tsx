@@ -36,6 +36,26 @@ import type { WidgetProps } from '@/lib/widget';
  */
 const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
   'widget';
+  // Before the app has handed over any data (the widget gallery, or right after
+  // installing), show a sample instead of failing to draw.
+  const p: WidgetProps =
+    props && Array.isArray(props.dots)
+      ? props
+      : {
+          mascot: 'lotl',
+          mood: 'happy',
+          image: null,
+          streak: 6,
+          headline: '2 more days',
+          detail: 'by Saturday to keep 6 weeks',
+          urgent: false,
+          dots: ['missed', 'done', 'missed', 'done', 'today', 'future', 'future'],
+          weekDays: 2,
+          weekGoal: 4,
+          resting: false,
+          reminder: null,
+          url: 'sigamos:///',
+        };
   const dark = environment.colorScheme !== 'light';
   const c = {
     background: dark ? '#1C1C26' : '#FFFFFF',
@@ -46,7 +66,7 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
     urgent: dark ? '#FF8A4C' : '#C2410C',
     rest: '#8B96E9',
   };
-  const accent = props.resting ? c.rest : c.flame;
+  const accent = p.resting ? c.rest : c.flame;
   const rounded = (size: number, weight: 'semibold' | 'bold' | 'heavy' | 'black' = 'bold') =>
     font({ design: 'rounded', size, weight });
   const icons = {
@@ -56,7 +76,7 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
     eyes: 'eyes',
     trophy: 'trophy.fill',
   } as const;
-  const labels = ['M', 'T', 'W', 'T', 'F', 'S', 'S'];
+  const labels = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
 
   const dot = (state: WidgetProps['dots'][number], size: number) =>
     state === 'today' ? (
@@ -72,48 +92,48 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
     );
 
   const buddy = (width: number) =>
-    props.image ? (
-      <Image uiImage={props.image} modifiers={[resizable(), frame({ width, height: width * 1.2 })]} />
+    p.image ? (
+      <Image uiImage={p.image} modifiers={[resizable(), frame({ width, height: width * 1.2 })]} />
     ) : (
       <Image systemName="flame.fill" size={width * 0.6} color={accent} />
     );
 
   const streakBadge = (size: number, suffix = '') =>
-    props.streak == null ? null : (
+    p.streak == null ? null : (
       <HStack spacing={3}>
         <Image systemName="flame.fill" size={size * 0.85} color={accent} />
-        <Text modifiers={[rounded(size, 'black'), foregroundStyle(c.text)]}>{`${props.streak}${suffix}`}</Text>
+        <Text modifiers={[rounded(size, 'black'), foregroundStyle(c.text)]}>{`${p.streak}${suffix}`}</Text>
       </HStack>
     );
 
   const words = (
     <VStack alignment="leading" spacing={1}>
-      <Text modifiers={[rounded(16, 'black'), foregroundStyle(props.urgent ? c.urgent : c.text), lineLimit(1), minimumScaleFactor(0.8)]}>
-        {props.headline}
+      <Text modifiers={[rounded(16, 'black'), foregroundStyle(p.urgent ? c.urgent : c.text), lineLimit(1), minimumScaleFactor(0.8)]}>
+        {p.headline}
       </Text>
-      <Text modifiers={[rounded(12, 'semibold'), foregroundStyle(c.secondary), lineLimit(2)]}>{props.detail}</Text>
+      <Text modifiers={[rounded(12, 'semibold'), foregroundStyle(c.secondary), lineLimit(2)]}>{p.detail}</Text>
     </VStack>
   );
 
   // ─── Lock Screen: one color, tinted by the system, and no names. ──────────────
   if (environment.widgetFamily === 'accessoryInline') {
-    const streak = props.streak == null ? '' : `🔥${props.streak} · `;
-    return <Text modifiers={[widgetURL(props.url)]}>{`${streak}${props.headline}`}</Text>;
+    const streak = p.streak == null ? '' : `🔥${p.streak} · `;
+    return <Text modifiers={[widgetURL(p.url)]}>{`${streak}${p.headline}`}</Text>;
   }
 
   if (environment.widgetFamily === 'accessoryCircular') {
     return (
-      <ZStack modifiers={[widgetURL(props.url)]}>
+      <ZStack modifiers={[widgetURL(p.url)]}>
         <AccessoryWidgetBackground />
         <Gauge
-          value={Math.min(props.weekDays, props.weekGoal)}
+          value={Math.min(p.weekDays, p.weekGoal)}
           min={0}
-          max={props.weekGoal}
+          max={p.weekGoal}
           modifiers={[gaugeStyle('circularCapacity')]}
           currentValueLabel={
             <VStack spacing={0}>
-              <Image systemName={props.resting ? 'moon.zzz.fill' : 'flame.fill'} size={11} />
-              <Text modifiers={[rounded(18, 'black')]}>{props.streak == null ? '–' : `${props.streak}`}</Text>
+              <Image systemName={p.resting ? 'moon.zzz.fill' : 'flame.fill'} size={11} />
+              <Text modifiers={[rounded(18, 'black')]}>{p.streak == null ? '–' : `${p.streak}`}</Text>
             </VStack>
           }
         />
@@ -123,16 +143,16 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
 
   if (environment.widgetFamily === 'accessoryRectangular') {
     return (
-      <VStack alignment="leading" spacing={1} modifiers={[widgetURL(props.url)]}>
+      <VStack alignment="leading" spacing={1} modifiers={[widgetURL(p.url)]}>
         <HStack spacing={4}>
-          <Image systemName={props.resting ? 'moon.zzz.fill' : 'flame.fill'} size={13} />
+          <Image systemName={p.resting ? 'moon.zzz.fill' : 'flame.fill'} size={13} />
           <Text modifiers={[rounded(15, 'black')]}>
-            {props.streak == null ? 'Sigamos' : `${props.streak}-week streak`}
+            {p.streak == null ? 'Sigamos' : `${p.streak}-week streak`}
           </Text>
         </HStack>
-        <Text modifiers={[rounded(14, 'semibold'), lineLimit(1)]}>{props.headline}</Text>
+        <Text modifiers={[rounded(14, 'semibold'), lineLimit(1)]}>{p.headline}</Text>
         <Text modifiers={[rounded(13, 'semibold'), opacity(0.7), lineLimit(1)]}>
-          {props.reminder?.privateText ?? props.detail}
+          {p.reminder?.privateText ?? p.detail}
         </Text>
       </VStack>
     );
@@ -141,15 +161,15 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
   // ─── Home screen, medium: buddy, the week, and one reminder. ──────────────────
   if (environment.widgetFamily === 'systemMedium') {
     return (
-      <HStack spacing={14} modifiers={[containerBackground(c.background, 'widget'), widgetURL(props.url)]}>
+      <HStack spacing={14} modifiers={[containerBackground(c.background, 'widget'), widgetURL(p.url)]}>
         <VStack spacing={4}>
           {buddy(84)}
-          {streakBadge(14, props.streak === 1 ? ' week' : ' weeks')}
+          {streakBadge(14, p.streak === 1 ? ' week' : ' weeks')}
         </VStack>
         <VStack alignment="leading" spacing={8}>
           {words}
           <HStack spacing={0}>
-            {props.dots.map((state, i) => (
+            {p.dots.map((state, i) => (
               <VStack key={i} spacing={4} modifiers={[frame({ maxWidth: 1000 })]}>
                 <Text modifiers={[rounded(10, 'heavy'), foregroundStyle(state === 'today' ? accent : c.secondary)]}>
                   {labels[i]}
@@ -158,13 +178,13 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
               </VStack>
             ))}
           </HStack>
-          {props.reminder && (
+          {p.reminder && (
             <VStack alignment="leading" spacing={6}>
               <Divider />
               <HStack spacing={6}>
-                <Image systemName={icons[props.reminder.icon]} size={13} color={c.urgent} />
+                <Image systemName={icons[p.reminder.icon]} size={13} color={c.urgent} />
                 <Text modifiers={[rounded(12, 'bold'), foregroundStyle(c.text), lineLimit(1), minimumScaleFactor(0.85)]}>
-                  {props.reminder.text}
+                  {p.reminder.text}
                 </Text>
               </HStack>
             </VStack>
@@ -176,7 +196,7 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
 
   // ─── Home screen, small: buddy, streak, one message, and the week's dots. ─────
   return (
-    <VStack alignment="leading" spacing={6} modifiers={[containerBackground(c.background, 'widget'), widgetURL(props.url)]}>
+    <VStack alignment="leading" spacing={6} modifiers={[containerBackground(c.background, 'widget'), widgetURL(p.url)]}>
       <HStack alignment="top">
         {buddy(54)}
         <Spacer />
@@ -184,7 +204,7 @@ const StreakWidget = (props: WidgetProps, environment: WidgetEnvironment) => {
       </HStack>
       <Spacer />
       {words}
-      <HStack spacing={5}>{props.dots.map((state, i) => <ZStack key={i}>{dot(state, 10)}</ZStack>)}</HStack>
+      <HStack spacing={5}>{p.dots.map((state, i) => <ZStack key={i}>{dot(state, 10)}</ZStack>)}</HStack>
     </VStack>
   );
 };

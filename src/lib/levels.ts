@@ -15,7 +15,7 @@ export interface LevelInfo {
   progress: number;
 }
 
-const TITLES: [minLevel: number, title: string][] = [
+export const TITLES: [minLevel: number, title: string][] = [
   [1, 'Rookie'],
   [3, 'Regular'],
   [5, 'Grinder'],

@@ -48,6 +48,18 @@ const PAGES: Page[] = [
     ],
   },
   {
+    emoji: '⚡',
+    title: 'Earn XP, level up',
+    body: 'Everything you do earns XP. It never resets, so your level only goes up: Rookie, Regular, Grinder, Iron, Machine, Legend.',
+    points: [
+      'Workouts earn 10–40 XP; check-in photos +5',
+      'Hit your weekly goal: +50',
+      'Partner verifies your workout: +5; you verify theirs: +2',
+      'Earn an incentive: +100',
+      'The weekly league starts over every Sunday',
+    ],
+  },
+  {
     title: 'Pick your buddy',
     body: 'Your buddy’s mood follows your week. Choose Lotl, Capi, Lento, or Canela on the Me tab, and add the Sigamos widget to your Home Screen to keep them close.',
   },

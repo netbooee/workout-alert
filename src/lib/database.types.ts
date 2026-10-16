@@ -146,6 +146,16 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      legacy_week_hits: {
+        Row: {
+          user_id: string;
+          week_start: string;
+          goal: number;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       partnerships: {
         Row: {
           id: string;

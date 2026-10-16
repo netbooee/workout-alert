@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import { niceMax, weekRangeLabel, weeklyAverage, weeklyTotals } from './progress';
 
-// Thursday, Oct 15 2026, 9pm local. Current week starts Monday Oct 12.
+// Thursday, Oct 15 2026, 9pm local. Current week starts Sunday Oct 11.
 const now = new Date(2026, 9, 15, 21, 0);
 const workout = (y: number, m: number, d: number, minutes: number, hour = 7) => ({
   started_at: new Date(y, m - 1, d, hour).toISOString(),
@@ -14,7 +14,7 @@ describe('weeklyTotals', () => {
     [
       workout(2026, 10, 12, 30), // this week
       workout(2026, 10, 15, 45, 20),
-      workout(2026, 10, 11, 20, 23), // Sunday night: previous week
+      workout(2026, 10, 10, 20, 23), // Saturday night: previous week
       workout(2026, 9, 28, 60), // three weeks back
       workout(2026, 6, 1, 90), // outside the range
     ],
@@ -24,15 +24,15 @@ describe('weeklyTotals', () => {
 
   it('returns one week per slot, oldest first, ending with the current week', () => {
     expect(totals.map((t) => t.weekStart)).toEqual([
-      '2026-09-21',
-      '2026-09-28',
-      '2026-10-05',
-      '2026-10-12',
+      '2026-09-20',
+      '2026-09-27',
+      '2026-10-04',
+      '2026-10-11',
     ]);
     expect(totals.map((t) => t.isCurrent)).toEqual([false, false, false, true]);
   });
 
-  it('sums minutes and counts workouts per Monday–Sunday week', () => {
+  it('sums minutes and counts workouts per Sunday–Saturday week', () => {
     expect(totals.map((t) => t.minutes)).toEqual([0, 60, 20, 75]);
     expect(totals.map((t) => t.workouts)).toEqual([0, 1, 1, 2]);
   });
@@ -46,7 +46,7 @@ describe('weeklyAverage', () => {
   );
 
   it('averages completed weeks from the first active week, skipping the current week', () => {
-    // Weeks 09-28 (60) and 10-05 (30); 08-31 … 09-21 are before the first workout.
+    // Weeks 09-27 (60) and 10-04 (30); 08-30 … 09-20 are before the first workout.
     expect(weeklyAverage(totals, 'minutes')).toBe(45);
     expect(weeklyAverage(totals, 'workouts')).toBe(1);
   });

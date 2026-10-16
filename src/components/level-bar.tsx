@@ -1,15 +1,22 @@
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
-import { StyleSheet, View } from 'react-native';
+import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { levelFor } from '@/lib/levels';
 
-/** Duolingo-style level badge with an XP progress bar. */
-export function LevelBar({ xp }: { xp: number }) {
+/** Duolingo-style level badge with an XP progress bar. Tap it for "How XP works". */
+export function LevelBar({ xp, pressable = true }: { xp: number; pressable?: boolean }) {
   const info = levelFor(xp);
   return (
-    <View style={styles.row}>
+    <Pressable
+      disabled={!pressable}
+      onPress={() => router.push('/xp')}
+      accessibilityRole={pressable ? 'button' : undefined}
+      accessibilityLabel={`Level ${info.level}, ${info.title}, ${info.into} of ${info.span} XP`}
+      accessibilityHint={pressable ? 'Shows how XP works' : undefined}
+      style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}>
       <View style={styles.badge}>
         <SymbolView name="bolt.fill" size={14} tintColor="#000" />
         <AppText variant="heading" color="#000" style={{ fontSize: 15 }}>
@@ -29,7 +36,7 @@ export function LevelBar({ xp }: { xp: number }) {
           <View style={[styles.fill, { width: `${Math.max(info.progress * 100, 3)}%` }]} />
         </View>
       </View>
-    </View>
+    </Pressable>
   );
 }
 

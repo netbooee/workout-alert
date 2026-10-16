@@ -1,9 +1,11 @@
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { SymbolView } from 'expo-symbols';
+import { useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
+import { RewardPicker } from '@/components/reward-picker';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useOfferIncentive } from '@/hooks/use-incentives';
@@ -17,7 +19,9 @@ import {
   incentiveGoalText,
   NOTES_MAX,
   REWARD_PRESETS,
+  rewardById,
   WINDOW_OPTIONS,
+  type RewardPreset,
 } from '@/lib/incentives';
 
 /** Offer a partner a real-world reward for a stretch goal. */
@@ -33,9 +37,15 @@ export default function NewIncentiveScreen() {
   const [target, setTarget] = useState(goalOption('workout_days').defaultTarget);
   const [activity, setActivity] = useState<string | null>(null);
   const [weeks, setWeeks] = useState<number>(1);
-  const [emoji, setEmoji] = useState<string>(REWARD_PRESETS[0].emoji);
-  const [reward, setReward] = useState<string>(REWARD_PRESETS[0].reward);
+  const [rewardId, setRewardId] = useState('custom');
+  const [reward, setReward] = useState(REWARD_PRESETS[0]!.reward);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const picked = rewardById(rewardId) ?? REWARD_PRESETS[0]!;
+  const emoji = picked.emoji;
+  // A pick from the library shows on the "More…" tile.
+  const fromLibrary = !REWARD_PRESETS.some((p) => p.id === rewardId);
   const [notes, setNotes] = useState('');
+  const rewardInput = useRef<TextInput>(null);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   const option = goalOption(kind);
@@ -58,6 +68,14 @@ export default function NewIncentiveScreen() {
     Haptics.selectionAsync();
     setWeeks(next);
     if (kind !== 'streak_weeks') setTarget(Math.min(option.defaultTarget * next, option.max(next)));
+  };
+
+  const pickReward = (p: RewardPreset, focusDelay = 0) => {
+    setRewardId(p.id);
+    setReward(p.reward);
+    // Custom, cash and gift cards need words or an amount: jump into the text
+    // (after the library sheet has closed, when picked from there).
+    if (p.edit) setTimeout(() => rewardInput.current?.focus(), focusDelay);
   };
 
   const send = () => {
@@ -147,29 +165,28 @@ export default function NewIncentiveScreen() {
           ))}
         </View>
         <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
-          Counts from this Monday, so workouts they’ve already done this week count.
+          Counts from this Sunday, so workouts they’ve already done this week count.
         </AppText>
 
         <AppText variant="label">Reward</AppText>
         <View style={styles.presets}>
           {REWARD_PRESETS.map((p) => (
             <Pressable
-              key={p.emoji}
+              key={p.id}
               onPress={() => {
                 Haptics.selectionAsync();
-                setEmoji(p.emoji);
-                setReward(p.reward);
+                pickReward(p);
               }}
               accessibilityRole="button"
-              accessibilityState={{ selected: emoji === p.emoji }}
+              accessibilityState={{ selected: rewardId === p.id }}
               accessibilityLabel={p.label}
-              style={[styles.preset, emoji === p.emoji && styles.presetSelected]}>
+              style={[styles.preset, rewardId === p.id && styles.presetSelected]}>
               <AppText variant="title" style={{ fontSize: 26 }}>
                 {p.emoji}
               </AppText>
               <AppText
                 variant="caption"
-                color={emoji === p.emoji ? Colors.text : Colors.textSecondary}
+                color={rewardId === p.id ? Colors.text : Colors.textSecondary}
                 style={styles.presetLabel}
                 numberOfLines={1}
                 adjustsFontSizeToFit
@@ -178,17 +195,73 @@ export default function NewIncentiveScreen() {
               </AppText>
             </Pressable>
           ))}
+          <Pressable
+            onPress={() => {
+              Haptics.selectionAsync();
+              setLibraryOpen(true);
+            }}
+            accessibilityRole="button"
+            accessibilityState={{ selected: fromLibrary }}
+            accessibilityLabel={fromLibrary ? `${picked.label}. More rewards` : 'More rewards'}
+            style={[styles.preset, fromLibrary && styles.presetSelected]}>
+            {fromLibrary ? (
+              <>
+                {/* Still the way into the library: keep saying so once it shows a pick. */}
+                <View style={styles.moreBadge}>
+                  <SymbolView name="square.grid.2x2.fill" size={11} tintColor={Colors.textSecondary} />
+                </View>
+                <AppText variant="title" style={{ fontSize: 22 }}>
+                  {picked.emoji}
+                </AppText>
+                <AppText
+                  variant="caption"
+                  color={Colors.text}
+                  style={styles.presetLabel}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.8}>
+                  {picked.label}
+                </AppText>
+                <AppText variant="caption" color={Colors.flame} style={styles.moreHint}>
+                  More…
+                </AppText>
+              </>
+            ) : (
+              <>
+                <SymbolView name="square.grid.2x2.fill" size={26} tintColor={Colors.textSecondary} />
+                <AppText variant="caption" color={Colors.textSecondary} style={styles.presetLabel}>
+                  More…
+                </AppText>
+              </>
+            )}
+          </Pressable>
         </View>
+        <RewardPicker
+          visible={libraryOpen}
+          selectedId={rewardId}
+          onPick={(p) => {
+            setLibraryOpen(false);
+            pickReward(p, 400);
+          }}
+          onClose={() => setLibraryOpen(false)}
+        />
         <TextInput
+          ref={rewardInput}
           style={styles.input}
           value={reward}
           onChangeText={setReward}
           maxLength={80}
+          selectTextOnFocus={!!picked.edit}
           placeholder="What will you treat them to?"
           placeholderTextColor={Colors.textMuted}
+          accessibilityLabel="Reward"
         />
         <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
-          Real-world rewards only. You’ll mark it delivered once you’ve paid up.
+          {rewardId === 'custom'
+            ? 'Keep it a surprise, or type your own reward here to replace it.'
+            : rewardId === 'cash'
+              ? 'Set the amount. You pay them yourself; no money moves through Sigamos.'
+              : 'Real-world rewards only. You’ll mark it delivered once you’ve paid up.'}
         </AppText>
 
         <AppText variant="label">Rules and notes</AppText>
@@ -305,6 +378,8 @@ const styles = StyleSheet.create({
   },
   presetSelected: { borderColor: Colors.flame, backgroundColor: Colors.flameSoft },
   presetLabel: { fontWeight: '600', textAlign: 'center' },
+  moreBadge: { position: 'absolute', top: 6, right: 6 },
+  moreHint: { fontSize: 11, lineHeight: 13, fontWeight: '700' },
   notes: { height: undefined, minHeight: 96, paddingTop: 12, paddingBottom: 12, textAlignVertical: 'top' },
   input: {
     height: 48,

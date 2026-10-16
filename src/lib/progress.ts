@@ -1,5 +1,5 @@
 // Weekly totals for the Progress chart. Pure functions (no native imports) so
-// they stay unit-testable. Weeks run Monday–Sunday in local time, like week.ts.
+// they stay unit-testable. Weeks run Sunday–Saturday in local time, like week.ts.
 
 import { addDays, dayKey, startOfWeek, type WorkoutLike } from '@/lib/week';
 
@@ -13,7 +13,7 @@ export const PROGRESS_RANGES = [
 export type ProgressRange = (typeof PROGRESS_RANGES)[number]['key'];
 
 export interface WeekTotal {
-  /** Monday of the week, YYYY-MM-DD. */
+  /** Sunday of the week, YYYY-MM-DD. */
   weekStart: string;
   minutes: number;
   workouts: number;
@@ -26,11 +26,11 @@ export function weeklyTotals(
   weeks: number,
   now: Date = new Date(),
 ): WeekTotal[] {
-  const thisMonday = startOfWeek(now);
+  const thisSunday = startOfWeek(now);
   const totals: WeekTotal[] = [];
   const byWeek = new Map<string, WeekTotal>();
   for (let i = weeks - 1; i >= 0; i--) {
-    const weekStart = dayKey(addDays(thisMonday, -7 * i));
+    const weekStart = dayKey(addDays(thisSunday, -7 * i));
     const total = { weekStart, minutes: 0, workouts: 0, isCurrent: i === 0 };
     totals.push(total);
     byWeek.set(weekStart, total);

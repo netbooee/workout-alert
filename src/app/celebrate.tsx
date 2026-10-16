@@ -75,7 +75,7 @@ export default function CelebrateScreen() {
 
         {total != null && (
           <Animated.View entering={FadeInDown.delay(500)} style={styles.level}>
-            <LevelBar xp={total} />
+            <LevelBar xp={total} pressable={false} />
           </Animated.View>
         )}
       </View>

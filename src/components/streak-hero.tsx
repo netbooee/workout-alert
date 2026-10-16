@@ -79,7 +79,7 @@ function message(state: WeekState, weeks: number): string {
     case 'out-of-reach':
       return weeks > 0
         ? 'This week is out of reach. A freeze will cover it if you have one.'
-        : 'Fresh start next Monday. Any workout still counts toward your history.';
+        : 'Fresh start on Sunday. Any workout still counts toward your history.';
   }
 }
 

@@ -90,7 +90,7 @@ export function useProgressWorkouts() {
   });
 }
 
-/** One week's workouts and streak status. `weekStart` is the Monday, YYYY-MM-DD. */
+/** One week's workouts and streak status. `weekStart` is the Sunday, YYYY-MM-DD. */
 export function useWeekDetail(weekStart: string) {
   const userId = useAuth().session?.user.id;
   return useQuery({

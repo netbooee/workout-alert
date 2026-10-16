@@ -1,4 +1,4 @@
-import { signedOutWidget, widgetTimeline, type WidgetInput } from '@/lib/widget';
+import { signedOutWidget, toWidgetPayload, widgetTimeline, type WidgetInput } from '@/lib/widget';
 import { widgetPictureDir } from '@/widgets/pictures';
 import StreakWidget from '@/widgets/streak-widget';
 
@@ -6,7 +6,9 @@ import StreakWidget from '@/widgets/streak-widget';
 export async function updateWidget(input: Omit<WidgetInput, 'imageDir'>): Promise<void> {
   try {
     const imageDir = await widgetPictureDir();
-    StreakWidget.updateTimeline(widgetTimeline({ ...input, imageDir }));
+    StreakWidget.updateTimeline(
+      widgetTimeline({ ...input, imageDir }).map((e) => ({ date: e.date, props: toWidgetPayload(e.props) })),
+    );
   } catch (e) {
     console.warn('Could not update the widget', e);
   }
@@ -15,7 +17,7 @@ export async function updateWidget(input: Omit<WidgetInput, 'imageDir'>): Promis
 /** Clears your streak and partners' names off the widget, e.g. after signing out. */
 export function resetWidget(): void {
   try {
-    StreakWidget.updateSnapshot(signedOutWidget());
+    StreakWidget.updateSnapshot(toWidgetPayload(signedOutWidget()));
   } catch (e) {
     console.warn('Could not reset the widget', e);
   }

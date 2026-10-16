@@ -3,14 +3,14 @@ import { describe, expect, it } from 'vitest';
 import { lotlMessage, lotlMood, partnerMood, type LotlInput } from './lotl';
 import type { MascotKind } from './mascots';
 
-// Weekdays in Sept/Oct 2026 (local time).
-const mon = new Date(2026, 8, 28, 9);
-const wed = new Date(2026, 8, 30, 9);
-const fri = new Date(2026, 9, 2, 18);
-const sun = new Date(2026, 9, 4, 18);
+// Weekdays in Sept/Oct 2026 (local time). Weeks run Sunday–Saturday.
+const sun = new Date(2026, 8, 27, 9);
+const tue = new Date(2026, 8, 29, 9);
+const thu = new Date(2026, 9, 1, 18);
+const sat = new Date(2026, 9, 3, 18);
 
 const base: LotlInput = {
-  now: wed,
+  now: tue,
   firstName: 'Jordan',
   streakWeeks: 6,
   freezes: 0,
@@ -22,7 +22,7 @@ const base: LotlInput = {
 
 describe('lotlMood', () => {
   it('blazes once the week goal is hit', () => {
-    expect(lotlMood({ ...base, now: fri, weekDays: 4 })).toBe('blazing');
+    expect(lotlMood({ ...base, now: thu, weekDays: 4 })).toBe('blazing');
   });
 
   it('is happy when on track', () => {
@@ -30,11 +30,11 @@ describe('lotlMood', () => {
   });
 
   it('is ready at the start of a week with nothing done yet', () => {
-    expect(lotlMood({ ...base, now: mon, weekDays: 0, daysSinceLastWorkout: 2 })).toBe('ready');
+    expect(lotlMood({ ...base, now: sun, weekDays: 0, daysSinceLastWorkout: 2 })).toBe('ready');
   });
 
   it('worries when the streak is at risk', () => {
-    expect(lotlMood({ ...base, now: fri, weekDays: 2 })).toBe('worried');
+    expect(lotlMood({ ...base, now: thu, weekDays: 2 })).toBe('worried');
   });
 
   it('gets fired up after several idle days', () => {
@@ -42,11 +42,11 @@ describe('lotlMood', () => {
   });
 
   it('gets fired up when the week is out of reach and no freeze can save it', () => {
-    expect(lotlMood({ ...base, now: sun, weekDays: 1, daysSinceLastWorkout: 2 })).toBe('fired_up');
+    expect(lotlMood({ ...base, now: sat, weekDays: 1, daysSinceLastWorkout: 2 })).toBe('fired_up');
   });
 
   it('never gets angry when a freeze will cover the week', () => {
-    expect(lotlMood({ ...base, now: sun, weekDays: 1, freezes: 1, daysSinceLastWorkout: 2 })).toBe('worried');
+    expect(lotlMood({ ...base, now: sat, weekDays: 1, freezes: 1, daysSinceLastWorkout: 2 })).toBe('worried');
   });
 
   it('calms "fired up" down to "worried" after the daily greeting', () => {
@@ -58,7 +58,7 @@ describe('lotlMood', () => {
   });
 
   it('does not get angry at brand-new users with no workouts yet', () => {
-    expect(lotlMood({ ...base, now: mon, streakWeeks: 0, weekDays: 0, daysSinceLastWorkout: null })).toBe('ready');
+    expect(lotlMood({ ...base, now: sun, streakWeeks: 0, weekDays: 0, daysSinceLastWorkout: null })).toBe('ready');
   });
 });
 
@@ -98,7 +98,7 @@ describe('lotlMessage', () => {
   });
 
   it('fills in the numbers in the headline', () => {
-    const msg = lotlMessage({ ...base, now: fri, weekDays: 2 });
+    const msg = lotlMessage({ ...base, now: thu, weekDays: 2 });
     expect(msg.mood).toBe('worried');
     expect(msg.headline).not.toMatch(/undefined|NaN/);
   });
@@ -110,7 +110,7 @@ describe('lotlMessage', () => {
   });
 
   it('points a blazing user at the league', () => {
-    expect(lotlMessage({ ...base, now: fri, weekDays: 4 }).action).toEqual({
+    expect(lotlMessage({ ...base, now: thu, weekDays: 4 }).action).toEqual({
       label: 'See the league',
       href: '/partners',
     });
@@ -129,10 +129,10 @@ describe('lotlMessage', () => {
 
   it('gives each character its own voice without borrowing Lotl\'s', () => {
     const moods = [
-      { now: fri, weekDays: 4 },
+      { now: thu, weekDays: 4 },
       { weekDays: 2 },
-      { now: mon, weekDays: 0, daysSinceLastWorkout: 2 },
-      { now: fri, weekDays: 2 },
+      { now: sun, weekDays: 0, daysSinceLastWorkout: 2 },
+      { now: thu, weekDays: 2 },
       { weekDays: 0, daysSinceLastWorkout: 5 },
       { resting: true },
     ];
@@ -152,15 +152,15 @@ describe('partnerMood', () => {
   const p = { weekDays: 1, weekGoal: 4, streakWeeks: 6, resting: false };
 
   it('celebrates a partner who hit their goal', () => {
-    expect(partnerMood({ ...p, weekDays: 4 }, fri)).toBe('blazing');
+    expect(partnerMood({ ...p, weekDays: 4 }, thu)).toBe('blazing');
   });
 
   it('worries, but never gets angry, when a partner is behind', () => {
-    expect(partnerMood({ ...p, weekDays: 0 }, sun)).toBe('worried');
+    expect(partnerMood({ ...p, weekDays: 0 }, sat)).toBe('worried');
   });
 
   it('sleeps while a partner rests', () => {
-    expect(partnerMood({ ...p, resting: true }, fri)).toBe('sleepy');
+    expect(partnerMood({ ...p, resting: true }, thu)).toBe('sleepy');
   });
 });
 

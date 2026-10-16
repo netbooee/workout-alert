@@ -45,17 +45,143 @@ export const WINDOW_OPTIONS = [
   { weeks: 4, label: '4 weeks' },
 ] as const;
 
-export const REWARD_PRESETS = [
-  { emoji: '🎁', label: 'Surprise', reward: 'A surprise' },
-  { emoji: '🤳', label: 'Selfie', reward: 'A selfie' },
-  { emoji: '☕', label: 'Coffee', reward: 'Coffee on me' },
-  { emoji: '🍕', label: 'Pizza', reward: 'Pizza night on me' },
-  { emoji: '🍦', label: 'Ice cream', reward: 'Ice cream on me' },
-  { emoji: '🎬', label: 'Movie', reward: 'Movie night, my treat' },
-  { emoji: '💆', label: 'Massage', reward: 'A massage on me' },
-  { emoji: '👟', label: 'Socks', reward: 'New running socks' },
-  { emoji: '🍽️', label: 'Dinner', reward: 'Dinner on me' },
-] as const;
+export interface RewardPreset {
+  id: string;
+  emoji: string;
+  label: string;
+  reward: string;
+  /** Jump into the reward text so it can be changed right away (amounts, custom). */
+  edit?: boolean;
+}
+
+const r = (id: string, emoji: string, label: string, reward: string, edit?: boolean): RewardPreset => ({
+  id,
+  emoji,
+  label,
+  reward,
+  ...(edit ? { edit } : {}),
+});
+
+/** Every suggested reward, grouped for the "More…" sheet. All are editable after picking. */
+export const REWARD_LIBRARY: { title: string; rewards: RewardPreset[] }[] = [
+  {
+    title: 'Popular',
+    rewards: [
+      // Custom: starts as "A surprise"; keep it, or type your own reward over it.
+      r('custom', '🎁', 'Custom', 'A surprise', true),
+      r('selfie', '🤳', 'Selfie', 'A selfie'),
+      r('coffee', '☕', 'Coffee', 'Coffee on me'),
+      r('date-night', '🍷', 'Date night', 'Date night, my treat'),
+      r('cook', '🍝', 'Cook for you', 'I’ll cook your favorite meal'),
+      r('massage', '💆', 'Massage', 'A massage on me'),
+      // Paid in person: no money moves through Sigamos.
+      r('cash', '💵', 'Cash prize', '$20 cash prize', true),
+      r('your-call', '👑', 'Your call', 'You call the shots tonight'),
+      r('dinner', '🍽️', 'Dinner', 'Dinner on me'),
+    ],
+  },
+  {
+    title: 'Food and treats',
+    rewards: [
+      r('pizza', '🍕', 'Pizza', 'Pizza night on me'),
+      r('ice-cream', '🍦', 'Ice cream', 'Ice cream on me'),
+      r('smoothie', '🥤', 'Smoothie', 'Smoothie on me'),
+      r('tacos', '🌮', 'Tacos', 'Taco night on me'),
+      r('sushi', '🍣', 'Sushi', 'Sushi on me'),
+      r('donuts', '🍩', 'Donuts', 'Donuts on me'),
+      r('chocolate', '🍫', 'Chocolate', 'Your favorite chocolate'),
+      r('brunch', '🥞', 'Brunch', 'Brunch on me'),
+      r('burger', '🍔', 'Burger', 'Burgers on me'),
+      r('bake', '🧁', 'Bake for you', 'I’ll bake you something'),
+    ],
+  },
+  {
+    title: 'Time together',
+    rewards: [
+      r('movie', '🎬', 'Movie', 'Movie night, my treat'),
+      r('sunset-walk', '🌅', 'Sunset walk', 'A sunset walk together'),
+      r('picnic', '🧺', 'Picnic', 'A picnic, I’ll pack it'),
+      r('game-night', '🎲', 'Game night', 'Game night, you pick the game'),
+      r('adventure', '🥾', 'Adventure', 'A hike or day trip together'),
+      r('bowling', '🎳', 'Bowling', 'Bowling, my treat'),
+      r('karaoke', '🎤', 'Karaoke', 'Karaoke night'),
+      r('beach', '🏖️', 'Beach day', 'A beach day together'),
+    ],
+  },
+  {
+    title: 'Pampering and rest',
+    rewards: [
+      r('spa', '🛁', 'Spa night', 'A spa night at home'),
+      r('foot-rub', '🦶', 'Foot rub', 'A foot rub, no time limit'),
+      r('mani-pedi', '💅', 'Mani-pedi', 'Mani-pedi on me'),
+      r('sleep-in', '🛌', 'Sleep in', 'I take the morning, you sleep in'),
+      r('breakfast-in-bed', '🍳', 'Breakfast in bed', 'Breakfast in bed'),
+    ],
+  },
+  {
+    title: 'Chores and favors',
+    rewards: [
+      r('chore-pass', '🧺', 'Chore pass', 'I’ll do one of your chores'),
+      r('dishes', '🍽️', 'Dishes', 'I’ll do the dishes for a week'),
+      r('errands', '🚗', 'Errands', 'I’ll run your errands this weekend'),
+      r('dog-walk', '🐕', 'Dog walk', 'I’ll walk the dog for a week'),
+      r('clean-up', '🧹', 'Clean-up', 'I’ll clean up, you relax'),
+    ],
+  },
+  {
+    title: 'Sweet and personal',
+    rewards: [
+      r('note', '💌', 'Love note', 'A handwritten note'),
+      r('playlist', '🎵', 'Playlist', 'A playlist I made for you'),
+      r('flowers', '💐', 'Flowers', 'Flowers for you'),
+      r('photo-shoot', '📸', 'Photo shoot', 'I’ll take your photos'),
+    ],
+  },
+  {
+    title: 'Fitness',
+    rewards: [
+      r('workout-buddy', '🏃', 'Workout buddy', 'I’ll join your next workout'),
+      r('gear', '👟', 'New gear', 'New workout gear'),
+      r('class', '🧘', 'Class pass', 'A fitness class on me'),
+      r('earbuds', '🎧', 'Headphones', 'New earbuds'),
+    ],
+  },
+  {
+    title: 'Bigger stakes',
+    rewards: [
+      r('tickets', '🎟️', 'Tickets', 'Tickets to a show or game'),
+      r('shopping', '🛍️', 'Shopping', 'A shopping trip on me'),
+      r('gift-card', '💳', 'Gift card', 'A $25 gift card', true),
+      r('trip', '✈️', 'Trip', 'A weekend getaway'),
+    ],
+  },
+];
+
+export const ALL_REWARDS: RewardPreset[] = REWARD_LIBRARY.flatMap((c) => c.rewards);
+
+export const rewardById = (id: string): RewardPreset | undefined => ALL_REWARDS.find((p) => p.id === id);
+
+/** The tiles on the offer screen; the last slot is "More…", which opens the whole library. */
+export const REWARD_PRESETS: RewardPreset[] = [
+  'custom',
+  'selfie',
+  'coffee',
+  'date-night',
+  'cook',
+  'massage',
+  'cash',
+  'your-call',
+].map((id) => rewardById(id)!);
+
+/** The library filtered by a search ("pizza", "walk"), keeping only groups with matches. */
+export function searchRewards(query: string): { title: string; rewards: RewardPreset[] }[] {
+  const q = query.trim().toLowerCase();
+  if (!q) return REWARD_LIBRARY;
+  return REWARD_LIBRARY.map((c) => ({
+    title: c.title,
+    rewards: c.rewards.filter((p) => p.label.toLowerCase().includes(q) || p.reward.toLowerCase().includes(q)),
+  })).filter((c) => c.rewards.length > 0);
+}
 
 /** Longest "rules and notes" a partner can add to an offer (matches the database). */
 export const NOTES_MAX = 500;

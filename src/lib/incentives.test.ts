@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest';
 
-import { incentiveGoalText, progressFraction, timeLeft } from './incentives';
+import {
+  ALL_REWARDS,
+  incentiveGoalText,
+  progressFraction,
+  REWARD_PRESETS,
+  searchRewards,
+  timeLeft,
+} from './incentives';
 
 describe('incentiveGoalText', () => {
   it('matches the server wording', () => {
@@ -39,5 +46,27 @@ describe('progressFraction', () => {
   it('is clamped to 0–1', () => {
     expect(progressFraction({ progress: 2, goal_target: 4 })).toBe(0.5);
     expect(progressFraction({ progress: 6, goal_target: 4 })).toBe(1);
+  });
+});
+
+describe('reward library', () => {
+  it('gives every reward its own id, short enough labels, and no drinks', () => {
+    const ids = ALL_REWARDS.map((p) => p.id);
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(ALL_REWARDS.length).toBe(49);
+    expect(ALL_REWARDS.every((p) => p.label.length <= 16 && p.reward.length <= 80)).toBe(true);
+    expect(ALL_REWARDS.some((p) => /drink|cocktail|bubbly|beer|wine/i.test(p.label + p.reward))).toBe(false);
+  });
+
+  it('leaves room for "More…" after the favorites, starting with Custom', () => {
+    expect(REWARD_PRESETS).toHaveLength(8);
+    expect(REWARD_PRESETS[0]).toMatchObject({ id: 'custom', edit: true });
+  });
+
+  it('searches labels and reward text, keeping only groups with matches', () => {
+    expect(searchRewards('walk').flatMap((c) => c.rewards.map((p) => p.id))).toEqual(['sunset-walk', 'dog-walk']);
+    expect(searchRewards('PIZZA')).toEqual([{ title: 'Food and treats', rewards: [expect.objectContaining({ id: 'pizza' })] }]);
+    expect(searchRewards('zzz')).toEqual([]);
+    expect(searchRewards('  ')).toHaveLength(8);
   });
 });

@@ -2,20 +2,20 @@ import { describe, expect, it } from 'vitest';
 
 import { buildWeek, dayKey, startOfWeek, weekState } from './week';
 
-// Thursday, Sept 24 2026, 9pm local.
+// Thursday, Sept 24 2026, 9pm local. The week runs Sun 09-20 through Sat 09-26.
 const thursday = new Date(2026, 8, 24, 21, 0);
 
 describe('startOfWeek', () => {
-  it('returns Monday for a mid-week day', () => {
-    expect(dayKey(startOfWeek(thursday))).toBe('2026-09-21');
+  it('returns Sunday for a mid-week day', () => {
+    expect(dayKey(startOfWeek(thursday))).toBe('2026-09-20');
   });
 
-  it('treats Sunday as the end of the week, not the start', () => {
-    expect(dayKey(startOfWeek(new Date(2026, 8, 27, 23, 0)))).toBe('2026-09-21');
+  it('treats Saturday as the end of the week', () => {
+    expect(dayKey(startOfWeek(new Date(2026, 8, 26, 23, 0)))).toBe('2026-09-20');
   });
 
-  it('returns the same day for Monday', () => {
-    expect(dayKey(startOfWeek(new Date(2026, 8, 21, 0, 5)))).toBe('2026-09-21');
+  it('returns the same day for Sunday', () => {
+    expect(dayKey(startOfWeek(new Date(2026, 8, 27, 0, 5)))).toBe('2026-09-27');
   });
 });
 
@@ -27,20 +27,24 @@ describe('buildWeek', () => {
     { started_at: new Date(2026, 8, 24, 20).toISOString(), duration_s: 2700 },
   ];
 
+  it('labels the days S M T W T F S', () => {
+    expect(buildWeek([], 15, thursday).map((d) => d.label).join('')).toBe('SMTWTFS');
+  });
+
   it('marks days with qualifying workouts', () => {
     const week = buildWeek(workouts, 15, thursday);
-    expect(week.map((d) => d.active)).toEqual([true, false, false, true, false, false, false]);
+    expect(week.map((d) => d.active)).toEqual([false, true, false, false, true, false, false]);
   });
 
   it('flags today and future days', () => {
     const week = buildWeek(workouts, 15, thursday);
-    expect(week.findIndex((d) => d.isToday)).toBe(3);
-    expect(week.map((d) => d.isFuture)).toEqual([false, false, false, false, true, true, true]);
+    expect(week.findIndex((d) => d.isToday)).toBe(4);
+    expect(week.map((d) => d.isFuture)).toEqual([false, false, false, false, false, true, true]);
   });
 
   it('respects the minimum workout length', () => {
     const week = buildWeek(workouts, 5, thursday);
-    expect(week[1].active).toBe(true);
+    expect(week[2].active).toBe(true);
   });
 });
 
@@ -50,16 +54,16 @@ describe('weekState', () => {
   });
 
   it('is on track with slack left', () => {
-    // Thursday → 4 days left including today.
-    expect(weekState(1, 3, thursday)).toEqual({ kind: 'on-track', needed: 2, daysLeft: 4 });
+    // Thursday → 3 days left including today.
+    expect(weekState(2, 3, thursday)).toEqual({ kind: 'on-track', needed: 1, daysLeft: 3 });
   });
 
   it('is at risk when at most one spare day remains', () => {
-    expect(weekState(0, 3, thursday)).toEqual({ kind: 'at-risk', needed: 3, daysLeft: 4 });
+    expect(weekState(1, 3, thursday)).toEqual({ kind: 'at-risk', needed: 2, daysLeft: 3 });
   });
 
   it('is out of reach when there are not enough days left', () => {
-    const sunday = new Date(2026, 8, 27, 10);
-    expect(weekState(0, 2, sunday)).toEqual({ kind: 'out-of-reach', needed: 2, daysLeft: 1 });
+    const saturday = new Date(2026, 8, 26, 10);
+    expect(weekState(0, 2, saturday)).toEqual({ kind: 'out-of-reach', needed: 2, daysLeft: 1 });
   });
 });

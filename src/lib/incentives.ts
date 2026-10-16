@@ -46,7 +46,8 @@ export const WINDOW_OPTIONS = [
 ] as const;
 
 export const REWARD_PRESETS = [
-  { emoji: '🎁', label: 'Surprise', reward: 'A surprise' },
+  // Also the "custom" tile: keep it a surprise or type your own reward over it.
+  { emoji: '🎁', label: 'Surprise or custom', reward: 'A surprise' },
   { emoji: '🤳', label: 'Selfie', reward: 'A selfie' },
   { emoji: '☕', label: 'Coffee', reward: 'Coffee on me' },
   { emoji: '🍕', label: 'Pizza', reward: 'Pizza night on me' },

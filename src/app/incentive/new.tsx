@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { router, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
@@ -20,6 +20,8 @@ import {
   WINDOW_OPTIONS,
 } from '@/lib/incentives';
 
+const SURPRISE = REWARD_PRESETS[0].emoji;
+
 /** Offer a partner a real-world reward for a stretch goal. */
 export default function NewIncentiveScreen() {
   const { to } = useLocalSearchParams<{ to: string }>();
@@ -36,6 +38,7 @@ export default function NewIncentiveScreen() {
   const [emoji, setEmoji] = useState<string>(REWARD_PRESETS[0].emoji);
   const [reward, setReward] = useState<string>(REWARD_PRESETS[0].reward);
   const [notes, setNotes] = useState('');
+  const rewardInput = useRef<TextInput>(null);
   const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   const option = goalOption(kind);
@@ -159,6 +162,8 @@ export default function NewIncentiveScreen() {
                 Haptics.selectionAsync();
                 setEmoji(p.emoji);
                 setReward(p.reward);
+                // The surprise tile doubles as "custom": jump into the text, ready to replace.
+                if (p.emoji === SURPRISE) rewardInput.current?.focus();
               }}
               accessibilityRole="button"
               accessibilityState={{ selected: emoji === p.emoji }}
@@ -180,15 +185,20 @@ export default function NewIncentiveScreen() {
           ))}
         </View>
         <TextInput
+          ref={rewardInput}
           style={styles.input}
           value={reward}
           onChangeText={setReward}
           maxLength={80}
+          selectTextOnFocus={emoji === SURPRISE}
           placeholder="What will you treat them to?"
           placeholderTextColor={Colors.textMuted}
+          accessibilityLabel="Reward"
         />
         <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
-          Real-world rewards only. You’ll mark it delivered once you’ve paid up.
+          {emoji === SURPRISE
+            ? 'Keep it a surprise, or type your own reward here to replace it.'
+            : 'Real-world rewards only. You’ll mark it delivered once you’ve paid up.'}
         </AppText>
 
         <AppText variant="label">Rules and notes</AppText>

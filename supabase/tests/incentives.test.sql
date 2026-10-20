@@ -104,8 +104,10 @@ select pg_temp.workout('00000000-0000-0000-0000-00000000000b', 1);
 select pg_temp.workout('00000000-0000-0000-0000-00000000000b', 2);
 select is((select status from public.incentives), 'earned', 'hitting the goal earns the incentive');
 select is((select amount from public.xp_events where kind = 'incentive'), 100, 'earning it is worth 100 XP');
+-- Only incentive pushes: early in the week these workouts are recent enough that
+-- Sam also gets the usual "Jo just worked out" push.
 select bag_eq(
-  $$select user_id, title, body from public.notifications$$,
+  $$select user_id, title, body from public.notifications where kind = 'incentive'$$,
   $$values
     ('00000000-0000-0000-0000-00000000000b'::uuid, 'You earned Sam’s incentive! 🎉'::text, '☕ Coffee on me · +100 XP'::text),
     ('00000000-0000-0000-0000-00000000000a'::uuid, 'Jo earned your incentive 🎉'::text, 'Time to deliver: ☕ Coffee on me'::text)$$,

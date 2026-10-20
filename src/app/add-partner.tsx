@@ -6,19 +6,14 @@ import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useRequestPartner } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
+import { inviteMessage } from '@/lib/invite-link';
 
 export default function AddPartnerScreen() {
   const profile = useProfile();
   const request = useRequestPartner();
   const [code, setCode] = useState('');
 
-  const share = () =>
-    Share.share({
-      message:
-        `Be my workout accountability partner on Sigamos 🔥\n\n` +
-        `Open this link: sigamos://invite/${profile.invite_code}\n` +
-        `or enter my code: ${profile.invite_code}`,
-    });
+  const share = () => Share.share({ message: inviteMessage(profile.invite_code) });
 
   const send = () =>
     request.mutate(code, {

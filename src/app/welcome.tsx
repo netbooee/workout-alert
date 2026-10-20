@@ -20,7 +20,7 @@ const PAGES: Page[] = [
   {
     emoji: '🔥',
     title: 'Your weekly streak',
-    body: 'Pick how many days a week you want to move, from 1 to 7.',
+    body: 'Hit your days-a-week goal and the streak grows. You can change the goal any time on the Me tab.',
     points: [
       'A day counts when it has a workout of 15+ minutes',
       'Workouts sync from Apple Health, or log one with +',
@@ -84,11 +84,13 @@ export default function WelcomeScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.top}>
-        <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button">
-          <AppText variant="heading" color={Colors.textSecondary}>
-            {last ? '' : 'Skip'}
-          </AppText>
-        </Pressable>
+        {!last && (
+          <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button">
+            <AppText variant="heading" color={Colors.textSecondary}>
+              Skip
+            </AppText>
+          </Pressable>
+        )}
       </View>
 
       <ScrollView

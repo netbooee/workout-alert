@@ -1,4 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { useLinkingURL } from 'expo-linking';
 import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
@@ -8,6 +9,8 @@ import { useColorScheme } from 'react-native';
 import { Colors, Palettes } from '@/constants/theme';
 import { restoreAppearance } from '@/lib/appearance';
 import { AuthProvider, useAuth } from '@/lib/auth';
+import { inviteCodeFromUrl } from '@/lib/invite-link';
+import { savePendingInvite } from '@/lib/pending-invite';
 
 SplashScreen.preventAutoHideAsync();
 restoreAppearance();
@@ -50,15 +53,21 @@ export default function RootLayout() {
 
 function RootNavigator() {
   const { ready, session, profile } = useAuth();
+  const url = useLinkingURL();
+  const signedIn = !!session;
+  const onboarded = !!profile?.onboarded_at;
 
   useEffect(() => {
     if (ready) SplashScreen.hideAsync();
   }, [ready]);
 
-  if (!ready) return null;
+  // Hold on to an invite opened before onboarding is done; the partner step uses it.
+  useEffect(() => {
+    const code = url && inviteCodeFromUrl(url);
+    if (ready && code && !(signedIn && onboarded)) savePendingInvite(code);
+  }, [url, ready, signedIn, onboarded]);
 
-  const signedIn = !!session;
-  const onboarded = !!profile?.onboarded_at;
+  if (!ready) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: Colors.background } }}>

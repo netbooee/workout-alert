@@ -100,11 +100,19 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   (never fired up; asleep in rest mode, which is only shared once you're partners).
 - Drawings live in `src/components/mascots/` (shared face and motion, one file per animal).
 
+## Onboarding
+
+**Onboarding** has a progress bar and the buddy speaking on every step: a name (skipped when
+Sign in with Apple provides one), the weekly goal, Apple Health, notifications, and finally a
+partner step to share an invite or enter a code. An invite link opened before sign-in or
+onboarding is kept (`src/lib/pending-invite.ts`) and offered on that last step. Invites are
+shared as `https://sigamos.cloud/invite/CODE`, which opens the app or offers the beta.
+
 ## Welcome tour
 
 The first time someone opens the app (after onboarding) they get a six-page swipeable tour:
 what Sigamos is, how the weekly streak works, partners, incentives, XP and levels, and picking
-a buddy plus the widget. **Skip** works on every page, and it takes the place of that day's
+a buddy plus the widget. **Skip** works on every page before the last, and it takes the place of that day's
 greeting so two pop-ups never stack. Reopen it any time from **Me → Help → Show the welcome
 tour** (`src/app/welcome.tsx`; seen-state is per account in AsyncStorage).
 
@@ -207,7 +215,7 @@ buddy** in the mood that matches your week.
 ```
 src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
-  onboarding.tsx         Weekly goal + Apple Health permission
+  onboarding.tsx         Name (if missing), goal, Apple Health, notifications, invite a partner
   (tabs)/index.tsx       Home: streak + week dots, rings, 8-week trend, recent workouts
   (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code

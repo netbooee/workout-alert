@@ -36,6 +36,8 @@ const GOAL_HINTS: Record<number, string> = {
 };
 
 type Step = 'name' | 'goal' | 'health' | 'notify' | 'partner';
+/** Someone new only meets the buddy's friendly side; fired up, worried and sleepy are for later. */
+type WelcomeMood = Extract<LotlMood, 'happy' | 'ready' | 'blazing'>;
 
 /**
  * First-run setup, Duolingo style: a progress bar, the buddy talking on every
@@ -173,7 +175,7 @@ export default function OnboardingScreen() {
         ) : step === 'health' ? (
           <StepLayout
             buddy={buddy}
-            mood="fired_up"
+            mood="happy"
             says="I’ll count your workouts from Apple Health, so there’s nothing to log."
             footer={
               <>
@@ -195,7 +197,7 @@ export default function OnboardingScreen() {
         ) : step === 'notify' ? (
           <StepLayout
             buddy={buddy}
-            mood="happy"
+            mood="ready"
             says="Want a ping when your partner works out or nudges you?"
             footer={
               <>
@@ -341,7 +343,7 @@ function StepLayout({
   children,
 }: {
   buddy: MascotKind;
-  mood: LotlMood;
+  mood: WelcomeMood;
   says: string;
   footer: ReactNode;
   children: ReactNode;

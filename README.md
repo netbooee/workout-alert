@@ -291,7 +291,7 @@ Apple both require one), and a Supabase project.
 `/support`, and `/invite/<CODE>` fallback for invite links), deployed by Netlify from this repo
 (`netlify.toml`, no build step). Keep DNS at Hover so the Resend email records keep working: point
 `@` (A record) and `www` (CNAME) at Netlify. The beta buttons use the public TestFlight link
-(https://testflight.apple.com/join/epCEHKDt) in `website/index.html` and
+(https://testflight.apple.com/join/epCEHKDt) in `website/index.html` (hero, "Join the beta" steps, and CTA) and
 `website/invite/index.html`. Screenshots in
 `website/img/` come from the web preview; swap in real device screenshots when you have them.
 

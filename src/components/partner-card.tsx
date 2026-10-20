@@ -6,6 +6,7 @@ import { Alert, Pressable, StyleSheet, View, type ColorValue } from 'react-nativ
 
 import { Avatar } from '@/components/avatar';
 import { Mascot } from '@/components/mascots';
+import { QuestProgress } from '@/components/quest-progress';
 import { AppText, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useMyIncentives } from '@/hooks/use-incentives';
@@ -74,15 +75,18 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
         <Pressable
           onPress={() => router.push({ pathname: '/incentive/[id]', params: { id: incentive.id } })}
           style={[styles.incentive, incentive.status === 'earned' && styles.incentiveEarned]}>
-          <AppText variant="caption" color={Colors.text} style={{ flex: 1 }} numberOfLines={1}>
-            {incentive.reward_emoji}{' '}
-            {incentive.status === 'earned'
-              ? `${firstName} earned it! Tap to mark delivered`
-              : incentive.status === 'offered'
-                ? `Waiting for ${firstName} to accept: ${incentive.reward}`
-                : `${incentive.progress} of ${incentive.goal_target} toward ${incentive.reward}`}
-          </AppText>
-          <SymbolView name="chevron.right" size={12} tintColor={Colors.textMuted} />
+          <View style={styles.incentiveHeader}>
+            <AppText variant="caption" color={Colors.text} style={{ flex: 1 }} numberOfLines={1}>
+              {incentive.reward_emoji}{' '}
+              {incentive.status === 'earned'
+                ? `${firstName} earned it! Tap to mark delivered`
+                : incentive.status === 'offered'
+                  ? `Waiting for ${firstName} to accept: ${incentive.reward}`
+                  : incentive.reward}
+            </AppText>
+            <SymbolView name="chevron.right" size={12} tintColor={Colors.textMuted} />
+          </View>
+          {incentive.status === 'active' && <QuestProgress incentive={incentive} who={firstName} />}
         </Pressable>
       )}
       <View style={styles.actions}>
@@ -151,14 +155,13 @@ const styles = StyleSheet.create({
   actions: { flexDirection: 'row', gap: Spacing.sm },
   offer: { backgroundColor: Colors.flameSoft },
   incentive: {
-    flexDirection: 'row',
-    alignItems: 'center',
     gap: Spacing.sm,
     paddingHorizontal: Spacing.md,
     paddingVertical: 10,
     borderRadius: Radius.md,
     backgroundColor: Colors.flameSoft,
   },
+  incentiveHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   incentiveEarned: { backgroundColor: Colors.xpSoft, borderWidth: 1, borderColor: Colors.success },
   // Big, equal-width buttons that are easy to hit (Apple's minimum is 44pt tall).
   action: {

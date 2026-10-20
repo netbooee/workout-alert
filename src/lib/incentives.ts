@@ -227,3 +227,29 @@ export function progressFraction(i: Pick<Incentive, 'progress' | 'goal_target'>)
 }
 
 export const isOpen = (i: Pick<Incentive, 'status'>) => i.status === 'offered' || i.status === 'active';
+
+type ProgressFields = Pick<Incentive, 'goal_kind' | 'goal_target' | 'activity_type' | 'progress'>;
+
+/** What's still needed: "2 more workout days", "45 more active minutes", "1 more run". */
+export function remainingText(i: ProgressFields): string {
+  const left = Math.max(i.goal_target - i.progress, 0);
+  if (left === 0) return 'Goal reached';
+  switch (i.goal_kind) {
+    case 'workout_days':
+      return `${left} more ${plural(left, 'workout day')}`;
+    case 'active_minutes':
+      return `${left} more active ${plural(left, 'minute')}`;
+    case 'workouts': {
+      const noun = GOAL_ACTIVITIES.find((a) => a.type === (i.activity_type ?? null))?.noun ?? 'workout';
+      return `${left} more ${plural(left, noun)}`;
+    }
+    case 'streak_weeks':
+      return `${left} more streak ${plural(left, 'week')}`;
+  }
+}
+
+/** Most counted goals get one pip per day, workout or week; minutes and long goals get a bar. */
+export const MAX_PIPS = 14;
+export function usesPips(i: Pick<Incentive, 'goal_kind' | 'goal_target'>): boolean {
+  return i.goal_kind !== 'active_minutes' && i.goal_target <= MAX_PIPS;
+}

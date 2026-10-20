@@ -2,29 +2,35 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
+import { QuestProgress } from '@/components/quest-progress';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useMarkIncentiveDelivered, useRespondToIncentive } from '@/hooks/use-incentives';
-import { useNames } from '@/hooks/use-social';
+import { useNames, useNudge, usePartners } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import type { Incentive } from '@/lib/database.types';
-import { incentiveGoalText, progressFraction, timeLeft } from '@/lib/incentives';
+import { incentiveGoalText, timeLeft } from '@/lib/incentives';
 
 const fail = (title: string) => (e: unknown) =>
   Alert.alert(title, e instanceof Error ? e.message : String(e));
 
 /**
  * An incentive from either side: what you were offered (accept, track, earn)
- * or what you offered a partner (track, mark delivered). Tapping opens the
- * detail screen unless `linked` is false.
+ * or what you offered a partner (track, nudge, mark delivered). An active one
+ * reads like Duolingo's Friends Quest: progress and what's left, with the next
+ * action on the card. Tapping opens the detail screen unless `linked` is false.
  */
 export function IncentiveCard({ incentive: i, linked = true }: { incentive: Incentive; linked?: boolean }) {
   const me = useAuth().session?.user.id;
   const nameOf = useNames();
   const respond = useRespondToIncentive();
   const deliver = useMarkIncentiveDelivered();
+  const nudge = useNudge();
+  const { data: partners } = usePartners();
   const received = i.to_id === me;
   const other = nameOf(received ? i.from_id : i.to_id).split(' ')[0];
+  const recentlyNudged = !!partners?.find((p) => p.partner_id === i.to_id)?.recently_nudged;
+  const reached = i.progress >= i.goal_target;
 
   const title = received ? `${other}’s incentive for you` : `Your incentive for ${other}`;
   const card = (
@@ -59,22 +65,34 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
         </View>
       ) : null}
 
-      {(i.status === 'active' || i.status === 'offered') && (
-        <View style={{ gap: 6 }}>
-          <View style={styles.track}>
-            <View style={[styles.fill, { width: `${progressFraction(i) * 100}%` }]} />
-          </View>
-          <View style={styles.row}>
-            <AppText variant="caption">
-              {i.status === 'active'
-                ? `${i.progress} of ${i.goal_target}`
-                : received
-                  ? 'Accept to start tracking'
-                  : `Waiting for ${other} to accept`}
-            </AppText>
-            <AppText variant="caption">{timeLeft(i.ends_at)}</AppText>
-          </View>
+      {i.status === 'offered' && (
+        <View style={styles.row}>
+          <AppText variant="caption">
+            {received ? 'Accept to start tracking' : `Waiting for ${other} to accept`}
+          </AppText>
+          <AppText variant="caption">{timeLeft(i.ends_at)}</AppText>
         </View>
+      )}
+
+      {i.status === 'active' && (
+        <>
+          <QuestProgress incentive={i} who={received ? undefined : other} />
+          {!reached &&
+            (received ? (
+              <Button title="Log a workout" onPress={() => router.push('/log')} />
+            ) : (
+              <Button
+                title={recentlyNudged ? 'Nudged 👋' : `👋 Nudge ${other}`}
+                variant="secondary"
+                disabled={recentlyNudged}
+                loading={nudge.isPending}
+                onPress={() => {
+                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                  nudge.mutate(i.to_id, { onError: fail('Could not nudge') });
+                }}
+              />
+            ))}
+        </>
       )}
 
       {i.status === 'offered' && received && (
@@ -152,6 +170,4 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: Spacing.sm },
-  track: { height: 8, borderRadius: 4, backgroundColor: Colors.cardRaised, overflow: 'hidden' },
-  fill: { height: '100%', borderRadius: 4, backgroundColor: Colors.flame },
 });

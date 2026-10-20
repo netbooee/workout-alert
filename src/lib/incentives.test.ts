@@ -4,9 +4,11 @@ import {
   ALL_REWARDS,
   incentiveGoalText,
   progressFraction,
+  remainingText,
   REWARD_PRESETS,
   searchRewards,
   timeLeft,
+  usesPips,
 } from './incentives';
 
 describe('incentiveGoalText', () => {
@@ -68,5 +70,40 @@ describe('reward library', () => {
     expect(searchRewards('PIZZA')).toEqual([{ title: 'Food and treats', rewards: [expect.objectContaining({ id: 'pizza' })] }]);
     expect(searchRewards('zzz')).toEqual([]);
     expect(searchRewards('  ')).toHaveLength(8);
+  });
+});
+
+describe('remainingText', () => {
+  const base = { goal_kind: 'workout_days' as const, goal_target: 4, activity_type: null, progress: 2 };
+
+  it('counts what is left in the goal’s own unit', () => {
+    expect(remainingText(base)).toBe('2 more workout days');
+    expect(remainingText({ ...base, progress: 3 })).toBe('1 more workout day');
+    expect(remainingText({ ...base, goal_kind: 'active_minutes', goal_target: 150, progress: 105 })).toBe(
+      '45 more active minutes',
+    );
+    expect(remainingText({ ...base, goal_kind: 'streak_weeks', progress: 3 })).toBe('1 more streak week');
+  });
+
+  it('names the activity for a workouts goal', () => {
+    expect(remainingText({ ...base, goal_kind: 'workouts', activity_type: 'running', goal_target: 3, progress: 2 })).toBe(
+      '1 more run',
+    );
+  });
+
+  it('says the goal is reached instead of going negative', () => {
+    expect(remainingText({ ...base, progress: 6 })).toBe('Goal reached');
+  });
+});
+
+describe('usesPips', () => {
+  it('uses pips for small counted goals', () => {
+    expect(usesPips({ goal_kind: 'workout_days', goal_target: 5 })).toBe(true);
+    expect(usesPips({ goal_kind: 'workouts', goal_target: 14 })).toBe(true);
+  });
+
+  it('uses a bar for minutes and long goals', () => {
+    expect(usesPips({ goal_kind: 'active_minutes', goal_target: 150 })).toBe(false);
+    expect(usesPips({ goal_kind: 'workout_days', goal_target: 28 })).toBe(false);
   });
 });

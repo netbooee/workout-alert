@@ -71,6 +71,11 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
 - The recipient accepts or passes. Progress updates automatically from workouts (computed in
   Postgres). Hitting the goal earns it: **+100 XP**, a celebration, and pushes to both people.
   The giver marks it **delivered**; it lands on the recipient's **reward shelf** (Me tab).
+- An active incentive shows as a **quest card** (like Duolingo's Friends Quest,
+  `src/components/quest-progress.tsx`): the count, one pip per day or workout (a bar for
+  minutes), what's left and the days remaining, with the next action on the card: **Log a
+  workout** for the recipient on Home, **Nudge** for the giver. The giver's partner card shows
+  the same progress. The nudge banner also has **Log a workout**.
 - One open incentive per giver → recipient. Unmet ones expire at the deadline (hourly sweep) with
   a gentle message; no shaming.
 - Logic: `supabase/migrations/20261003000000_incentives.sql` (pgTAP in

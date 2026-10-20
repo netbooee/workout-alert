@@ -100,11 +100,19 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   (never fired up; asleep in rest mode, which is only shared once you're partners).
 - Drawings live in `src/components/mascots/` (shared face and motion, one file per animal).
 
+## Onboarding
+
+**Onboarding** has a progress bar and the buddy speaking on every step: a name (skipped when
+Sign in with Apple provides one), the weekly goal, Apple Health, notifications, and finally a
+partner step to share an invite or enter a code. An invite link opened before sign-in or
+onboarding is kept (`src/lib/pending-invite.ts`) and offered on that last step. Invites are
+shared as `https://sigamos.cloud/invite/CODE`, which opens the app or offers the beta.
+
 ## Welcome tour
 
 The first time someone opens the app (after onboarding) they get a six-page swipeable tour:
 what Sigamos is, how the weekly streak works, partners, incentives, XP and levels, and picking
-a buddy plus the widget. **Skip** works on every page, and it takes the place of that day's
+a buddy plus the widget. **Skip** works on every page before the last, and it takes the place of that day's
 greeting so two pop-ups never stack. Reopen it any time from **Me → Help → Show the welcome
 tour** (`src/app/welcome.tsx`; seen-state is per account in AsyncStorage).
 
@@ -183,7 +191,12 @@ buddy** in the mood that matches your week.
 - **Weekly league**: you and your partners ranked by XP earned this week (Mon–Sun).
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
-- A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo).
+- A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo),
+  including a new account's first workout. New workouts get a second step with the streak, the
+  week's dots and what's next, plus a callout for a milestone (2, 4, 8, 12, 26, 52, 104 weeks)
+  or a freeze earned that week.
+- Tapping the streak card on Home opens the **streak screen**: next milestone, freezes banked and
+  how they're earned, and week-by-week history linking to each week.
 - **Verifying** doesn't change streaks: every 15+ minute workout counts, verified or not. It
   earns XP on both sides, and "verified only" incentives count hand-logged workouts only once a
   partner verifies them. Removing a ✅ takes its XP back.
@@ -202,7 +215,7 @@ buddy** in the mood that matches your week.
 ```
 src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
-  onboarding.tsx         Weekly goal + Apple Health permission
+  onboarding.tsx         Name (if missing), goal, Apple Health, notifications, invite a partner
   (tabs)/index.tsx       Home: streak + week dots, rings, 8-week trend, recent workouts
   (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code
@@ -211,7 +224,8 @@ src/app/                 Screens (Expo Router)
   log.tsx                Log a workout by hand with a check-in photo
   add-partner.tsx        Share your code / enter someone else's
   invite/[code].tsx      Deep link handler for invites
-  celebrate.tsx          "+XP" celebration
+  celebrate.tsx          "+XP" celebration, then the streak step
+  streak.tsx             Streak detail: milestone, freezes, week-by-week history
 src/components/          UI pieces
 src/lib/health/          HealthKit queries, mapping to rows, sync to Supabase
 src/lib/week.ts          Week math shared by the UI
@@ -311,11 +325,12 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 - **App icon.** The app still uses Expo's placeholder icon (`assets/images/icon.png`). Replace it
   with a Sigamos icon, e.g. Lotl on flame orange, using the same artwork as the website
   (`website/img/lotl-*.svg`), plus a matching splash image. Needs a new build.
-- **In-app account deletion** (App Store guideline 5.1.1(v)). A "Delete account" option on the
-  Me tab with a confirmation, backed by a security-definer function that deletes the user's auth
-  account and cascades their data, and removes their photos and voice messages from storage.
-  Then update `website/privacy/` and `website/support/`, which currently say "email us" and
-  "coming soon".
+- ~~**In-app account deletion**~~ (App Store guideline 5.1.1(v)): "Delete account" on the Me
+  tab removes the user's files from storage, then `delete_my_account()` deletes the auth user and
+  cascades their data. Still to do: revoke the Sign in with Apple token on deletion (Apple asks
+  for this; it needs a server-side call with the app's client secret), and update
+  `website/privacy/` and `website/support/`, which say "email us" and "coming soon", once a
+  build with deletion is out.
 
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~

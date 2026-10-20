@@ -17,7 +17,7 @@ import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
 import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
-import { signOut, useProfile, useUpdateProfile } from '@/lib/auth';
+import { deleteAccount, signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 import { mascotKind } from '@/lib/mascots';
 import { supabase } from '@/lib/supabase';
@@ -194,9 +194,39 @@ export default function MeScreen() {
           />
         </Card>
 
-        <Button title="Sign out" variant="secondary" onPress={signOut} />
+        <Button title="Sign out" variant="secondary" onPress={confirmSignOut} />
+        <Pressable accessibilityRole="button" onPress={() => confirmDeleteAccount(profile.id)} style={styles.deleteAccount}>
+          <AppText variant="body" color={Colors.danger}>
+            Delete account
+          </AppText>
+        </Pressable>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+function confirmSignOut() {
+  Alert.alert('Sign out?', 'Your streak and workouts stay saved to your account.', [
+    { text: 'Cancel', style: 'cancel' },
+    { text: 'Sign out', style: 'destructive', onPress: () => signOut() },
+  ]);
+}
+
+function confirmDeleteAccount(userId: string) {
+  Alert.alert(
+    'Delete your account?',
+    'This permanently deletes your streak, workouts, photos, messages, partners and rewards. It can’t be undone. Workouts in Apple Health are not touched.',
+    [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete account',
+        style: 'destructive',
+        onPress: () =>
+          deleteAccount(userId).catch((e) =>
+            Alert.alert('Could not delete your account', e instanceof Error ? e.message : String(e)),
+          ),
+      },
+    ],
   );
 }
 
@@ -268,6 +298,7 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
 }
 
 const styles = StyleSheet.create({
+  deleteAccount: { alignSelf: 'center', padding: Spacing.sm },
   nameRow: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.sm },
   appearanceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   container: { flex: 1, backgroundColor: Colors.background },

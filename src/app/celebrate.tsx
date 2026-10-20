@@ -8,12 +8,20 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LevelBar } from '@/components/level-bar';
 import { AppText, Button } from '@/components/ui';
+import { WeekDots } from '@/components/week-dots';
 import { Colors, Spacing } from '@/constants/theme';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
+import { useProfile } from '@/lib/auth';
+import type { Streak } from '@/lib/database.types';
 import { levelFor } from '@/lib/levels';
+import { earnedFreezeAt, isMilestone, milestoneLabel } from '@/lib/streak';
+import { buildWeek, weekState, type WeekState, type WorkoutLike } from '@/lib/week';
 
-/** The Duolingo-style "lesson complete" moment after new activity earns XP. */
+/**
+ * The Duolingo-style "lesson complete" moment after new activity earns XP.
+ * New workouts get a second step showing the streak and what comes next.
+ */
 export default function CelebrateScreen() {
   const params = useLocalSearchParams<{
     xp: string;
@@ -29,6 +37,8 @@ export default function CelebrateScreen() {
   const { data: total } = useXpTotal();
   const { data: home } = useHomeData();
   const shown = useCountUp(earned);
+  const [step, setStep] = useState<'xp' | 'streak'>('xp');
+  const hasStreakStep = (workouts > 0 || weekGoal) && !!home?.streak;
 
   useEffect(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -44,6 +54,10 @@ export default function CelebrateScreen() {
         : workouts === 1
           ? 'Workout logged!'
           : 'Check-in added!';
+
+  if (step === 'streak' && home?.streak) {
+    return <StreakStep streak={home.streak} weekWorkouts={home.weekWorkouts} weekGoal={weekGoal} />;
+  }
 
   return (
     <SafeAreaView style={styles.container}>
@@ -81,10 +95,103 @@ export default function CelebrateScreen() {
       </View>
 
       <Animated.View entering={FadeInDown.delay(700)}>
-        <Button title="Continue" onPress={() => router.back()} />
+        <Button title="Continue" onPress={() => (hasStreakStep ? setStep('streak') : router.back())} />
       </Animated.View>
     </SafeAreaView>
   );
+}
+
+function StreakStep({
+  streak,
+  weekWorkouts,
+  weekGoal,
+}: {
+  streak: Streak;
+  weekWorkouts: readonly WorkoutLike[];
+  weekGoal: boolean;
+}) {
+  const profile = useProfile();
+  const days = buildWeek(weekWorkouts, profile.min_workout_minutes);
+  const state = weekState(days.filter((d) => d.active).length, profile.weekly_goal);
+  const weeks = streak.current_weeks;
+  const lit = weeks > 0 || state.kind === 'done';
+
+  useEffect(() => {
+    if (weekGoal) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, [weekGoal]);
+
+  return (
+    <SafeAreaView style={styles.container}>
+      <View style={styles.body}>
+        <Animated.View entering={ZoomIn.springify().damping(9)} style={[styles.burst, styles.flameBurst]}>
+          <SymbolView
+            name="flame.fill"
+            size={96}
+            tintColor={lit ? Colors.flame : Colors.textMuted}
+            animationSpec={lit ? { effect: { type: 'bounce' } } : undefined}
+          />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(150)} style={styles.center}>
+          <AppText variant="display" color={lit ? Colors.flame : Colors.text}>
+            {weeks}
+          </AppText>
+          <AppText variant="heading" color={lit ? Colors.flame : Colors.textSecondary}>
+            week streak
+          </AppText>
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(300)} style={styles.level}>
+          <WeekDots days={days} goal={profile.weekly_goal} />
+        </Animated.View>
+
+        <Animated.View entering={FadeInDown.delay(450)} style={styles.center}>
+          <AppText variant="body" style={{ textAlign: 'center' }}>
+            {nextStepLine(state, streak, weekGoal)}
+          </AppText>
+          {weekGoal && isMilestone(weeks) && (
+            <View style={styles.pill}>
+              <AppText variant="heading" color={Colors.flame}>
+                🏆 {milestoneLabel(weeks)} milestone
+              </AppText>
+            </View>
+          )}
+          {weekGoal && earnedFreezeAt(weeks) && (
+            <View style={[styles.pill, { backgroundColor: Colors.cardRaised }]}>
+              <AppText variant="heading" color={Colors.freeze}>
+                ❄️ Freeze earned
+              </AppText>
+            </View>
+          )}
+        </Animated.View>
+      </View>
+
+      <Animated.View entering={FadeInDown.delay(600)}>
+        <Button title="Keep it going" onPress={() => router.back()} />
+      </Animated.View>
+    </SafeAreaView>
+  );
+}
+
+/** What this workout means for the week, looking forward rather than back. */
+function nextStepLine(state: WeekState, streak: Streak, weekGoal: boolean): string {
+  const weeks = streak.current_weeks;
+  const days = (n: number) => `${n} more day${n === 1 ? '' : 's'}`;
+  switch (state.kind) {
+    case 'done':
+      return weekGoal
+        ? `Goal hit. Week ${weeks} is in the books 🔥`
+        : 'Goal already hit this week. Extra days still earn XP.';
+    case 'on-track':
+    case 'at-risk':
+      return weeks > 0
+        ? `${days(state.needed)} this week keeps your streak going.`
+        : `${days(state.needed)} this week starts your streak.`;
+    case 'out-of-reach':
+      return weeks > 0 && streak.freezes_banked > 0
+        ? 'This week is out of reach, but a freeze will cover it ❄️'
+        : 'Every workout still counts. Fresh week on Sunday.';
+  }
 }
 
 function useCountUp(target: number, durationMs = 700) {
@@ -120,4 +227,5 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.flameSoft,
   },
   level: { alignSelf: 'stretch' },
+  flameBurst: { backgroundColor: Colors.flameSoft },
 });

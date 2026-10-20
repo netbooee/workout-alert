@@ -292,6 +292,10 @@ export type Database = {
         Args: { p_on: boolean };
         Returns: undefined;
       };
+      delete_my_account: {
+        Args: Record<string, never>;
+        Returns: undefined;
+      };
       register_push_token: {
         Args: { p_token: string };
         Returns: undefined;

@@ -90,9 +90,17 @@ export default function HomeScreen() {
           <ActivityIndicator color={Colors.flame} style={{ marginTop: Spacing.xl }} />
         ) : (
           <>
-            <StreakHero streak={data?.streak ?? null} state={state} resting={!!profile.resting_since}>
-              <WeekDots days={days} goal={profile.weekly_goal} embedded />
-            </StreakHero>
+            <Link href="/streak" asChild>
+              <Pressable accessibilityRole="button" accessibilityHint="Opens your streak and freezes">
+                <StreakHero
+                  streak={data?.streak ?? null}
+                  state={state}
+                  resting={!!profile.resting_since}
+                  showChevron>
+                  <WeekDots days={days} goal={profile.weekly_goal} embedded />
+                </StreakHero>
+              </Pressable>
+            </Link>
             <ActivityRings today={data?.today ?? null} />
             <ProgressMini />
 

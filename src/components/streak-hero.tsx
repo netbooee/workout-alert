@@ -11,11 +11,14 @@ export function StreakHero({
   streak,
   state,
   resting = false,
+  showChevron = false,
   children,
 }: {
   streak: Streak | null;
   state: WeekState;
   resting?: boolean;
+  /** Hints that the card opens the streak screen. */
+  showChevron?: boolean;
   /** Rendered between the streak and the status line (Home puts the week dots here). */
   children?: ReactNode;
 }) {
@@ -38,10 +41,13 @@ export function StreakHero({
           <AppText variant="caption">week streak</AppText>
         </View>
         <FreezeChips count={streak?.freezes_banked ?? 0} />
+        {showChevron && <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />}
       </View>
       {children}
       <AppText variant="body" color={resting ? Colors.rest : messageColor(state)}>
-        {resting ? 'Rest mode is on. Your streak is protected 😴' : message(state, weeks)}
+        {resting
+          ? 'Rest mode is on. Your streak is protected 😴'
+          : message(state, weeks, streak?.freezes_banked ?? 0)}
       </AppText>
     </Card>
   );
@@ -65,7 +71,7 @@ function FreezeChips({ count }: { count: number }) {
   );
 }
 
-function message(state: WeekState, weeks: number): string {
+function message(state: WeekState, weeks: number, freezes: number): string {
   const days = (n: number) => `${n} more day${n === 1 ? '' : 's'}`;
   switch (state.kind) {
     case 'done':
@@ -77,9 +83,10 @@ function message(state: WeekState, weeks: number): string {
         ? `Streak at risk: ${days(state.needed)} needed with ${state.daysLeft} left`
         : `${days(state.needed)} needed with ${state.daysLeft} left`;
     case 'out-of-reach':
-      return weeks > 0
-        ? 'This week is out of reach. A freeze will cover it if you have one.'
-        : 'Fresh start on Sunday. Any workout still counts toward your history.';
+      if (weeks === 0) return 'Fresh start on Sunday. Any workout still counts toward your history.';
+      return freezes > 0
+        ? 'This week is out of reach, but a freeze will cover it ❄️'
+        : 'This week is out of reach. Hit next week’s goal to start a new streak.';
   }
 }
 

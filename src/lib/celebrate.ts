@@ -18,11 +18,13 @@ const RECENT_MS = 3 * 24 * 3600 * 1000;
 
 /**
  * Returns what was earned since the last celebration, or null if nothing new.
- * The very first call just records a baseline.
+ * On a device's first call, a new account counts from when it finished
+ * onboarding, so the first workout celebrates. An older account (a reinstall)
+ * just records a baseline instead of replaying what it already saw.
  */
 export async function takeCelebration(userId: string): Promise<Celebration | null> {
-  const lastSeen = await AsyncStorage.getItem(key(userId));
   const now = new Date().toISOString();
+  const lastSeen = (await AsyncStorage.getItem(key(userId))) ?? (await newAccountBaseline(userId));
   if (!lastSeen) {
     await AsyncStorage.setItem(key(userId), now);
     return null;
@@ -46,6 +48,18 @@ export async function takeCelebration(userId: string): Promise<Celebration | nul
     evidence: data.some((e) => e.kind === 'evidence'),
     incentive: data.some((e) => e.kind === 'incentive'),
   };
+}
+
+async function newAccountBaseline(userId: string): Promise<string | null> {
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('onboarded_at')
+    .eq('id', userId)
+    .single();
+  if (error) throw error;
+  const onboardedAt = data.onboarded_at;
+  if (!onboardedAt || Date.now() - new Date(onboardedAt).getTime() > RECENT_MS) return null;
+  return onboardedAt;
 }
 
 /** Opens the celebration screen if anything new was earned. */

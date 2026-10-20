@@ -110,3 +110,41 @@ export async function signOut() {
   await signOutOfGoogle();
   await supabase.auth.signOut();
 }
+
+/**
+ * Permanently deletes the account: the user's photos and voice messages
+ * first (storage objects can't be removed from SQL), then the auth user,
+ * which cascades through every table. Ends signed out.
+ */
+export async function deleteAccount(userId: string) {
+  await unregisterDevice().catch(() => {});
+  const paths = await listFiles(EVIDENCE_BUCKET, userId);
+  for (let i = 0; i < paths.length; i += 100) {
+    const { error } = await supabase.storage.from(EVIDENCE_BUCKET).remove(paths.slice(i, i + 100));
+    if (error) throw error;
+  }
+  const { error } = await supabase.rpc('delete_my_account');
+  if (error) throw error;
+
+  resetWidget();
+  await signOutOfGoogle();
+  // The server session went with the user, so only clear the local one.
+  await supabase.auth.signOut({ scope: 'local' });
+}
+
+const EVIDENCE_BUCKET = 'evidence';
+
+/** Every file path under `folder`, walking subfolders (entries without an id are folders). */
+async function listFiles(bucket: string, folder: string): Promise<string[]> {
+  const paths: string[] = [];
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await supabase.storage.from(bucket).list(folder, { limit: 1000, offset });
+    if (error) throw error;
+    for (const entry of data) {
+      const path = `${folder}/${entry.name}`;
+      if (entry.id) paths.push(path);
+      else paths.push(...(await listFiles(bucket, path)));
+    }
+    if (data.length < 1000) return paths;
+  }
+}

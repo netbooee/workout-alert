@@ -76,6 +76,8 @@ export function usePartnerFeed() {
           .select('*')
           .neq('user_id', userId!)
           .is('duplicate_of', null)
+          // Workouts under their owner's "What counts" bar stay out of the feed.
+          .eq('counted', true)
           .order('started_at', { ascending: false })
           .limit(30),
       );

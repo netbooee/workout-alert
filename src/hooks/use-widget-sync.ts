@@ -47,7 +47,7 @@ export function useWidgetSync() {
     ? [
         ...new Set(
           home.weekWorkouts
-            .filter((w) => w.duration_s >= profile.min_workout_minutes * 60)
+            .filter((w) => w.counted && w.duration_s >= profile.min_workout_minutes * 60)
             .map((w) => dayKey(new Date(w.started_at))),
         ),
       ]

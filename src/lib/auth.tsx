@@ -84,6 +84,9 @@ export function useUpdateProfile() {
         | 'notify_comments'
         | 'notify_incentives'
         | 'mascot'
+        | 'min_workout_minutes'
+        | 'min_walk_minutes'
+        | 'count_walks'
       >
     >,
   ) => {
@@ -97,8 +100,11 @@ export function useUpdateProfile() {
       .single();
     if (error) throw error;
     queryClient.setQueryData(['profile', userId], data);
-    // Goal/timezone changes recompute the streak server-side.
+    // Goal, timezone and "What counts" changes recompute the streak and XP server-side.
     await queryClient.invalidateQueries({ queryKey: ['home'] });
+    if ('min_workout_minutes' in patch || 'min_walk_minutes' in patch || 'count_walks' in patch) {
+      await queryClient.invalidateQueries({ queryKey: ['social'] });
+    }
     return data;
   };
 }

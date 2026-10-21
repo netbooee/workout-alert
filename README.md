@@ -54,6 +54,18 @@ The Me tab has a **Progress** chart: weekly active minutes or workout count for 
 first active week, current week excluded). Tap a bar to see that week's totals, streak
 status, and workouts by day. The math is in `src/lib/progress.ts` (unit-tested).
 
+## What counts
+
+**Me → What counts** sets the shortest workout that counts (10, 15, 20 or 30 minutes; default
+15) and a separate bar for walks (same, 20, 30 or 45 minutes, or never), because phone apps
+save lots of short auto-detected walks to Apple Health. A workout under the bar is still
+stored and shown faded with "Didn't count" in your own lists, but it doesn't count toward the
+streak, XP, incentives or quests, doesn't notify partners, and stays out of their feed.
+`workouts.counted` holds the answer (set on write by `public.workout_counts()`, refreshed for
+all of your workouts when you change the rules) so the database and the app agree; the client
+mirror is `src/lib/what-counts.ts`. Logic: `supabase/migrations/20261022000000_what_counts.sql`
+(pgTAP in `supabase/tests/what_counts.test.sql`).
+
 ## Incentives
 
 A partner can reward you for extra effort: **"Hit 5 workout days this week → ☕ Coffee on me"**.

@@ -17,7 +17,7 @@ export function WorkoutRow({ workout }: { workout: Workout }) {
   const verifiedBy = evidenceBadges(workout)[0]!;
 
   return (
-    <View style={styles.row}>
+    <View style={[styles.row, !workout.counted && styles.uncounted]}>
       <View style={styles.icon}>
         <SymbolView name={workoutIcon(workout.activity_type)} size={22} tintColor={Colors.flame} />
       </View>
@@ -31,6 +31,7 @@ export function WorkoutRow({ workout }: { workout: Workout }) {
           <AppText variant="caption" numberOfLines={1} style={{ fontSize: 11, color: Colors.textMuted }}>
             {verifiedBy.label}
             {workout.photo_paths.length > 0 && verifiedBy.icon !== 'camera.fill' ? ' · 📷' : ''}
+            {workout.counted ? '' : ' · Didn’t count'}
           </AppText>
         </View>
       </View>
@@ -45,6 +46,7 @@ export function WorkoutRow({ workout }: { workout: Workout }) {
 const styles = StyleSheet.create({
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.sm },
   evidence: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  uncounted: { opacity: 0.5 },
   icon: {
     width: 44,
     height: 44,

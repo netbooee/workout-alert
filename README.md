@@ -207,8 +207,10 @@ buddy** in the mood that matches your week.
   including a new account's first workout. New workouts get a second step with the streak, the
   week's dots and what's next, plus a callout for a milestone (2, 4, 8, 12, 26, 52, 104 weeks)
   or a freeze earned that week.
-- Tapping the streak card on Home opens the **streak screen**: next milestone, freezes banked and
-  how they're earned, and week-by-week history linking to each week.
+- Tapping the streak card on Home opens the **streak screen**. **Personal**: next milestone,
+  freezes banked and how they're earned, and week-by-week history linking to each week.
+  **Friends**: a friend streak row per partner ("🔥 12 weeks together"), open "Invite a friend"
+  slots, and **Edit** to remove a partner. The "wk together" badge on a partner card opens it.
 - **Verifying** doesn't change streaks: every 15+ minute workout counts, verified or not. It
   earns XP on both sides, and "verified only" incentives count hand-logged workouts only once a
   partner verifies them. Removing a ✅ takes its XP back.

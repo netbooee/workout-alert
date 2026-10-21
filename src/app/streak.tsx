@@ -1,9 +1,11 @@
-import { Link, Stack } from 'expo-router';
+import { Link, Stack, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View, type ColorValue } from 'react-native';
 
+import { FriendStreaks } from '@/components/friend-streaks';
 import { StreakHistory } from '@/components/streak-history';
-import { AppText, Card } from '@/components/ui';
+import { AppText, Card, Segmented } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
 import { useProfile } from '@/lib/auth';
@@ -25,20 +27,37 @@ const STATUS: Record<StreakWeek['status'], { label: string; color: ColorValue }>
   rest: { label: 'Rest week 😴', color: Colors.rest },
 };
 
-/** The streak in detail: next milestone, how freezes work, and week-by-week history. */
+/**
+ * The streak in detail. Personal: next milestone, how freezes work, and
+ * week-by-week history. Friends: a friend streak with each partner.
+ */
 export default function StreakScreen() {
+  const { tab } = useLocalSearchParams<{ tab?: string }>();
+  const [view, setView] = useState<'personal' | 'friends'>(tab === 'friends' ? 'friends' : 'personal');
+
+  return (
+    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+      <Stack.Screen options={{ title: 'Streak' }} />
+      <Segmented
+        options={[
+          { key: 'personal', label: 'Personal' },
+          { key: 'friends', label: 'Friends' },
+        ]}
+        value={view}
+        onChange={setView}
+      />
+      {view === 'personal' ? <PersonalStreak /> : <FriendStreaks />}
+    </ScrollView>
+  );
+}
+
+function PersonalStreak() {
   const profile = useProfile();
   const { data, isPending } = useHomeData();
   const { data: history } = useStreakHistory(12);
-  const title = <Stack.Screen options={{ title: 'Your streak' }} />;
 
   if (isPending || !data) {
-    return (
-      <View style={styles.centered}>
-        {title}
-        <ActivityIndicator color={Colors.flame} />
-      </View>
-    );
+    return <ActivityIndicator color={Colors.flame} style={{ marginTop: Spacing.xl }} />;
   }
 
   const weeks = data.streak?.current_weeks ?? 0;
@@ -49,8 +68,7 @@ export default function StreakScreen() {
   const plural = (n: number) => `${n} goal week${n === 1 ? '' : 's'}`;
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {title}
+    <>
       <Card style={styles.hero}>
         <View style={[styles.flame, { backgroundColor: weeks > 0 ? Colors.flameSoft : Colors.cardRaised }]}>
           <SymbolView name="flame.fill" size={48} tintColor={weeks > 0 ? Colors.flame : Colors.textMuted} />
@@ -133,7 +151,7 @@ export default function StreakScreen() {
           })}
         </Card>
       )}
-    </ScrollView>
+    </>
   );
 }
 
@@ -148,12 +166,6 @@ function Bar({ value, max, color }: { value: number; max: number; color: ColorVa
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl },
-  centered: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: Colors.background,
-  },
   hero: { alignItems: 'center', gap: Spacing.xs },
   flame: {
     width: 88,

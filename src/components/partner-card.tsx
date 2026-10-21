@@ -62,14 +62,18 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
         <View accessible accessibilityLabel={`${firstName}'s buddy, ${MASCOTS[mascotKind(partner.mascot)].name}`}>
           <Mascot kind={mascotKind(partner.mascot)} mood={mood} size={40} />
         </View>
-        <View style={styles.friendStreak}>
+        <Pressable
+          onPress={() => router.push({ pathname: '/streak', params: { tab: 'friends' } })}
+          accessibilityRole="button"
+          accessibilityLabel={`Friend streak with ${firstName}: ${partner.friend_streak} weeks`}
+          style={styles.friendStreak}>
           <AppText variant="title" color={partner.friend_streak ? Colors.xp : Colors.textMuted} style={{ fontSize: 22 }}>
-            {partner.friend_streak}
+            🔥{partner.friend_streak}
           </AppText>
           <AppText variant="caption" style={{ fontSize: 10 }}>
-            together
+            wk together
           </AppText>
-        </View>
+        </Pressable>
       </Pressable>
       {incentive && (
         <Pressable

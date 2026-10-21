@@ -202,6 +202,10 @@ export type Database = {
           delivered_at: string | null;
           /** The offering partner's rules and notes, if any. */
           notes: string | null;
+          /** Shared quest: both partners' workouts count, and both earn the reward. */
+          shared: boolean;
+          /** The giver's share of `progress` (always 0 unless shared). */
+          from_progress: number;
         };
         Insert: never;
         Update: never;
@@ -315,6 +319,7 @@ export type Database = {
           p_activity_type?: string | null;
           p_verified_only?: boolean;
           p_notes?: string | null;
+          p_shared?: boolean;
         };
         Returns: Database['public']['Tables']['incentives']['Row'];
       };

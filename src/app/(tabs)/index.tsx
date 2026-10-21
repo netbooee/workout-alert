@@ -30,10 +30,11 @@ export default function HomeScreen() {
   const { data, isPending, error } = useHomeData();
   const { data: xp } = useXpTotal();
   const lotl = useLotl();
-  const { received } = useMyIncentives();
+  const { received, given } = useMyIncentives();
   const [openedAt] = useState(() => Date.now());
   // Offers and live goals stay on Home; earned ones for a few days, then on the reward shelf.
-  const incentives = received.filter(
+  // Shared quests you started count your workouts too, so they live on your Home as well.
+  const incentives = [...received, ...given.filter((i) => i.shared)].filter(
     (i) =>
       i.status === 'offered' ||
       i.status === 'active' ||

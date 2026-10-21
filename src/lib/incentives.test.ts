@@ -107,3 +107,12 @@ describe('usesPips', () => {
     expect(usesPips({ goal_kind: 'workout_days', goal_target: 28 })).toBe(false);
   });
 });
+
+describe('shared quests', () => {
+  it('reads "between us"', () => {
+    expect(
+      incentiveGoalText({ goal_kind: 'workout_days', goal_target: 8, activity_type: null, weeks: 1, shared: true }),
+    ).toBe('Hit 8 workout days between us this week');
+  });
+}
+);

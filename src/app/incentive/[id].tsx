@@ -33,7 +33,7 @@ export default function IncentiveScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={{ width: 52 }} />
-        <AppText variant="heading">Incentive</AppText>
+        <AppText variant="heading">{incentive?.shared ? 'Shared quest' : 'Incentive'}</AppText>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <AppText variant="heading" color={Colors.flame}>
             Done
@@ -49,13 +49,14 @@ export default function IncentiveScreen() {
           <>
             <IncentiveCard incentive={incentive} linked={false} />
             <AppText variant="caption">
-              Progress updates automatically from workouts. Earning it is worth +100 XP, and the
-              reward itself is between the two of you.
+              {incentive.shared
+                ? 'Both of your workouts count and progress updates automatically. Finishing it is worth +100 XP each, and either of you can mark the reward done.'
+                : 'Progress updates automatically from workouts. Earning it is worth +100 XP, and the reward itself is between the two of you.'}
             </AppText>
             {incentive.from_id === me && isOpen(incentive) && (
               <Pressable onPress={confirmCancel} style={styles.cancel} hitSlop={8}>
                 <AppText variant="heading" color={Colors.danger}>
-                  Cancel incentive
+                  {incentive.shared ? 'Cancel shared quest' : 'Cancel incentive'}
                 </AppText>
               </Pressable>
             )}

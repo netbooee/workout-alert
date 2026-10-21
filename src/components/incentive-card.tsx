@@ -29,10 +29,20 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
   const { data: partners } = usePartners();
   const received = i.to_id === me;
   const other = nameOf(received ? i.from_id : i.to_id).split(' ')[0];
-  const recentlyNudged = !!partners?.find((p) => p.partner_id === i.to_id)?.recently_nudged;
+  const recentlyNudged = !!partners?.find((p) => p.partner_id === (received ? i.from_id : i.to_id))
+    ?.recently_nudged;
   const reached = i.progress >= i.goal_target;
 
-  const title = received ? `${other}’s incentive for you` : `Your incentive for ${other}`;
+  const title = i.shared
+    ? `Shared quest with ${other}`
+    : received
+      ? `${other}’s incentive for you`
+      : `Your incentive for ${other}`;
+  const otherId = received ? i.from_id : i.to_id;
+  const theirShare = i.shared ? (received ? i.from_progress : i.progress - i.from_progress) : 0;
+  const split = i.shared
+    ? { mine: i.progress - theirShare, theirs: theirShare, otherName: other }
+    : undefined;
   const card = (
     <Card style={[styles.card, i.status === 'earned' && styles.earned]}>
       <View style={styles.header}>
@@ -43,7 +53,7 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <AppText variant="caption" style={{ fontSize: 12 }}>
-            🎁 {title}
+            {i.shared ? '🤝' : '🎁'} {title}
           </AppText>
           <AppText variant="heading">{i.reward}</AppText>
           <AppText variant="caption">
@@ -76,22 +86,27 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
 
       {i.status === 'active' && (
         <>
-          <QuestProgress incentive={i} who={received ? undefined : other} />
-          {!reached &&
-            (received ? (
-              <Button title="Log a workout" onPress={() => router.push('/log')} />
-            ) : (
-              <Button
-                title={recentlyNudged ? 'Nudged 👋' : `👋 Nudge ${other}`}
-                variant="secondary"
-                disabled={recentlyNudged}
-                loading={nudge.isPending}
-                onPress={() => {
-                  Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                  nudge.mutate(i.to_id, { onError: fail('Could not nudge') });
-                }}
-              />
-            ))}
+          <QuestProgress incentive={i} who={received || i.shared ? undefined : other} split={split} />
+          {!reached && (
+            <View style={styles.row}>
+              {(received || i.shared) && (
+                <Button title="Log a workout" style={{ flex: 1 }} onPress={() => router.push('/log')} />
+              )}
+              {(!received || i.shared) && (
+                <Button
+                  title={recentlyNudged ? 'Nudged 👋' : `👋 Nudge ${other}`}
+                  variant="secondary"
+                  style={{ flex: 1 }}
+                  disabled={recentlyNudged}
+                  loading={nudge.isPending}
+                  onPress={() => {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    nudge.mutate(otherId, { onError: fail('Could not nudge') });
+                  }}
+                />
+              )}
+            </View>
+          )}
         </>
       )}
 
@@ -119,11 +134,15 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
       {i.status === 'earned' && (
         <View style={{ gap: Spacing.sm }}>
           <AppText variant="body" color={Colors.success}>
-            {received ? `🎉 You earned it! +100 XP. ${other} owes you this one.` : `🎉 ${other} earned it!`}
+            {i.shared
+              ? `🎉 You and ${other} did it! +100 XP each. Enjoy it together.`
+              : received
+                ? `🎉 You earned it! +100 XP. ${other} owes you this one.`
+                : `🎉 ${other} earned it!`}
           </AppText>
-          {!received && (
+          {(!received || i.shared) && (
             <Button
-              title="Mark as delivered"
+              title={i.shared ? 'Mark as done' : 'Mark as delivered'}
               loading={deliver.isPending}
               onPress={() => {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
@@ -136,13 +155,13 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
 
       {i.status === 'delivered' && (
         <AppText variant="caption" color={Colors.success}>
-          ✓ Delivered{i.delivered_at ? ` ${new Date(i.delivered_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : ''}
+          ✓ {i.shared ? 'Done' : 'Delivered'}{i.delivered_at ? ` ${new Date(i.delivered_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}` : ''}
         </AppText>
       )}
       {i.status === 'expired' && (
         <AppText variant="caption">
           Ended at {i.progress} of {i.goal_target}
-          {received ? '. Every workout still counted 💪' : `. Offer ${other} another?`}
+          {received || i.shared ? '. Every workout still counted 💪' : `. Offer ${other} another?`}
         </AppText>
       )}
       {i.status === 'declined' && <AppText variant="caption">{received ? 'You passed on this one' : `${other} passed on this one`}</AppText>}

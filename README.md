@@ -76,6 +76,13 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   minutes), what's left and the days remaining, with the next action on the card: **Log a
   workout** for the recipient on Home, **Nudge** for the giver. The giver's partner card shows
   the same progress. The nudge banner also has **Log a workout**.
+- **Shared quests** (the **Shared quest** switch on the offer screen) work like Duolingo's Friends
+  Quest: both partners' workouts count toward one goal ("8 workout days between us this week →
+  🍕 Pizza night together"). Workout days, workouts or minutes, with targets up to twice as high;
+  not streak weeks. The quest card splits the pips by person (yours, then theirs). Finishing it
+  gives **both** people +100 XP, and either of them can mark the reward done. Logic:
+  `supabase/migrations/20261021000000_shared_quests.sql` (pgTAP in
+  `supabase/tests/shared_quests.test.sql`).
 - One open incentive per giver → recipient. Unmet ones expire at the deadline (hourly sweep) with
   a gentle message; no shaming.
 - Logic: `supabase/migrations/20261003000000_incentives.sql` (pgTAP in

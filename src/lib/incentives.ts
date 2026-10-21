@@ -11,15 +11,17 @@ export interface GoalOption {
   unit: string;
   defaultTarget: number;
   step: number;
-  /** Largest target for a window of `weeks` (matches offer_incentive). */
-  max: (weeks: number) => number;
+  /** Largest target for a window of `weeks`, doubled for a shared quest (matches offer_incentive). */
+  max: (weeks: number, people?: number) => number;
+  /** Can be a shared quest (both partners' workouts add up). */
+  shareable: boolean;
 }
 
 export const GOAL_OPTIONS: GoalOption[] = [
-  { kind: 'workout_days', label: 'Workout days', unit: 'days', defaultTarget: 4, step: 1, max: (w) => 7 * w },
-  { kind: 'active_minutes', label: 'Active minutes', unit: 'min', defaultTarget: 150, step: 15, max: (w) => 1500 * w },
-  { kind: 'workouts', label: 'Workouts', unit: 'workouts', defaultTarget: 3, step: 1, max: (w) => 14 * w },
-  { kind: 'streak_weeks', label: 'Streak', unit: 'weeks', defaultTarget: 4, step: 1, max: () => 104 },
+  { kind: 'workout_days', label: 'Workout days', unit: 'days', defaultTarget: 4, step: 1, max: (w, p = 1) => 7 * w * p, shareable: true },
+  { kind: 'active_minutes', label: 'Active minutes', unit: 'min', defaultTarget: 150, step: 15, max: (w, p = 1) => 1500 * w * p, shareable: true },
+  { kind: 'workouts', label: 'Workouts', unit: 'workouts', defaultTarget: 3, step: 1, max: (w, p = 1) => 14 * w * p, shareable: true },
+  { kind: 'streak_weeks', label: 'Streak', unit: 'weeks', defaultTarget: 4, step: 1, max: () => 104, shareable: false },
 ];
 
 export function goalOption(kind: IncentiveGoalKind): GoalOption {
@@ -188,9 +190,10 @@ export const NOTES_MAX = 500;
 
 const plural = (n: number, word: string) => `${word}${n === 1 ? '' : 's'}`;
 
-type GoalFields = Pick<Incentive, 'goal_kind' | 'goal_target' | 'activity_type' | 'weeks'>;
+type GoalFields = Pick<Incentive, 'goal_kind' | 'goal_target' | 'activity_type' | 'weeks'> &
+  Partial<Pick<Incentive, 'shared'>>;
 
-/** "Hit 5 workout days this week", "Reach a 6-week streak in 4 weeks". */
+/** "Hit 5 workout days this week", "Hit 8 workout days between us in 2 weeks". */
 export function incentiveGoalText(i: GoalFields): string {
   const n = i.goal_target;
   let goal: string;
@@ -209,7 +212,7 @@ export function incentiveGoalText(i: GoalFields): string {
     case 'streak_weeks':
       goal = `Reach a ${n}-week streak`;
   }
-  return `${goal} ${i.weeks === 1 ? 'this week' : `in ${i.weeks} weeks`}`;
+  return `${goal}${i.shared ? ' between us' : ''} ${i.weeks === 1 ? 'this week' : `in ${i.weeks} weeks`}`;
 }
 
 /** "3 days left", "Ends today", "Ended". */
@@ -227,3 +230,29 @@ export function progressFraction(i: Pick<Incentive, 'progress' | 'goal_target'>)
 }
 
 export const isOpen = (i: Pick<Incentive, 'status'>) => i.status === 'offered' || i.status === 'active';
+
+type ProgressFields = Pick<Incentive, 'goal_kind' | 'goal_target' | 'activity_type' | 'progress'>;
+
+/** What's still needed: "2 more workout days", "45 more active minutes", "1 more run". */
+export function remainingText(i: ProgressFields): string {
+  const left = Math.max(i.goal_target - i.progress, 0);
+  if (left === 0) return 'Goal reached';
+  switch (i.goal_kind) {
+    case 'workout_days':
+      return `${left} more ${plural(left, 'workout day')}`;
+    case 'active_minutes':
+      return `${left} more active ${plural(left, 'minute')}`;
+    case 'workouts': {
+      const noun = GOAL_ACTIVITIES.find((a) => a.type === (i.activity_type ?? null))?.noun ?? 'workout';
+      return `${left} more ${plural(left, noun)}`;
+    }
+    case 'streak_weeks':
+      return `${left} more streak ${plural(left, 'week')}`;
+  }
+}
+
+/** Most counted goals get one pip per day, workout or week; minutes and long goals get a bar. */
+export const MAX_PIPS = 14;
+export function usesPips(i: Pick<Incentive, 'goal_kind' | 'goal_target'>): boolean {
+  return i.goal_kind !== 'active_minutes' && i.goal_target <= MAX_PIPS;
+}

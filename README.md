@@ -71,6 +71,18 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
 - The recipient accepts or passes. Progress updates automatically from workouts (computed in
   Postgres). Hitting the goal earns it: **+100 XP**, a celebration, and pushes to both people.
   The giver marks it **delivered**; it lands on the recipient's **reward shelf** (Me tab).
+- An active incentive shows as a **quest card** (like Duolingo's Friends Quest,
+  `src/components/quest-progress.tsx`): the count, one pip per day or workout (a bar for
+  minutes), what's left and the days remaining, with the next action on the card: **Log a
+  workout** for the recipient on Home, **Nudge** for the giver. The giver's partner card shows
+  the same progress. The nudge banner also has **Log a workout**.
+- **Shared quests** (the **Shared quest** switch on the offer screen) work like Duolingo's Friends
+  Quest: both partners' workouts count toward one goal ("8 workout days between us this week →
+  🍕 Pizza night together"). Workout days, workouts or minutes, with targets up to twice as high;
+  not streak weeks. The quest card splits the pips by person (yours, then theirs). Finishing it
+  gives **both** people +100 XP, and either of them can mark the reward done. Logic:
+  `supabase/migrations/20261021000000_shared_quests.sql` (pgTAP in
+  `supabase/tests/shared_quests.test.sql`).
 - One open incentive per giver → recipient. Unmet ones expire at the deadline (hourly sweep) with
   a gentle message; no shaming.
 - Logic: `supabase/migrations/20261003000000_incentives.sql` (pgTAP in
@@ -195,8 +207,10 @@ buddy** in the mood that matches your week.
   including a new account's first workout. New workouts get a second step with the streak, the
   week's dots and what's next, plus a callout for a milestone (2, 4, 8, 12, 26, 52, 104 weeks)
   or a freeze earned that week.
-- Tapping the streak card on Home opens the **streak screen**: next milestone, freezes banked and
-  how they're earned, and week-by-week history linking to each week.
+- Tapping the streak card on Home opens the **streak screen**. **Personal**: next milestone,
+  freezes banked and how they're earned, and week-by-week history linking to each week.
+  **Friends**: a friend streak row per partner ("🔥 12 weeks together"), open "Invite a friend"
+  slots, and **Edit** to remove a partner. The "wk together" badge on a partner card opens it.
 - **Verifying** doesn't change streaks: every 15+ minute workout counts, verified or not. It
   earns XP on both sides, and "verified only" incentives count hand-logged workouts only once a
   partner verifies them. Removing a ✅ takes its XP back.

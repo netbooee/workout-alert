@@ -6,7 +6,7 @@ import { Alert, Pressable, ScrollView, StyleSheet, Switch, TextInput, View } fro
 
 import { Avatar } from '@/components/avatar';
 import { RewardPicker } from '@/components/reward-picker';
-import { AppText, Button, Card } from '@/components/ui';
+import { AppText, Button, Card, Segmented } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useOfferIncentive } from '@/hooks/use-incentives';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
@@ -24,9 +24,15 @@ import {
   type RewardPreset,
 } from '@/lib/incentives';
 
-/** Offer a partner a real-world reward for a stretch goal. */
+/**
+ * Offer a partner a real-world reward for a stretch goal, or start a shared
+ * quest where both of your workouts count and you both earn the reward.
+ */
 export default function NewIncentiveScreen() {
-  const { to } = useLocalSearchParams<{ to: string }>();
+  const { to, shared: sharedParam } = useLocalSearchParams<{ to: string; shared?: string }>();
+  const [mode, setMode] = useState<'reward' | 'shared'>(sharedParam === '1' ? 'shared' : 'reward');
+  const shared = mode === 'shared';
+  const people = shared ? 2 : 1;
   const { data: partners } = usePartners();
   const partner = partners?.find((p) => p.partner_id === to);
   const firstName = partner?.display_name?.split(' ')[0] ?? 'your partner';
@@ -49,7 +55,7 @@ export default function NewIncentiveScreen() {
   const [verifiedOnly, setVerifiedOnly] = useState(false);
 
   const option = goalOption(kind);
-  const max = option.max(weeks);
+  const max = option.max(weeks, people);
   const clamp = (n: number) => Math.max(option.step, Math.min(n, max));
 
   const pickKind = (next: IncentiveGoalKind) => {
@@ -60,14 +66,23 @@ export default function NewIncentiveScreen() {
     setTarget(
       next === 'streak_weeks'
         ? Math.max(nextOption.defaultTarget, (partner?.current_weeks ?? 0) + 2)
-        : nextOption.defaultTarget * weeks,
+        : nextOption.defaultTarget * weeks * people,
     );
+  };
+
+  const pickMode = (next: 'reward' | 'shared') => {
+    setMode(next);
+    const nextPeople = next === 'shared' ? 2 : 1;
+    // Streaks don't add up between two people; fall back to workout days.
+    const nextKind = next === 'shared' && !option.shareable ? 'workout_days' : kind;
+    setKind(nextKind);
+    setTarget(goalOption(nextKind).defaultTarget * weeks * nextPeople);
   };
 
   const pickWeeks = (next: number) => {
     Haptics.selectionAsync();
     setWeeks(next);
-    if (kind !== 'streak_weeks') setTarget(Math.min(option.defaultTarget * next, option.max(next)));
+    if (kind !== 'streak_weeks') setTarget(Math.min(option.defaultTarget * next * people, option.max(next, people)));
   };
 
   const pickReward = (p: RewardPreset, focusDelay = 0) => {
@@ -91,6 +106,7 @@ export default function NewIncentiveScreen() {
         p_activity_type: kind === 'workouts' ? activity : null,
         p_verified_only: verifiedOnly,
         p_notes: notes.trim() || null,
+        p_shared: shared,
       },
       {
         onSuccess: () => {
@@ -102,7 +118,7 @@ export default function NewIncentiveScreen() {
     );
   };
 
-  const summary = incentiveGoalText({ goal_kind: kind, goal_target: clamp(target), activity_type: activity, weeks });
+  const summary = incentiveGoalText({ goal_kind: kind, goal_target: clamp(target), activity_type: activity, weeks, shared });
 
   return (
     <View style={[styles.container, { paddingBottom: keyboardHeight }]}>
@@ -112,7 +128,7 @@ export default function NewIncentiveScreen() {
             Cancel
           </AppText>
         </Pressable>
-        <AppText variant="heading">Offer an incentive</AppText>
+        <AppText variant="heading">{shared ? 'Shared quest' : 'Offer an incentive'}</AppText>
         <View style={{ width: 52 }} />
       </View>
 
@@ -123,7 +139,9 @@ export default function NewIncentiveScreen() {
         <View style={styles.partner}>
           {to && <Avatar id={to} name={partner?.display_name ?? null} size={44} />}
           <View style={{ flex: 1 }}>
-            <AppText variant="heading">Reward {firstName} for extra effort 🎁</AppText>
+            <AppText variant="heading">
+              {shared ? `Team up with ${firstName} 🤝` : `Reward ${firstName} for extra effort 🎁`}
+            </AppText>
             {partner && (
               <AppText variant="caption">
                 {partner.this_week_days}/{partner.this_week_goal} days this week · {partner.current_weeks}-week streak
@@ -132,9 +150,23 @@ export default function NewIncentiveScreen() {
           </View>
         </View>
 
-        <AppText variant="label">Goal</AppText>
+        <Segmented
+          options={[
+            { key: 'reward', label: `Reward ${firstName}` },
+            { key: 'shared', label: 'Shared quest' },
+          ]}
+          value={mode}
+          onChange={pickMode}
+        />
+        <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
+          {shared
+            ? `Both of your workouts count toward one goal, and you both earn the reward and +100 XP.`
+            : `${firstName} works toward the goal and you treat them when they hit it.`}
+        </AppText>
+
+        <AppText variant="label">{shared ? 'Goal between you' : 'Goal'}</AppText>
         <View style={styles.chips}>
-          {GOAL_OPTIONS.map((g) => (
+          {GOAL_OPTIONS.filter((g) => !shared || g.shareable).map((g) => (
             <Chip key={g.kind} label={g.label} selected={g.kind === kind} onPress={() => pickKind(g.kind)} />
           ))}
         </View>
@@ -165,7 +197,9 @@ export default function NewIncentiveScreen() {
           ))}
         </View>
         <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
-          Counts from this Sunday, so workouts they’ve already done this week count.
+          {shared
+            ? 'Counts from this Sunday, so workouts you’ve both done this week count.'
+            : 'Counts from this Sunday, so workouts they’ve already done this week count.'}
         </AppText>
 
         <AppText variant="label">Reward</AppText>
@@ -252,12 +286,14 @@ export default function NewIncentiveScreen() {
           onChangeText={setReward}
           maxLength={80}
           selectTextOnFocus={!!picked.edit}
-          placeholder="What will you treat them to?"
+          placeholder={shared ? 'What will you do together?' : 'What will you treat them to?'}
           placeholderTextColor={Colors.textMuted}
           accessibilityLabel="Reward"
         />
         <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
-          {rewardId === 'custom'
+          {shared
+            ? 'Something you’ll enjoy together. Either of you can mark it done.'
+            : rewardId === 'custom'
             ? 'Keep it a surprise, or type your own reward here to replace it.'
             : rewardId === 'cash'
               ? 'Set the amount. You pay them yourself; no money moves through Sigamos.'
@@ -291,14 +327,14 @@ export default function NewIncentiveScreen() {
           </AppText>
           {notes.trim() ? <AppText variant="body">{notes.trim()}</AppText> : null}
           <AppText variant="caption" color={Colors.xp}>
-            +100 XP for {firstName} when they earn it
+            {shared ? '+100 XP for both of you when you finish it' : `+100 XP for ${firstName} when they earn it`}
           </AppText>
         </Card>
       </ScrollView>
 
       <View style={[styles.footer, keyboardHeight > 0 && { paddingBottom: Spacing.md }]}>
         <Button
-          title={`Send to ${firstName}`}
+          title={shared ? `Start quest with ${firstName}` : `Send to ${firstName}`}
           loading={offer.isPending}
           disabled={!reward.trim() || !partner}
           onPress={send}

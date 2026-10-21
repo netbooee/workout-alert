@@ -1,6 +1,7 @@
+import { router } from 'expo-router';
 import { Pressable, StyleSheet, View } from 'react-native';
 
-import { AppText, Card } from '@/components/ui';
+import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useMarkNudgesSeen, useNames, useUnseenNudges } from '@/hooks/use-social';
 
@@ -29,11 +30,18 @@ export function NudgeBanner() {
           </AppText>
         </Pressable>
       </View>
+      <Button
+        title="Log a workout"
+        onPress={() => {
+          markSeen.mutate(nudges.map((n) => n.id));
+          router.push('/log');
+        }}
+      />
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { borderColor: Colors.flame, backgroundColor: Colors.flameSoft },
+  card: { borderColor: Colors.flame, backgroundColor: Colors.flameSoft, gap: Spacing.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
 });

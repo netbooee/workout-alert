@@ -70,8 +70,8 @@ export default function AddPartnerScreen() {
       </Card>
 
       <AppText variant="caption" style={{ textAlign: 'center' }}>
-        Partners see each other’s workouts, streaks, and check-in photos. You can remove a partner
-        any time by long-pressing their card.
+        Partners see each other’s workouts, streaks, and check-in photos. To remove a partner, tap
+        Edit on the Friends tab of your streak.
       </AppText>
     </KeyboardAvoidingView>
   );

@@ -20,6 +20,14 @@ import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { deleteAccount, signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 import { mascotKind } from '@/lib/mascots';
+import {
+  MIN_WORKOUT_OPTIONS,
+  rulesSummary,
+  WALK_OPTIONS,
+  walkChoice,
+  walkRules,
+  type WalkChoice,
+} from '@/lib/what-counts';
 import { supabase } from '@/lib/supabase';
 
 export default function MeScreen() {
@@ -114,6 +122,8 @@ export default function MeScreen() {
           </AppText>
         </Card>
 
+        <WhatCountsCard />
+
         <MascotPicker />
 
         <RestModeCard resting={!!profile.resting_since} />
@@ -202,6 +212,50 @@ export default function MeScreen() {
         </Pressable>
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/** The shortest workout that counts, and a separate bar for walks (short auto-detected walks are noisy). */
+function WhatCountsCard() {
+  const profile = useProfile();
+  const updateProfile = useUpdateProfile();
+  const [saving, setSaving] = useState(false);
+
+  const save = async (patch: Parameters<typeof updateProfile>[0]) => {
+    Haptics.selectionAsync();
+    setSaving(true);
+    try {
+      await updateProfile(patch);
+    } catch (e) {
+      Alert.alert('Could not save', e instanceof Error ? e.message : String(e));
+    }
+    setSaving(false);
+  };
+
+  return (
+    <Card style={{ gap: Spacing.sm }}>
+      <AppText variant="label">What counts</AppText>
+      <AppText variant="caption">Shortest workout</AppText>
+      <View style={{ opacity: saving ? 0.6 : 1, pointerEvents: saving ? 'none' : 'auto' }}>
+        <Segmented
+          options={MIN_WORKOUT_OPTIONS.map((m) => ({ key: String(m), label: `${m} min` }))}
+          value={String(profile.min_workout_minutes)}
+          onChange={(m) => save({ min_workout_minutes: Number(m) })}
+        />
+      </View>
+      <AppText variant="caption">Walks count from</AppText>
+      <View style={{ opacity: saving ? 0.6 : 1, pointerEvents: saving ? 'none' : 'auto' }}>
+        <Segmented<WalkChoice>
+          options={WALK_OPTIONS}
+          value={walkChoice(profile)}
+          onChange={(choice) => save(walkRules(choice))}
+        />
+      </View>
+      <AppText variant="caption">
+        {rulesSummary(profile)} Shorter ones stay in your history but don’t count toward your
+        streak, XP or incentives, and your partners aren’t notified.
+      </AppText>
+    </Card>
   );
 }
 

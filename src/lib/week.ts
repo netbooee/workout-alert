@@ -28,6 +28,8 @@ export function startOfWeek(date: Date): Date {
 export interface WorkoutLike {
   started_at: string;
   duration_s: number;
+  /** False when it's under the owner's "What counts" bar (set by the database). */
+  counted?: boolean;
 }
 
 export interface WeekDay {
@@ -46,7 +48,7 @@ export function buildWeek(
 ): WeekDay[] {
   const activeDays = new Set(
     workouts
-      .filter((w) => w.duration_s >= minWorkoutMinutes * 60)
+      .filter((w) => w.counted !== false && w.duration_s >= minWorkoutMinutes * 60)
       .map((w) => dayKey(new Date(w.started_at))),
   );
   const sunday = startOfWeek(now);

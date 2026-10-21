@@ -24,6 +24,9 @@ export type Database = {
           timezone: string;
           weekly_goal: number;
           min_workout_minutes: number;
+          /** Shortest walk that counts; null means the same as min_workout_minutes. */
+          min_walk_minutes: number | null;
+          count_walks: boolean;
           onboarded_at: string | null;
           invite_code: string;
           notify_nudges: boolean;
@@ -51,6 +54,8 @@ export type Database = {
           timezone?: string;
           weekly_goal?: number;
           min_workout_minutes?: number;
+          min_walk_minutes?: number | null;
+          count_walks?: boolean;
           onboarded_at?: string | null;
           mascot?: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
         };
@@ -75,6 +80,8 @@ export type Database = {
           source_name: string | null;
           /** Set when another device recorded the same workout; points at the copy that counts. */
           duplicate_of: string | null;
+          /** Meets the owner's "What counts" rules (set by the database). */
+          counted: boolean;
           created_at: string;
         };
         Insert: {

@@ -1,4 +1,5 @@
 import { Link } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -56,6 +57,10 @@ export default function HomeScreen() {
           <Link href="/greeting" asChild>
             <Pressable accessibilityLabel={`Talk to ${MASCOTS[mascotKind(profile.mascot)].name}`} hitSlop={8}>
               <Mascot kind={mascotKind(profile.mascot)} mood={lotl?.mood ?? 'ready'} size={52} />
+              {/* Hints that your buddy has something to say. */}
+              <View style={styles.talkBadge}>
+                <SymbolView name="ellipsis.bubble.fill" size={13} tintColor="#fff" />
+              </View>
             </Pressable>
           </Link>
           <View style={{ flex: 1 }}>
@@ -161,5 +166,18 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  talkBadge: {
+    position: 'absolute',
+    right: -4,
+    top: -2,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.flame,
+    borderWidth: 2,
+    borderColor: Colors.background,
+  },
   more: { alignItems: 'center', paddingTop: Spacing.xs },
 });

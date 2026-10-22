@@ -1,22 +1,27 @@
+import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import type { ReactNode } from 'react';
-import { StyleSheet, View, type ColorValue } from 'react-native';
+import { Pressable, StyleSheet, View, type ColorValue } from 'react-native';
 
 import { AppText, Card } from '@/components/ui';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import type { Streak } from '@/lib/database.types';
+import { levelFor } from '@/lib/levels';
 import type { WeekState } from '@/lib/week';
 
 export function StreakHero({
   streak,
   state,
   resting = false,
+  xp,
   showChevron = false,
   children,
 }: {
   streak: Streak | null;
   state: WeekState;
   resting?: boolean;
+  /** Your total XP, shown as a square on the right that opens How XP works. */
+  xp?: number;
   /** Hints that the card opens the streak screen. */
   showChevron?: boolean;
   /** Rendered between the streak and the status line (Home puts the week dots here). */
@@ -40,7 +45,7 @@ export function StreakHero({
           <AppText variant="display">{weeks}</AppText>
           <AppText variant="caption">week streak</AppText>
         </View>
-        <FreezeChips count={streak?.freezes_banked ?? 0} />
+        {xp != null && <XpSquare xp={xp} />}
         {showChevron && <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />}
       </View>
       {children}
@@ -53,21 +58,28 @@ export function StreakHero({
   );
 }
 
-function FreezeChips({ count }: { count: number }) {
+function XpSquare({ xp }: { xp: number }) {
+  const info = levelFor(xp);
   return (
-    <View style={styles.freezes}>
-      {[0, 1].map((i) => (
-        <SymbolView
-          key={i}
-          name="snowflake"
-          size={18}
-          tintColor={i < count ? Colors.freeze : Colors.textMuted}
-        />
-      ))}
-      <AppText variant="caption" style={{ fontSize: 11 }}>
-        {count} freeze{count === 1 ? '' : 's'}
+    <Pressable
+      onPress={() => router.push('/xp')}
+      accessibilityRole="button"
+      accessibilityLabel={`${xp} XP, level ${info.level}, ${info.title}`}
+      accessibilityHint="Shows how XP works"
+      style={({ pressed }) => [styles.xp, pressed && { opacity: 0.7 }]}>
+      <View style={styles.xpTop}>
+        <SymbolView name="bolt.fill" size={14} tintColor={Colors.xp} />
+        <AppText variant="caption" color={Colors.text} style={styles.xpUnit}>
+          XP
+        </AppText>
+      </View>
+      <AppText style={styles.xpNumber} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
+        {xp.toLocaleString()}
       </AppText>
-    </View>
+      <AppText variant="caption" style={{ fontSize: 11, lineHeight: 14 }}>
+        Level {info.level}
+      </AppText>
+    </Pressable>
   );
 }
 
@@ -112,5 +124,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  freezes: { alignItems: 'center', gap: 2 },
+  xp: {
+    width: 84,
+    height: 84,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 0,
+    paddingHorizontal: 6,
+    borderRadius: Radius.lg,
+    borderCurve: 'continuous',
+    borderWidth: 1.5,
+    borderColor: Colors.xp,
+    backgroundColor: Colors.xpSoft,
+  },
+  xpTop: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  xpUnit: { fontSize: 12, lineHeight: 15, fontWeight: '800' },
+  xpNumber: {
+    fontFamily: Font.rounded,
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '800',
+    color: Colors.text,
+    fontVariant: ['tabular-nums'],
+  },
 });

@@ -41,26 +41,7 @@ export function LevelBar({ xp, pressable = true }: { xp: number; pressable?: boo
 }
 
 /** The compact version for headers: "⚡ 4". Tap it for "How XP works". */
-export function LevelChip({ xp }: { xp: number }) {
-  const info = levelFor(xp);
-  return (
-    <Pressable
-      onPress={() => router.push('/xp')}
-      accessibilityRole="button"
-      accessibilityLabel={`Level ${info.level}, ${info.title}, ${info.into} of ${info.span} XP`}
-      accessibilityHint="Shows how XP works"
-      hitSlop={6}
-      style={({ pressed }) => [styles.badge, styles.chip, pressed && { opacity: 0.6 }]}>
-      <SymbolView name="bolt.fill" size={12} tintColor="#000" />
-      <AppText variant="heading" color="#000" style={{ fontSize: 14 }}>
-        {info.level}
-      </AppText>
-    </Pressable>
-  );
-}
-
 const styles = StyleSheet.create({
-  chip: { height: 28, paddingHorizontal: 8, borderRadius: Radius.pill },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   badge: {
     flexDirection: 'row',

@@ -1,16 +1,16 @@
-import { Link, Stack, useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, View, type ColorValue } from 'react-native';
+import { ActivityIndicator, ScrollView, StyleSheet, View, type ColorValue } from 'react-native';
 
 import { FriendStreaks } from '@/components/friend-streaks';
-import { StreakHistory } from '@/components/streak-history';
+import { StreakCalendar } from '@/components/streak-calendar';
 import { AppText, Card, Segmented } from '@/components/ui';
-import { Colors, Radius, Spacing } from '@/constants/theme';
-import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
+import { Colors, Font, Radius, Spacing } from '@/constants/theme';
+import { useHomeData } from '@/hooks/use-home-data';
+import { useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
-import type { StreakWeek } from '@/lib/database.types';
-import { weekRangeLabel } from '@/lib/progress';
+import { levelFor } from '@/lib/levels';
 import {
   MAX_FREEZES,
   milestoneLabel,
@@ -18,18 +18,12 @@ import {
   WEEKS_PER_FREEZE,
   weeksToNextFreeze,
 } from '@/lib/streak';
-
-const STATUS: Record<StreakWeek['status'], { label: string; color: ColorValue }> = {
-  hit: { label: 'Goal hit 🔥', color: Colors.flame },
-  frozen: { label: 'Covered by a freeze ❄️', color: Colors.freeze },
-  missed: { label: 'Goal missed', color: Colors.textSecondary },
-  in_progress: { label: 'In progress', color: Colors.textSecondary },
-  rest: { label: 'Rest week 😴', color: Colors.rest },
-};
+import { dayKey } from '@/lib/week';
 
 /**
- * The streak in detail. Personal: next milestone, how freezes work, and
- * week-by-week history. Friends: a friend streak with each partner.
+ * The streak in detail, Duolingo-style. Personal: the streak and what keeps it
+ * going this week, a month calendar with XP, the next milestone and freezes.
+ * Friends: a friend streak with each partner.
  */
 export default function StreakScreen() {
   const { tab } = useLocalSearchParams<{ tab?: string }>();
@@ -55,7 +49,7 @@ export default function StreakScreen() {
 function PersonalStreak() {
   const profile = useProfile();
   const { data, isPending } = useHomeData();
-  const { data: history } = useStreakHistory(12);
+  const { data: totalXp } = useXpTotal();
 
   if (isPending || !data) {
     return <ActivityIndicator color={Colors.flame} style={{ marginTop: Spacing.xl }} />;
@@ -67,21 +61,69 @@ function PersonalStreak() {
   const milestone = nextMilestone(weeks);
   const toFreeze = weeksToNextFreeze(weeks);
   const plural = (n: number) => `${n} goal week${n === 1 ? '' : 's'}`;
+  const goal = profile.weekly_goal;
+  const daysThisWeek = new Set(
+    data.weekWorkouts.filter((w) => w.counted).map((w) => dayKey(new Date(w.started_at))),
+  ).size;
+  const left = Math.max(goal - daysThisWeek, 0);
+  const lit = weeks > 0;
 
   return (
     <>
-      <Card style={styles.hero}>
-        <View style={[styles.flame, { backgroundColor: weeks > 0 ? Colors.flameSoft : Colors.cardRaised }]}>
-          <SymbolView name="flame.fill" size={48} tintColor={weeks > 0 ? Colors.flame : Colors.textMuted} />
-        </View>
-        <AppText variant="display">{weeks}</AppText>
-        <AppText variant="caption">week streak · longest {longest}</AppText>
-        {profile.resting_since && (
-          <AppText variant="body" color={Colors.rest}>
-            Rest mode is on. Your streak is protected 😴
+      <View style={styles.hero}>
+        <View style={{ flex: 1 }}>
+          <AppText style={[styles.heroNumber, !lit && { color: Colors.textMuted }]}>{weeks}</AppText>
+          <AppText style={[styles.heroLabel, !lit && { color: Colors.textMuted }]}>
+            week streak{lit ? '!' : ''}
           </AppText>
+        </View>
+        <View style={[styles.flame, { backgroundColor: lit ? Colors.flameSoft : Colors.cardRaised }]}>
+          <SymbolView name="flame.fill" size={76} tintColor={lit ? Colors.flame : Colors.textMuted} />
+        </View>
+      </View>
+      <View style={styles.chips}>
+        <View style={styles.chip}>
+          <AppText variant="caption" color={Colors.text}>
+            🏆 Longest {longest} week{longest === 1 ? '' : 's'}
+          </AppText>
+        </View>
+        {totalXp != null && (
+          <View style={[styles.chip, { backgroundColor: Colors.xpSoft }]}>
+            <AppText variant="caption" color={Colors.text}>
+              ⚡ {totalXp.toLocaleString()} XP · Level {levelFor(totalXp).level}
+            </AppText>
+          </View>
         )}
+      </View>
+
+      <Card style={styles.tip}>
+        <SymbolView
+          name={profile.resting_since ? 'moon.zzz.fill' : 'flame.fill'}
+          size={34}
+          tintColor={profile.resting_since ? Colors.rest : Colors.flame}
+        />
+        <AppText variant="body" style={{ flex: 1 }}>
+          {profile.resting_since ? (
+            <>
+              <AppText style={[styles.strong, { color: Colors.rest }]}>Rest mode</AppText> is on. Your
+              streak is protected 😴
+            </>
+          ) : left > 0 ? (
+            <>
+              Work out <AppText style={styles.strong}>{left} more day{left === 1 ? '' : 's'}</AppText> this
+              week to {lit ? 'keep your ' : 'start a '}
+              <AppText style={styles.strong}>{lit ? `${weeks}-week streak` : 'streak'}</AppText>.
+            </>
+          ) : (
+            <>
+              <AppText style={styles.strong}>Goal hit!</AppText> Your streak is safe this week. Extra
+              workouts still earn XP ⚡
+            </>
+          )}
+        </AppText>
       </Card>
+
+      <StreakCalendar />
 
       {milestone && (
         <Card>
@@ -125,33 +167,6 @@ function PersonalStreak() {
           {WEEKS_PER_FREEZE} goal weeks in a row earns one, up to {MAX_FREEZES}.
         </AppText>
       </Card>
-
-      {history && <StreakHistory weeks={history} />}
-
-      {history && history.length > 0 && (
-        <Card>
-          <AppText variant="label">Week by week</AppText>
-          {[...history].reverse().map((w) => {
-            const status = STATUS[w.status];
-            return (
-              <Link key={w.week_start} href={{ pathname: '/week/[start]', params: { start: w.week_start } }} asChild>
-                <Pressable style={styles.weekRow}>
-                  <View style={{ flex: 1 }}>
-                    <AppText variant="body">{weekRangeLabel(w.week_start)}</AppText>
-                    <AppText variant="caption" color={status.color}>
-                      {status.label}
-                    </AppText>
-                  </View>
-                  <AppText variant="caption">
-                    {w.active_days}/{w.goal} days
-                  </AppText>
-                  <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />
-                </Pressable>
-              </Link>
-            );
-          })}
-        </Card>
-      )}
     </>
   );
 }
@@ -167,18 +182,23 @@ function Bar({ value, max, color }: { value: number; max: number; color: ColorVa
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl },
-  hero: { alignItems: 'center', gap: Spacing.xs },
-  flame: {
-    width: 88,
-    height: 88,
-    borderRadius: Radius.lg,
-    borderCurve: 'continuous',
-    alignItems: 'center',
-    justifyContent: 'center',
+  hero: { flexDirection: 'row', alignItems: 'center', marginTop: Spacing.sm },
+  heroNumber: {
+    fontFamily: Font.rounded,
+    fontSize: 84,
+    lineHeight: 92,
+    fontWeight: '900',
+    color: Colors.flame,
+    fontVariant: ['tabular-nums'],
   },
+  heroLabel: { fontFamily: Font.rounded, fontSize: 24, fontWeight: '800', color: Colors.flame, marginTop: -6 },
+  flame: { width: 120, height: 120, borderRadius: 60, alignItems: 'center', justifyContent: 'center' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  chip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.pill, backgroundColor: Colors.cardRaised },
+  tip: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, padding: Spacing.md + 2 },
+  strong: { fontWeight: '800', color: Colors.flame },
   freezeHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   freezeChips: { flexDirection: 'row', gap: Spacing.xs },
   track: { height: 10, borderRadius: 5, backgroundColor: Colors.cardRaised, overflow: 'hidden', marginVertical: Spacing.xs },
   fill: { height: '100%', borderRadius: 5 },
-  weekRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.xs },
 });

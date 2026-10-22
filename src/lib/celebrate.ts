@@ -2,6 +2,7 @@
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
+import { tierFromRef } from '@/lib/step-xp';
 import { supabase } from '@/lib/supabase';
 
 export interface Celebration {
@@ -10,6 +11,8 @@ export interface Celebration {
   weekGoal: boolean;
   evidence: boolean;
   incentive: boolean;
+  /** The highest step tier just reached (e.g. 8000), or 0. */
+  steps: number;
 }
 
 const key = (userId: string) => `celebrate:last-seen:${userId}`;
@@ -32,7 +35,7 @@ export async function takeCelebration(userId: string): Promise<Celebration | nul
 
   const { data, error } = await supabase
     .from('xp_events')
-    .select('kind, amount, awarded_at')
+    .select('kind, ref, amount, awarded_at')
     .eq('user_id', userId)
     .gt('awarded_at', lastSeen)
     .gte('created_at', new Date(Date.now() - RECENT_MS).toISOString());
@@ -47,6 +50,7 @@ export async function takeCelebration(userId: string): Promise<Celebration | nul
     weekGoal: data.some((e) => e.kind === 'week_goal'),
     evidence: data.some((e) => e.kind === 'evidence'),
     incentive: data.some((e) => e.kind === 'incentive'),
+    steps: Math.max(0, ...data.filter((e) => e.kind === 'steps').map((e) => tierFromRef(e.ref))),
   };
 }
 
@@ -76,6 +80,7 @@ export async function showCelebrationIfEarned(userId: string): Promise<void> {
       weekGoal: earned.weekGoal ? '1' : '0',
       evidence: earned.evidence ? '1' : '0',
       incentive: earned.incentive ? '1' : '0',
+      steps: String(earned.steps),
     },
   });
 }

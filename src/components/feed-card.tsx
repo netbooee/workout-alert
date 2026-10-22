@@ -14,6 +14,7 @@ import { whenLabel } from '@/lib/cheers';
 import { useEvidenceUrls } from '@/lib/evidence';
 import { evidenceBadges } from '@/lib/evidence-badges';
 import { formatDuration, workoutIcon, workoutLabel } from '@/lib/workout-types';
+import { isVerified, workoutXp } from '@/lib/workout-xp';
 
 const THUMB = 72;
 
@@ -29,6 +30,12 @@ export function FeedCard({ item, name }: { item: FeedItem; name: string }) {
   const photos = w.photo_paths.map((p) => urls?.[p]).filter((u): u is string => !!u);
   const [viewing, setViewing] = useState<number | null>(null);
   const evidence = evidenceBadges(w, item.alsoRecordedBy)[0]!;
+  const xp = workoutXp({
+    durationS: w.duration_s,
+    counted: w.counted,
+    hasPhoto: w.photo_paths.length > 0,
+    verified: isVerified(w.user_id, item.reactions),
+  }).earned;
 
   return (
     <Card style={{ gap: Spacing.md }}>
@@ -63,6 +70,13 @@ export function FeedCard({ item, name }: { item: FeedItem; name: string }) {
               <AppText variant="heading" numberOfLines={1} style={{ flex: 1 }}>
                 {name.split(' ')[0]} · {workoutLabel(w.activity_type)}
               </AppText>
+              {xp > 0 && (
+                <View style={styles.xp} accessibilityLabel={`Earned ${xp} XP`}>
+                  <AppText variant="caption" color={Colors.text} style={styles.xpText}>
+                    ⚡ {xp} XP
+                  </AppText>
+                </View>
+              )}
             </View>
             <AppText variant="caption" numberOfLines={1}>
               {formatDuration(w.duration_s)}
@@ -103,4 +117,6 @@ const styles = StyleSheet.create({
   },
   text: { flex: 1, gap: 3 },
   nameRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  xp: { paddingHorizontal: 6, paddingVertical: 1, borderRadius: Radius.pill, backgroundColor: Colors.xpSoft },
+  xpText: { fontSize: 11, fontWeight: '700' },
 });

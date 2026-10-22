@@ -4,6 +4,7 @@ import Svg, { Circle, G } from 'react-native-svg';
 import { AppText, Card } from '@/components/ui';
 import { Colors, DailyTargets, Spacing } from '@/constants/theme';
 import type { DailyActivity } from '@/lib/database.types';
+import { nextStepTier } from '@/lib/step-xp';
 
 const SIZE = 88;
 const STROKE = 10;
@@ -33,6 +34,8 @@ export function ActivityRings({ today }: { today: DailyActivity | null }) {
       unit: '',
     },
   ];
+
+  const next = nextStepTier(today?.steps ?? 0);
 
   return (
     <Card style={styles.card}>
@@ -83,6 +86,11 @@ export function ActivityRings({ today }: { today: DailyActivity | null }) {
             </AppText>
           </View>
         ))}
+        <AppText variant="caption" color={Colors.text} style={styles.stepXp}>
+          {next
+            ? `⚡ +${next.xp} XP at ${next.steps.toLocaleString()} steps`
+            : '⚡ Every step bonus earned today'}
+        </AppText>
       </View>
     </Card>
   );
@@ -93,4 +101,15 @@ const styles = StyleSheet.create({
   legend: { flex: 1, gap: 4 },
   line: { flexDirection: 'row', alignItems: 'baseline' },
   ringLabel: { width: 72 },
+  stepXp: {
+    alignSelf: 'flex-start',
+    marginTop: 2,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 999,
+    backgroundColor: Colors.xpSoft,
+    overflow: 'hidden',
+    fontSize: 12,
+    fontWeight: '600',
+  },
 });

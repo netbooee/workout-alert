@@ -66,7 +66,7 @@ export default function PartnerScreen() {
       )}
 
       {challenges.map((i) => (
-        <IncentiveCard key={i.id} incentive={i} />
+        <IncentiveCard key={i.id} incentive={i} collapsible />
       ))}
 
       <AppText variant="label" style={{ marginTop: Spacing.sm }}>

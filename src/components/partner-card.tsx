@@ -2,16 +2,17 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Alert, Pressable, StyleSheet, View, type ColorValue } from 'react-native';
+import { Alert, LayoutAnimation, Pressable, StyleSheet, View, type ColorValue } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { Mascot } from '@/components/mascots';
-import { QuestProgress } from '@/components/quest-progress';
 import { AppText, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useMyIncentives } from '@/hooks/use-incentives';
 import { useNudge, useRemovePartner, type PartnerState } from '@/hooks/use-social';
-import { isOpen } from '@/lib/incentives';
+import { useAuth } from '@/lib/auth';
+import type { Incentive } from '@/lib/database.types';
+import { goalOption, isOpen, progressFraction, timeLeft } from '@/lib/incentives';
 import { partnerMood } from '@/lib/lotl';
 import { MASCOTS, mascotKind } from '@/lib/mascots';
 
@@ -32,11 +33,12 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
     },
     now,
   );
-  // Your current incentive for them: open, or earned and waiting for you to deliver.
-  const { given } = useMyIncentives();
-  const incentive = given.find(
-    (i) => i.to_id === partner.partner_id && (isOpen(i) || i.status === 'earned'),
+  // Every challenge between you two that's still going, or earned and waiting to be delivered.
+  const { given, received } = useMyIncentives();
+  const challenges = [...given, ...received].filter(
+    (i) => (i.to_id === partner.partner_id || i.from_id === partner.partner_id) && (isOpen(i) || i.status === 'earned'),
   );
+  const canChallenge = !given.some((i) => i.to_id === partner.partner_id && isOpen(i));
 
   const confirmRemove = () =>
     Alert.alert(`Remove ${partner.display_name ?? 'partner'}?`, 'You will stop seeing each other’s workouts.', [
@@ -52,7 +54,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
         accessibilityRole="button"
         accessibilityHint={`Opens ${firstName}’s workouts`}
         style={styles.row}>
-        <Avatar id={partner.partner_id} name={partner.display_name} size={44} />
+        <Avatar id={partner.partner_id} name={partner.display_name} size={40} />
         <View style={{ flex: 1, gap: 2 }}>
           <AppText variant="heading">{partner.display_name ?? 'Partner'}</AppText>
           <View style={styles.stats}>
@@ -65,7 +67,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
           </View>
         </View>
         <View accessible accessibilityLabel={`${firstName}'s buddy, ${MASCOTS[mascotKind(partner.mascot)].name}`}>
-          <Mascot kind={mascotKind(partner.mascot)} mood={mood} size={40} />
+          <Mascot kind={mascotKind(partner.mascot)} mood={mood} size={34} />
         </View>
         <Pressable
           onPress={() => router.push({ pathname: '/streak', params: { tab: 'friends' } })}
@@ -84,24 +86,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
           </AppText>
         </Pressable>
       </Pressable>
-      {incentive && (
-        <Pressable
-          onPress={() => router.push({ pathname: '/incentive/[id]', params: { id: incentive.id } })}
-          style={[styles.incentive, incentive.status === 'earned' && styles.incentiveEarned]}>
-          <View style={styles.incentiveHeader}>
-            <AppText variant="caption" color={Colors.text} style={{ flex: 1 }} numberOfLines={1}>
-              {incentive.reward_emoji}{' '}
-              {incentive.status === 'earned'
-                ? `${firstName} earned it! Tap to mark delivered`
-                : incentive.status === 'offered'
-                  ? `Waiting for ${firstName} to accept: ${incentive.reward}`
-                  : incentive.reward}
-            </AppText>
-            <SymbolView name="chevron.right" size={12} tintColor={Colors.textMuted} />
-          </View>
-          {incentive.status === 'active' && <QuestProgress incentive={incentive} who={firstName} />}
-        </Pressable>
-      )}
+      {challenges.length > 0 && <Challenges challenges={challenges} firstName={firstName} />}
       <View style={styles.actions}>
         {!done && (
           <Pressable
@@ -120,7 +105,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
             </AppText>
           </Pressable>
         )}
-        {!incentive && (
+        {canChallenge && (
           <Pressable
             onPress={() => {
               Haptics.selectionAsync();
@@ -142,6 +127,82 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
         )}
       </View>
     </Card>
+  );
+}
+
+/** One challenge reads as a single row; two or more fold into a summary you can open. */
+function Challenges({ challenges, firstName }: { challenges: Incentive[]; firstName: string }) {
+  const [open, setOpen] = useState(false);
+  if (challenges.length === 1) return <ChallengeRow incentive={challenges[0]!} firstName={firstName} />;
+  const ready = challenges.filter((i) => i.status === 'earned').length;
+  const waiting = challenges.filter((i) => i.status === 'offered').length;
+  const summary = ready
+    ? `${ready} earned 🎉`
+    : waiting
+      ? `${waiting} waiting to be accepted`
+      : challenges.map((i) => i.reward_emoji).join(' ');
+  return (
+    <View style={styles.challenges}>
+      <Pressable
+        onPress={() => {
+          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+          setOpen((o) => !o);
+        }}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        style={styles.challengeRow}>
+        <AppText style={styles.challengeEmoji}>🎯</AppText>
+        <View style={{ flex: 1 }}>
+          <AppText variant="heading" style={{ fontSize: 14 }}>
+            {challenges.length} challenges with {firstName}
+          </AppText>
+          <AppText variant="caption" numberOfLines={1} style={{ fontSize: 12 }}>
+            {summary}
+          </AppText>
+        </View>
+        <SymbolView name={open ? 'chevron.up' : 'chevron.down'} size={12} weight="semibold" tintColor={Colors.textMuted} />
+      </Pressable>
+      {open &&
+        challenges.map((i) => <ChallengeRow key={i.id} incentive={i} firstName={firstName} nested />)}
+    </View>
+  );
+}
+
+function ChallengeRow({ incentive: i, firstName, nested = false }: { incentive: Incentive; firstName: string; nested?: boolean }) {
+  const me = useAuth().session?.user.id;
+  const received = i.to_id === me;
+  const status =
+    i.status === 'earned'
+      ? received && !i.shared
+        ? 'You earned it! 🎉'
+        : `Earned! Tap to mark ${i.shared ? 'done' : 'delivered'}`
+      : i.status === 'offered'
+        ? received
+          ? 'Tap to accept'
+          : `Waiting for ${firstName} to accept`
+        : `${Math.min(i.progress, i.goal_target)}/${i.goal_target} ${goalOption(i.goal_kind).unit} · ${timeLeft(i.ends_at)}`;
+  return (
+    <Pressable
+      onPress={() => router.push({ pathname: '/incentive/[id]', params: { id: i.id } })}
+      accessibilityRole="button"
+      style={[styles.challengeRow, nested && styles.nested, i.status === 'earned' && styles.challengeEarned]}>
+      <AppText style={styles.challengeEmoji}>{i.reward_emoji}</AppText>
+      <View style={{ flex: 1, gap: 3 }}>
+        <AppText variant="heading" numberOfLines={1} style={{ fontSize: 14 }}>
+          {i.shared ? '🤝 ' : ''}
+          {i.reward}
+        </AppText>
+        {i.status === 'active' && (
+          <View style={styles.track}>
+            <View style={[styles.fill, { width: `${progressFraction(i) * 100}%` }]} />
+          </View>
+        )}
+        <AppText variant="caption" numberOfLines={1} style={{ fontSize: 12 }}>
+          {status}
+        </AppText>
+      </View>
+      <SymbolView name="chevron.right" size={12} tintColor={Colors.textMuted} />
+    </Pressable>
   );
 }
 
@@ -170,24 +231,30 @@ const styles = StyleSheet.create({
   friendStreakLabel: { fontSize: 10, lineHeight: 12, textAlign: 'center' },
   actions: { flexDirection: 'row', gap: Spacing.sm },
   offer: { backgroundColor: Colors.flameSoft },
-  incentive: {
+  challenges: { gap: 6 },
+  challengeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.sm,
     paddingHorizontal: Spacing.md,
-    paddingVertical: 10,
+    paddingVertical: 8,
     borderRadius: Radius.md,
     backgroundColor: Colors.flameSoft,
   },
-  incentiveHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  incentiveEarned: { backgroundColor: Colors.xpSoft, borderWidth: 1, borderColor: Colors.success },
+  nested: { marginLeft: Spacing.md, backgroundColor: Colors.cardRaised },
+  challengeEarned: { backgroundColor: Colors.xpSoft, borderWidth: 1, borderColor: Colors.success },
+  challengeEmoji: { fontSize: 20 },
+  track: { height: 4, borderRadius: 2, backgroundColor: Colors.cardRaised, overflow: 'hidden' },
+  fill: { height: '100%', borderRadius: 2, backgroundColor: Colors.flame },
   // Big, equal-width buttons that are easy to hit (Apple's minimum is 44pt tall).
   action: {
     flex: 1,
-    minHeight: 48,
+    minHeight: 44,
     paddingHorizontal: Spacing.md,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: Radius.md,
     backgroundColor: Colors.cardRaised,
   },
-  actionText: { fontSize: 16 },
+  actionText: { fontSize: 15 },
 });

@@ -42,10 +42,19 @@ export function useHomeData() {
       for (const r of [streak, weekWorkouts, recent, today]) {
         if (r.error) throw r.error;
       }
+      // Which recent workouts a partner has ✅ verified, for their XP.
+      const verified = await supabase
+        .from('reactions')
+        .select('workout_id')
+        .eq('kind', 'verified')
+        .neq('user_id', userId!)
+        .in('workout_id', (recent.data ?? []).map((w) => w.id));
+      if (verified.error) throw verified.error;
       return {
         streak: streak.data,
         weekWorkouts: weekWorkouts.data ?? [],
         recentWorkouts: recent.data ?? [],
+        verifiedIds: new Set(verified.data.map((r) => r.workout_id)),
         today: today.data,
       };
     },

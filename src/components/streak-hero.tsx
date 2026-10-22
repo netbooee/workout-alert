@@ -76,7 +76,7 @@ function XpSquare({ xp }: { xp: number }) {
       <AppText style={styles.xpNumber} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
         {xp.toLocaleString()}
       </AppText>
-      <AppText variant="caption" style={{ fontSize: 11 }}>
+      <AppText variant="caption" style={{ fontSize: 11, lineHeight: 14 }}>
         Level {info.level}
       </AppText>
     </Pressable>
@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     height: 84,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 1,
+    gap: 0,
     paddingHorizontal: 6,
     borderRadius: Radius.lg,
     borderCurve: 'continuous',
@@ -138,6 +138,13 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.xpSoft,
   },
   xpTop: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  xpUnit: { fontSize: 12, fontWeight: '800' },
-  xpNumber: { fontFamily: Font.rounded, fontSize: 26, fontWeight: '800', color: Colors.text, fontVariant: ['tabular-nums'] },
+  xpUnit: { fontSize: 12, lineHeight: 15, fontWeight: '800' },
+  xpNumber: {
+    fontFamily: Font.rounded,
+    fontSize: 24,
+    lineHeight: 30,
+    fontWeight: '800',
+    color: Colors.text,
+    fontVariant: ['tabular-nums'],
+  },
 });

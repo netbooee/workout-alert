@@ -34,7 +34,8 @@ function Tabs() {
       <NativeTabs.Trigger name="partners">
         <NativeTabs.Trigger.Label>Partners</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'person.2', selected: 'person.2.fill' }} />
-        <NativeTabs.Trigger.Badge hidden={badge === 0}>{String(badge)}</NativeTabs.Trigger.Badge>
+        {/* expo-router ignores `hidden` when the badge has text, so give it none at 0. */}
+        <NativeTabs.Trigger.Badge hidden={badge === 0}>{badge ? String(badge) : undefined}</NativeTabs.Trigger.Badge>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="me">
         <NativeTabs.Trigger.Label>Me</NativeTabs.Trigger.Label>

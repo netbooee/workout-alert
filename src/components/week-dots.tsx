@@ -58,7 +58,7 @@ export function WeekDots({
         ))}
         {days.map((d) => (
           <View key={d.key} style={styles.cell}>
-            <View style={[styles.dot, d.isToday && styles.today]}>
+            <View style={[styles.dot, d.isToday && (d.active ? styles.todayWorked : styles.today)]}>
               <AppText
                 style={[
                   styles.dayText,
@@ -86,6 +86,8 @@ const styles = StyleSheet.create({
   run: { position: 'absolute', top: 4, bottom: 4, borderRadius: ROW / 2, backgroundColor: Colors.flame },
   cell: { flex: 1, height: ROW, alignItems: 'center', justifyContent: 'center' },
   dot: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  today: { borderWidth: 2, borderColor: Colors.text },
+  // Today: an orange ring, or a white one on top of an orange workout pill.
+  today: { borderWidth: 2, borderColor: Colors.flame },
+  todayWorked: { borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.85)' },
   dayText: { fontFamily: Font.rounded, fontSize: 16, lineHeight: 20, fontWeight: '700', fontVariant: ['tabular-nums'] },
 });

@@ -118,7 +118,7 @@ export function StreakCalendar() {
                       <View
                         style={[
                           styles.dayDot,
-                          d.today && styles.today,
+                          d.today && (d.worked ? styles.todayWorked : styles.today),
                           d.key === selected && !d.today && styles.selected,
                         ]}>
                         <AppText
@@ -283,7 +283,8 @@ const styles = StyleSheet.create({
   run: { position: 'absolute', top: 5, bottom: 5, borderRadius: ROW / 2, backgroundColor: Colors.flame },
   cell: { flex: 1, height: ROW, alignItems: 'center', justifyContent: 'center' },
   dayDot: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  today: { borderWidth: 2, borderColor: Colors.text },
+  today: { borderWidth: 2, borderColor: Colors.flame },
+  todayWorked: { borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.85)' },
   selected: { borderWidth: 2, borderColor: Colors.textMuted },
   dayText: { fontFamily: Font.rounded, fontSize: 16, fontWeight: '700', fontVariant: ['tabular-nums'] },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, justifyContent: 'center', marginTop: Spacing.xs },

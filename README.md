@@ -60,6 +60,10 @@ they're consistent across devices and can't be edited by the client.
   (appearance, notifications, Apple Health, help, sign out, delete account).
 - **Log a workout** by hand with any duration (− / + by 5 minutes, or a preset) and when you
   finished, up to 14 days back (`src/lib/log-workout.ts`).
+- **Feed cards** all have the same shape: a square on the left (the first photo's thumbnail
+  with a "+N" badge, or the workout's icon), three single lines (who and what; duration,
+  heart rate and when; the note or where it was recorded), then Cheer and Verify. Tapping the
+  thumbnail opens the photos full screen (swipe, pinch to zoom, save).
 - **Partners tab** order: requests, workouts to cheer, partner cards, partner activity, then
   the league (only with 2+ partners) and the incentive intro. Tapping a partner card opens
   their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,

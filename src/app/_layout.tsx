@@ -110,6 +110,15 @@ function RootNavigator() {
             headerTitleStyle: { color: Colors.text },
           }}
         />
+        <Stack.Screen
+          name="league"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.flame,
+            headerTitleStyle: { color: Colors.text },
+          }}
+        />
         <Stack.Screen name="log" options={{ presentation: 'modal' }} />
         <Stack.Screen name="incentive/new" options={{ presentation: 'modal' }} />
         <Stack.Screen name="incentive/[id]" options={{ presentation: 'modal' }} />
@@ -126,6 +135,10 @@ function RootNavigator() {
         />
         <Stack.Screen
           name="celebrate"
+          options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+        />
+        <Stack.Screen
+          name="league-result"
           options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
         />
       </Stack.Protected>

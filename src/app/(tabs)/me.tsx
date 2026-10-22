@@ -17,6 +17,7 @@ import { StreakHistory } from '@/components/streak-history';
 import { AppText, Button, Card, Segmented } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
+import { useLeagueSettings } from '@/hooks/use-league';
 import { useXpTotal } from '@/hooks/use-social';
 import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { deleteAccount, signOut, useProfile, useUpdateProfile } from '@/lib/auth';
@@ -226,6 +227,8 @@ export default function MeScreen() {
             </Card>
             <PushPrompt />
 
+            <LeaguePrivacyCard />
+
             <Card>
               <AppText variant="label">Apple Health</AppText>
               <AppText variant="caption">
@@ -375,6 +378,33 @@ function RestModeCard({ resting }: { resting: boolean }) {
   );
 }
 
+/** Whether people outside your partners can see you in public leagues. */
+function LeaguePrivacyCard() {
+  const { data } = useLeagueSettings();
+  const on = !!data?.opted_in;
+  return (
+    <Card>
+      <AppText variant="label">Privacy</AppText>
+      <Link href="/league" asChild>
+        <Pressable style={styles.leagueRow} accessibilityRole="button">
+          <View style={{ flex: 1 }}>
+            <AppText variant="body">Public leagues</AppText>
+            <AppText variant="caption">
+              {on
+                ? `Shown as ${data?.nickname || 'your first name'}, with your buddy and weekly XP`
+                : 'Off. Only your partners see your XP'}
+            </AppText>
+          </View>
+          <AppText variant="body" color={on ? Colors.success : Colors.textSecondary}>
+            {on ? 'On' : 'Off'}
+          </AppText>
+          <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />
+        </Pressable>
+      </Link>
+    </Card>
+  );
+}
+
 function Toggle({ label, value, onChange }: { label: string; value: boolean; onChange: (v: boolean) => Promise<unknown> }) {
   return (
     <View style={styles.toggle}>
@@ -401,6 +431,7 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
 }
 
 const styles = StyleSheet.create({
+  leagueRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, minHeight: 44 },
   deleteAccount: { alignSelf: 'center', padding: Spacing.sm },
   nameCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   editName: {

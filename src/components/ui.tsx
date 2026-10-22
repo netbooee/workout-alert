@@ -1,4 +1,5 @@
 import * as Haptics from 'expo-haptics';
+import { SymbolView, type SFSymbol } from 'expo-symbols';
 import type { PropsWithChildren } from 'react';
 import {
   ActivityIndicator,
@@ -83,6 +84,29 @@ const textStyles = StyleSheet.create({
 });
 
 /** A pill-style segmented control: compact by default, or `large` for switching a whole screen's section. */
+/**
+ * A screen's main action, top right: an icon and a word in a pill, with a hit
+ * area past Apple's 44pt minimum. `quiet` is for a second action beside it.
+ */
+export function ActionPill({
+  icon,
+  label,
+  quiet = false,
+  ...props
+}: PressableProps & { icon: SFSymbol; label: string; quiet?: boolean }) {
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      hitSlop={6}
+      {...props}
+      style={({ pressed }) => [styles.pill, quiet && styles.pillQuiet, pressed && { opacity: 0.7 }]}>
+      <SymbolView name={icon} size={15} weight="bold" tintColor={quiet ? Colors.flame : '#000'} />
+      <Text style={[styles.pillText, { color: quiet ? Colors.flame : '#000' }]}>{label}</Text>
+    </Pressable>
+  );
+}
+
 export function Segmented<T extends string>({
   options,
   value,
@@ -139,6 +163,17 @@ const styles = StyleSheet.create({
   segmentedLarge: { padding: 3 },
   segmentLarge: { flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', paddingVertical: 8 },
   segmentLargeText: { fontSize: 15, fontWeight: '600' },
+  pill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 5,
+    minHeight: 40,
+    paddingHorizontal: 14,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.flame,
+  },
+  pillQuiet: { backgroundColor: Colors.flameSoft },
+  pillText: { fontSize: 16, lineHeight: 20, fontWeight: '700' },
   card: {
     backgroundColor: Colors.card,
     borderRadius: Radius.lg,

@@ -1,6 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 import { Colors } from '@/constants/theme';
+import { useLeagueResultPopup } from '@/hooks/use-league';
 import { useDailyGreeting } from '@/hooks/use-lotl';
 import { usePushLifecycle } from '@/hooks/use-push';
 import { useCheerBadgeCount, usePartners } from '@/hooks/use-social';
@@ -20,6 +21,7 @@ export default function TabsLayout() {
 function Tabs() {
   useDailyGreeting();
   useWidgetSync();
+  useLeagueResultPopup();
   // Partner workouts waiting for your cheer, plus partner requests waiting for an answer.
   const cheers = useCheerBadgeCount();
   const requests = (usePartners().data ?? []).filter((p) => p.status === 'pending' && p.incoming).length;

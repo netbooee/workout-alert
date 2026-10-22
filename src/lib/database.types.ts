@@ -250,6 +250,18 @@ export type Database = {
         Update: { seen_at?: string | null };
         Relationships: [];
       };
+      league_players: {
+        Row: {
+          user_id: string;
+          opted_in: boolean;
+          tier: number;
+          nickname: string | null;
+          updated_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       xp_events: {
         Row: {
           user_id: string;
@@ -364,6 +376,55 @@ export type Database = {
           resting: boolean;
         }[];
       };
+      set_public_league: {
+        Args: { p_on: boolean; p_nickname?: string | null };
+        Returns: Database['public']['Tables']['league_players']['Row'];
+      };
+      my_public_league: {
+        Args: { p_now?: string };
+        Returns: {
+          member_key: string;
+          name: string;
+          mascot: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
+          xp: number;
+          rank: number;
+          is_me: boolean;
+          tier: number;
+          week_start: string;
+          group_size: number;
+        }[];
+      };
+      my_league_result: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          week_start: string;
+          final_rank: number;
+          final_xp: number;
+          result: 'up' | 'stay' | 'down';
+          tier: number;
+          group_size: number;
+        }[];
+      };
+      my_league_result_table: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          member_key: string;
+          name: string;
+          mascot: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
+          xp: number;
+          rank: number;
+          is_me: boolean;
+          result: 'up' | 'stay' | 'down';
+        }[];
+      };
+      mark_league_result_seen: {
+        Args: Record<PropertyKey, never>;
+        Returns: undefined;
+      };
+      report_league_member: {
+        Args: { p_member_key: string; p_reason?: string | null };
+        Returns: undefined;
+      };
       weekly_league: {
         Args: { p_now?: string };
         Returns: {
@@ -393,3 +454,6 @@ export type Nudge = PublicTables['nudges']['Row'];
 export type XpEvent = PublicTables['xp_events']['Row'];
 export type Partner = Database['public']['Functions']['my_partners']['Returns'][number];
 export type LeagueRow = Database['public']['Functions']['weekly_league']['Returns'][number];
+export type LeaguePlayer = PublicTables['league_players']['Row'];
+export type PublicLeagueRow = Database['public']['Functions']['my_public_league']['Returns'][number];
+export type LeagueResult = Database['public']['Functions']['my_league_result']['Returns'][number];

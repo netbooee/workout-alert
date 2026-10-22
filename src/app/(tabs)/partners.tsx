@@ -8,9 +8,10 @@ import { CheerCard } from '@/components/cheer-card';
 import { FeedCard } from '@/components/feed-card';
 import { IncentiveIntro } from '@/components/incentive-intro';
 import { LeagueCard } from '@/components/league-card';
+import { LeagueEntry } from '@/components/league-entry';
 import { PartnerCard } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
-import { AppText, Button, Card } from '@/components/ui';
+import { ActionPill, AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useLeague, useNames, usePartnerFeed, usePartners, useRespondToPartner } from '@/hooks/use-social';
 import type { Partner } from '@/lib/database.types';
@@ -44,11 +45,14 @@ export default function PartnersScreen() {
         }>
         <View style={styles.titleRow}>
           <AppText variant="title">Partners</AppText>
-          <Link href="/add-partner" asChild>
-            <Pressable hitSlop={12} accessibilityLabel="Add partner">
-              <SymbolView name="person.badge.plus" size={26} tintColor={Colors.flame} />
-            </Pressable>
-          </Link>
+          <View style={styles.titleActions}>
+            <Link href="/league" asChild>
+              <ActionPill icon="trophy.fill" label="Leagues" quiet />
+            </Link>
+            <Link href="/add-partner" asChild>
+              <ActionPill icon="plus" label="Add" accessibilityLabel="Add a partner" />
+            </Link>
+          </View>
         </View>
 
         {incoming.map((p) => (
@@ -75,6 +79,27 @@ export default function PartnersScreen() {
         {accepted.map((p) => (
           <PartnerCard key={p.partnership_id} partner={p} />
         ))}
+
+        {accepted.length > 0 && (
+          <Link href="/add-partner" asChild>
+            <Pressable accessibilityRole="button" style={styles.addMore}>
+              <SymbolView name="person.badge.plus" size={22} tintColor={Colors.flame} />
+              <View style={{ flex: 1 }}>
+                <AppText variant="heading" color={Colors.flame}>
+                  Add {accepted.length === 1 ? 'a partner' : 'another partner'}
+                </AppText>
+                <AppText variant="caption">
+                  {accepted.length === 1
+                    ? 'Two or more partners unlock your weekly league'
+                    : 'More partners, more cheers and a bigger league'}
+                </AppText>
+              </View>
+              <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />
+            </Pressable>
+          </Link>
+        )}
+
+        {partners.isSuccess && <LeagueEntry />}
 
         {accepted.length > 0 && <PushPrompt />}
 
@@ -145,6 +170,18 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  titleActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  addMore: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    borderCurve: 'continuous',
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    borderColor: Colors.flame,
+  },
   empty: { alignItems: 'stretch', gap: Spacing.md, padding: Spacing.lg, borderRadius: Radius.lg },
   pendingRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: 4 },
   actions: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.sm },

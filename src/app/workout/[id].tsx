@@ -254,9 +254,12 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
             <ActivityIndicator color={Colors.flame} />
           ) : (
             <>
-              <SymbolView name="camera.fill" size={22} tintColor={Colors.flame} />
-              <AppText variant="caption" style={{ fontSize: 11 }}>
-                +25 XP
+              <SymbolView name="camera.fill" size={26} tintColor={Colors.flame} />
+              <AppText variant="heading" color={Colors.flame} style={{ fontSize: 15 }}>
+                Add photo
+              </AppText>
+              <AppText variant="caption" style={{ fontSize: 12, fontWeight: '700' }}>
+                ⚡ +25 XP
               </AppText>
             </>
           )}

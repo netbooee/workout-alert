@@ -56,6 +56,8 @@ export function IncentiveCard({
   const split = i.shared
     ? { mine: i.progress - theirShare, theirs: theirShare, otherName: other }
     : undefined;
+  // Who it's from, short enough to fit the collapsed row.
+  const shortWho = i.shared ? `With ${other}` : received ? `From ${other}` : `For ${other}`;
   const canCollapse = collapsible && i.status === 'active';
   const toggle = () => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
@@ -82,7 +84,7 @@ export function IncentiveCard({
             </View>
             <AppText variant="caption" numberOfLines={1} style={{ fontSize: 12 }}>
               {i.shared ? '🤝' : '🎯'} {Math.min(i.progress, i.goal_target)}/{i.goal_target}{' '}
-              {goalOption(i.goal_kind).unit} · {timeLeft(i.ends_at)} · {title}
+              {goalOption(i.goal_kind).unit} · {timeLeft(i.ends_at)} · {shortWho}
             </AppText>
           </View>
           <SymbolView name="chevron.down" size={14} weight="semibold" tintColor={Colors.textMuted} />

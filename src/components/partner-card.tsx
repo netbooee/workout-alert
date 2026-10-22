@@ -85,6 +85,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
             {'\n'}together
           </AppText>
         </Pressable>
+        <SymbolView name="chevron.right" size={13} weight="semibold" tintColor={Colors.textMuted} />
       </Pressable>
       {challenges.length > 0 && <Challenges challenges={challenges} firstName={firstName} />}
       <View style={styles.actions}>

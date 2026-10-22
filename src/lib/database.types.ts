@@ -405,6 +405,18 @@ export type Database = {
           group_size: number;
         }[];
       };
+      my_league_result_table: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          member_key: string;
+          name: string;
+          mascot: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
+          xp: number;
+          rank: number;
+          is_me: boolean;
+          result: 'up' | 'stay' | 'down';
+        }[];
+      };
       mark_league_result_seen: {
         Args: Record<PropertyKey, never>;
         Returns: undefined;

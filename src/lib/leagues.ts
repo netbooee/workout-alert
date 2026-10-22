@@ -52,3 +52,31 @@ export function nicknameProblem(nickname: string): string | null {
   if (n.length > NICKNAME_MAX) return `Keep it to ${NICKNAME_MAX} characters`;
   return null;
 }
+
+/** Your place as of your first look at the league each day, kept on the phone. */
+export interface RankMemo {
+  week: string;
+  day: string;
+  /** Your place when the day started (your last place seen before today). */
+  startRank: number;
+  lastRank: number;
+}
+
+/**
+ * Updates the memo for a new look at the table and says how many places you've
+ * moved today (positive is up), or null the first time you look this week.
+ */
+export function trackRank(
+  memo: RankMemo | null,
+  week: string,
+  day: string,
+  rank: number,
+): { memo: RankMemo; moved: number | null } {
+  if (!memo || memo.week !== week) {
+    return { memo: { week, day, startRank: rank, lastRank: rank }, moved: null };
+  }
+  const startRank = memo.day === day ? memo.startRank : memo.lastRank;
+  return { memo: { week, day, startRank, lastRank: rank }, moved: startRank - rank };
+}
+
+export const MEDALS = ['🥇', '🥈', '🥉'] as const;

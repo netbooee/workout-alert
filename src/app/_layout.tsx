@@ -137,6 +137,10 @@ function RootNavigator() {
           name="celebrate"
           options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
         />
+        <Stack.Screen
+          name="league-result"
+          options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}
+        />
       </Stack.Protected>
     </Stack>
   );

@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(23);
+select plan(25);
 
 create function pg_temp.act_as(p_user uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', p_user)::text, true);
@@ -129,6 +129,9 @@ select is((select tier from public.league_players where user_id = pg_temp.u(19))
 select pg_temp.act_as(pg_temp.u(19));
 select results_eq($$select result, tier from public.my_league_result()$$, $$values ('up'::text, 2::smallint)$$,
   'you find out how your week went');
+select is((select count(*) from public.my_league_result_table()), 20::bigint, 'you see last week’s final table');
+select results_eq($$select rank, result from public.my_league_result_table() where is_me$$, $$values (2, 'up'::text)$$,
+  'with your final place');
 select public.mark_league_result_seen();
 select is((select count(*) from public.my_league_result()), 0::bigint, 'and only once');
 reset role;

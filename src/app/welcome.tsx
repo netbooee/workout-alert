@@ -39,11 +39,11 @@ const PAGES: Page[] = [
     ],
   },
   {
-    emoji: '🎁',
-    title: 'Rewards for extra effort',
-    body: 'Offer a partner an incentive for a stretch goal, like “4 workouts this week → coffee on me.”',
+    emoji: '🎯',
+    title: 'Challenges',
+    body: 'Challenge a partner to a stretch goal with a real reward, like “4 workouts this week → coffee on me,” or take one on together.',
     points: [
-      'Sigamos tracks it and they earn +100 XP',
+      'Sigamos tracks it, and finishing is worth +100 XP',
       'XP from every workout moves you up the weekly league',
     ],
   },
@@ -52,10 +52,10 @@ const PAGES: Page[] = [
     title: 'Earn XP, level up',
     body: 'Everything you do earns XP. It never resets, so your level only goes up: Rookie, Regular, Grinder, Iron, Machine, Legend.',
     points: [
-      'Workouts earn 10–40 XP; check-in photos +5',
+      'Workouts earn 10–40 XP; add a photo for +25',
       'Hit your weekly goal: +50',
       'Partner verifies your workout: +5; you verify theirs: +2',
-      'Earn an incentive: +100',
+      'Finish a challenge: +100',
       'The weekly league starts over every Sunday',
     ],
   },

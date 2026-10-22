@@ -111,7 +111,7 @@ export default function WorkoutScreen() {
   );
 }
 
-/** On a partner's workout: offer them an incentive (unless one is already going). */
+/** On a partner's workout: challenge them (unless a challenge is already going). */
 function RewardPrompt({ partnerId, name }: { partnerId: string; name: string }) {
   const { given } = useMyIncentives();
   const active = given.some(
@@ -122,12 +122,12 @@ function RewardPrompt({ partnerId, name }: { partnerId: string; name: string }) 
     <Pressable
       onPress={() => router.push({ pathname: '/incentive/new', params: { to: partnerId } })}
       style={styles.reward}>
-      <AppText variant="body">🎁</AppText>
+      <AppText variant="body">🎯</AppText>
       <View style={{ flex: 1 }}>
         <AppText variant="heading" style={{ fontSize: 15 }}>
-          Reward {name.split(' ')[0]} for extra effort
+          Challenge {name.split(' ')[0]}
         </AppText>
-        <AppText variant="caption">Offer a treat for a stretch goal. They get +100 XP too.</AppText>
+        <AppText variant="caption">Reward a stretch goal, or take one on together. +100 XP.</AppText>
       </View>
       <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />
     </Pressable>
@@ -256,7 +256,7 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
             <>
               <SymbolView name="camera.fill" size={22} tintColor={Colors.flame} />
               <AppText variant="caption" style={{ fontSize: 11 }}>
-                +5 XP
+                +25 XP
               </AppText>
             </>
           )}

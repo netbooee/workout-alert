@@ -45,6 +45,7 @@ export default function StreakScreen() {
         ]}
         value={view}
         onChange={setView}
+        size="large"
       />
       {view === 'personal' ? <PersonalStreak /> : <FriendStreaks />}
     </ScrollView>

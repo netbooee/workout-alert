@@ -55,7 +55,7 @@ export default function PartnerScreen() {
             )}
             {!given.some((i) => i.to_id === id && isOpen(i)) && (
               <Button
-                title="🎁 Incentive"
+                title="🎯 Challenge"
                 variant="secondary"
                 style={{ flex: 1 }}
                 onPress={() => router.push({ pathname: '/incentive/new', params: { to: partner.partner_id } })}

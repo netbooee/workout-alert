@@ -34,7 +34,7 @@ select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
 select throws_ok(
   $$select public.offer_incentive('00000000-0000-0000-0000-00000000000b', 'streak_weeks', 4, 4, 'Pizza',
       p_shared => true)$$,
-  '22023', 'A shared quest counts days, workouts, or minutes', 'a shared quest cannot be a streak goal');
+  '22023', 'A challenge together counts days, workouts, or minutes', 'a shared quest cannot be a streak goal');
 select throws_ok(
   $$select public.offer_incentive('00000000-0000-0000-0000-00000000000b', 'workout_days', 15, 1, 'Pizza',
       p_shared => true)$$,
@@ -50,7 +50,7 @@ select ok((select shared from quest), 'a partner can start a shared quest with a
 select is((select public.incentive_goal_text(i) from public.incentives i),
   'Hit 4 workout days between us this week', 'the goal reads "between us"');
 select is((select title from public.notifications where kind = 'incentive'),
-  'Sam started a shared quest with you 🤝', 'the partner hears about the shared quest');
+  'Sam wants to take on a challenge with you 🤝', 'the partner hears about the shared quest');
 
 -- ─── Progress from both people ──────────────────────────────────────────────
 
@@ -83,8 +83,8 @@ select results_eq(
 select results_eq(
   $$select user_id, title from public.notifications where kind = 'incentive' order by user_id$$,
   $$values
-    ('00000000-0000-0000-0000-00000000000a'::uuid, 'You and Jo finished your shared quest! 🎉'::text),
-    ('00000000-0000-0000-0000-00000000000b'::uuid, 'You and Sam finished your shared quest! 🎉'::text)$$,
+    ('00000000-0000-0000-0000-00000000000a'::uuid, 'You and Jo finished your challenge together! 🎉'::text),
+    ('00000000-0000-0000-0000-00000000000b'::uuid, 'You and Sam finished your challenge together! 🎉'::text)$$,
   'both people are told');
 
 -- Either person can mark the shared reward done.

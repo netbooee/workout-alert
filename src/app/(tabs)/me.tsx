@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useQueryClient } from '@tanstack/react-query';
-import { Link } from 'expo-router';
+import { Link, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
@@ -33,6 +33,14 @@ import {
 import { supabase } from '@/lib/supabase';
 
 export default function MeScreen() {
+  // You (goal, buddy, what counts), Progress (stats and history), Settings. Home links to Progress.
+  const params = useLocalSearchParams<{ section?: string }>();
+  const [section, setSection] = useState<MeSection>(isMeSection(params.section) ? params.section : 'you');
+  const [linkedSection, setLinkedSection] = useState(params.section);
+  if (params.section !== linkedSection) {
+    setLinkedSection(params.section);
+    if (isMeSection(params.section)) setSection(params.section);
+  }
   const profile = useProfile();
   const updateProfile = useUpdateProfile();
   const { data: home, refetch } = useHomeData();
@@ -102,127 +110,152 @@ export default function MeScreen() {
             </AppText>
           </Pressable>
         </Card>
-        <Card>
-          <LevelBar xp={xp ?? 0} />
-          <AppText variant="caption">
-            {xp ?? 0} XP total · Tap the bar to see how XP works.
-          </AppText>
-        </Card>
+        <Segmented
+          options={[
+            { key: 'you', label: 'You' },
+            { key: 'progress', label: 'Progress' },
+            { key: 'settings', label: 'Settings' },
+          ]}
+          value={section}
+          onChange={setSection}
+          size="large"
+        />
 
-        <View style={styles.stats}>
-          <Stat label="Current" value={home?.streak?.current_weeks ?? 0} unit="wks" color={Colors.flame} />
-          <Stat label="Longest" value={home?.streak?.longest_weeks ?? 0} unit="wks" />
-          <Stat label="Freezes" value={home?.streak?.freezes_banked ?? 0} color={Colors.freeze} />
-        </View>
+        {section === 'you' && (
+          <>
+            <Card>
+              <AppText variant="label">Weekly goal</AppText>
+              <View style={styles.stepper}>
+                <StepButton label="−" onPress={() => setGoal(profile.weekly_goal - 1)} />
+                <AppText variant="title">
+                  {profile.weekly_goal}
+                  <AppText variant="caption"> days / week</AppText>
+                </AppText>
+                <StepButton label="+" onPress={() => setGoal(profile.weekly_goal + 1)} />
+              </View>
+              <AppText variant="caption">
+                Changes apply to this week right away, and to the weeks from before you joined. Weeks
+                since you joined keep the goal they had.
+              </AppText>
+            </Card>
 
-        <StreakHistory weeks={history ?? []} />
-        <ProgressChart />
-        <RewardShelf />
+            <WhatCountsCard />
 
-        <Card>
-          <AppText variant="label">Weekly goal</AppText>
-          <View style={styles.stepper}>
-            <StepButton label="−" onPress={() => setGoal(profile.weekly_goal - 1)} />
-            <AppText variant="title">
-              {profile.weekly_goal}
-              <AppText variant="caption"> days / week</AppText>
-            </AppText>
-            <StepButton label="+" onPress={() => setGoal(profile.weekly_goal + 1)} />
-          </View>
-          <AppText variant="caption">
-            Changes apply to this week right away, and to the weeks from before you joined. Weeks
-            since you joined keep the goal they had.
-          </AppText>
-        </Card>
+            <MascotPicker />
 
-        <WhatCountsCard />
+            <RestModeCard resting={!!profile.resting_since} />
 
-        <MascotPicker />
+            <Card>
+              <AppText variant="label">Your invite code</AppText>
+              <View style={styles.inviteRow}>
+                <AppText variant="title" color={Colors.flame} style={{ letterSpacing: 4 }} selectable>
+                  {profile.invite_code}
+                </AppText>
+                <Link href="/add-partner" asChild>
+                  <Button title="Share" variant="secondary" style={{ height: 40 }} />
+                </Link>
+              </View>
+            </Card>
 
-        <RestModeCard resting={!!profile.resting_since} />
+          </>
+        )}
 
-        <Card>
-          <AppText variant="label">Your invite code</AppText>
-          <View style={styles.inviteRow}>
-            <AppText variant="title" color={Colors.flame} style={{ letterSpacing: 4 }} selectable>
-              {profile.invite_code}
-            </AppText>
-            <Link href="/add-partner" asChild>
-              <Button title="Share" variant="secondary" style={{ height: 40 }} />
-            </Link>
-          </View>
-        </Card>
+        {section === 'progress' && (
+          <>
+            <Card>
+              <LevelBar xp={xp ?? 0} />
+              <AppText variant="caption">
+                {xp ?? 0} XP total · Tap the bar to see how XP works.
+              </AppText>
+            </Card>
 
-        <AppearanceCard />
+            <View style={styles.stats}>
+              <Stat label="Current" value={home?.streak?.current_weeks ?? 0} unit="wks" color={Colors.flame} />
+              <Stat label="Longest" value={home?.streak?.longest_weeks ?? 0} unit="wks" />
+              <Stat label="Freezes" value={home?.streak?.freezes_banked ?? 0} color={Colors.freeze} />
+            </View>
 
-        <Card>
-          <AppText variant="label">Notifications</AppText>
-          <Toggle
-            label="Streak at risk reminders"
-            value={profile.notify_streak_reminders}
-            onChange={(v) => updateProfile({ notify_streak_reminders: v })}
-          />
-          <Toggle
-            label="Nudges from partners"
-            value={profile.notify_nudges}
-            onChange={(v) => updateProfile({ notify_nudges: v })}
-          />
-          <Toggle
-            label="When a partner works out"
-            value={profile.notify_partner_workouts}
-            onChange={(v) => updateProfile({ notify_partner_workouts: v })}
-          />
-          <Toggle
-            label="When a partner verifies your workout"
-            value={profile.notify_verifications}
-            onChange={(v) => updateProfile({ notify_verifications: v })}
-          />
-          <Toggle
-            label="Incentives"
-            value={profile.notify_incentives}
-            onChange={(v) => updateProfile({ notify_incentives: v })}
-          />
-          <Toggle
-            label="Comments and voice messages"
-            value={profile.notify_comments}
-            onChange={(v) => updateProfile({ notify_comments: v })}
-          />
-          <Toggle
-            label="Partner requests"
-            value={profile.notify_partner_requests}
-            onChange={(v) => updateProfile({ notify_partner_requests: v })}
-          />
-        </Card>
-        <PushPrompt />
+            <StreakHistory weeks={history ?? []} />
+            <ProgressChart />
+            <RewardShelf />
 
-        <Card>
-          <AppText variant="label">Apple Health</AppText>
-          <AppText variant="caption">
-            Workouts sync automatically when you open the app. If something looks missing, re-sync
-            the last 12 weeks.
-          </AppText>
-          <Button title="Re-sync health data" variant="secondary" loading={resyncing} onPress={resync} />
-        </Card>
+          </>
+        )}
 
-        <Card>
-          <AppText variant="label">Help</AppText>
-          <AppText variant="caption">A quick tour of streaks, partners, incentives, and your buddy.</AppText>
-          <Link href="/welcome" asChild>
-            <Button title="Show the welcome tour" variant="secondary" />
-          </Link>
-          <Button
-            title="Help and support"
-            variant="secondary"
-            onPress={() => Linking.openURL('https://sigamos.cloud/support/')}
-          />
-        </Card>
+        {section === 'settings' && (
+          <>
+            <AppearanceCard />
 
-        <Button title="Sign out" variant="secondary" onPress={confirmSignOut} />
-        <Pressable accessibilityRole="button" onPress={() => confirmDeleteAccount(profile.id)} style={styles.deleteAccount}>
-          <AppText variant="body" color={Colors.danger}>
-            Delete account
-          </AppText>
-        </Pressable>
+            <Card>
+              <AppText variant="label">Notifications</AppText>
+              <Toggle
+                label="Streak at risk reminders"
+                value={profile.notify_streak_reminders}
+                onChange={(v) => updateProfile({ notify_streak_reminders: v })}
+              />
+              <Toggle
+                label="Nudges from partners"
+                value={profile.notify_nudges}
+                onChange={(v) => updateProfile({ notify_nudges: v })}
+              />
+              <Toggle
+                label="When a partner works out"
+                value={profile.notify_partner_workouts}
+                onChange={(v) => updateProfile({ notify_partner_workouts: v })}
+              />
+              <Toggle
+                label="When a partner verifies your workout"
+                value={profile.notify_verifications}
+                onChange={(v) => updateProfile({ notify_verifications: v })}
+              />
+              <Toggle
+                label="Challenges"
+                value={profile.notify_incentives}
+                onChange={(v) => updateProfile({ notify_incentives: v })}
+              />
+              <Toggle
+                label="Comments and voice messages"
+                value={profile.notify_comments}
+                onChange={(v) => updateProfile({ notify_comments: v })}
+              />
+              <Toggle
+                label="Partner requests"
+                value={profile.notify_partner_requests}
+                onChange={(v) => updateProfile({ notify_partner_requests: v })}
+              />
+            </Card>
+            <PushPrompt />
+
+            <Card>
+              <AppText variant="label">Apple Health</AppText>
+              <AppText variant="caption">
+                Workouts sync automatically when you open the app. If something looks missing, re-sync
+                the last 12 weeks.
+              </AppText>
+              <Button title="Re-sync health data" variant="secondary" loading={resyncing} onPress={resync} />
+            </Card>
+
+            <Card>
+              <AppText variant="label">Help</AppText>
+              <AppText variant="caption">A quick tour of streaks, partners, challenges, and your buddy.</AppText>
+              <Link href="/welcome" asChild>
+                <Button title="Show the welcome tour" variant="secondary" />
+              </Link>
+              <Button
+                title="Help and support"
+                variant="secondary"
+                onPress={() => Linking.openURL('https://sigamos.cloud/support/')}
+              />
+            </Card>
+
+            <Button title="Sign out" variant="secondary" onPress={confirmSignOut} />
+            <Pressable accessibilityRole="button" onPress={() => confirmDeleteAccount(profile.id)} style={styles.deleteAccount}>
+              <AppText variant="body" color={Colors.danger}>
+                Delete account
+              </AppText>
+            </Pressable>
+          </>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -271,6 +304,9 @@ function WhatCountsCard() {
     </Card>
   );
 }
+
+type MeSection = 'you' | 'progress' | 'settings';
+const isMeSection = (v: unknown): v is MeSection => v === 'you' || v === 'progress' || v === 'settings';
 
 function confirmSignOut() {
   Alert.alert('Sign out?', 'Your streak and workouts stay saved to your account.', [

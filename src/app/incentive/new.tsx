@@ -128,7 +128,7 @@ export default function NewIncentiveScreen() {
             Cancel
           </AppText>
         </Pressable>
-        <AppText variant="heading">{shared ? 'Shared quest' : 'Offer an incentive'}</AppText>
+        <AppText variant="heading">Challenge {firstName}</AppText>
         <View style={{ width: 52 }} />
       </View>
 
@@ -140,7 +140,7 @@ export default function NewIncentiveScreen() {
           {to && <Avatar id={to} name={partner?.display_name ?? null} size={44} />}
           <View style={{ flex: 1 }}>
             <AppText variant="heading">
-              {shared ? `Team up with ${firstName} 🤝` : `Reward ${firstName} for extra effort 🎁`}
+              {shared ? `Team up with ${firstName} 🤝` : `Reward ${firstName} for extra effort 🎯`}
             </AppText>
             {partner && (
               <AppText variant="caption">
@@ -153,7 +153,7 @@ export default function NewIncentiveScreen() {
         <Segmented
           options={[
             { key: 'reward', label: `Reward ${firstName}` },
-            { key: 'shared', label: 'Shared quest' },
+            { key: 'shared', label: 'Do it together' },
           ]}
           value={mode}
           onChange={pickMode}
@@ -334,7 +334,7 @@ export default function NewIncentiveScreen() {
 
       <View style={[styles.footer, keyboardHeight > 0 && { paddingBottom: Spacing.md }]}>
         <Button
-          title={shared ? `Start quest with ${firstName}` : `Send to ${firstName}`}
+          title={shared ? `Start challenge with ${firstName}` : `Challenge ${firstName}`}
           loading={offer.isPending}
           disabled={!reward.trim() || !partner}
           onPress={send}

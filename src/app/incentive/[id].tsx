@@ -16,10 +16,10 @@ export default function IncentiveScreen() {
   const cancel = useCancelIncentive();
 
   const confirmCancel = () =>
-    Alert.alert('Cancel this incentive?', 'They’ll no longer see it.', [
+    Alert.alert('Cancel this challenge?', 'Your partner will no longer see it.', [
       { text: 'Keep it', style: 'cancel' },
       {
-        text: 'Cancel incentive',
+        text: 'Cancel challenge',
         style: 'destructive',
         onPress: () =>
           cancel.mutate(id, {
@@ -33,7 +33,7 @@ export default function IncentiveScreen() {
     <View style={styles.container}>
       <View style={styles.header}>
         <View style={{ width: 52 }} />
-        <AppText variant="heading">{incentive?.shared ? 'Shared quest' : 'Incentive'}</AppText>
+        <AppText variant="heading">Challenge</AppText>
         <Pressable onPress={() => router.back()} hitSlop={12}>
           <AppText variant="heading" color={Colors.flame}>
             Done
@@ -44,7 +44,7 @@ export default function IncentiveScreen() {
         {isPending ? (
           <ActivityIndicator color={Colors.flame} />
         ) : !incentive ? (
-          <AppText variant="body">This incentive is no longer available.</AppText>
+          <AppText variant="body">This challenge is no longer available.</AppText>
         ) : (
           <>
             <IncentiveCard incentive={incentive} linked={false} />
@@ -56,7 +56,7 @@ export default function IncentiveScreen() {
             {incentive.from_id === me && isOpen(incentive) && (
               <Pressable onPress={confirmCancel} style={styles.cancel} hitSlop={8}>
                 <AppText variant="heading" color={Colors.danger}>
-                  {incentive.shared ? 'Cancel shared quest' : 'Cancel incentive'}
+                  Cancel challenge
                 </AppText>
               </Pressable>
             )}

@@ -52,6 +52,18 @@ they're consistent across devices and can't be edited by the client.
   (`src/lib/notification-actions.ts`). The buttons open the app because that's the reliable
   way on iOS for the app to save the reaction; reacting without opening it would need a
   native notification extension.
+- **Home** order: your streak and this week first, then nudges, partners to cheer, active
+  challenges and recent workouts; today's activity rings and the trend are at the bottom. The
+  header has a small level chip (tap for How XP works) and a labeled **+ Log** button.
+- **Me** has three sections: **You** (goal, What counts, buddy, rest mode, invite code),
+  **Progress** (level, streak stats, history, chart, reward shelf) and **Settings**
+  (appearance, notifications, Apple Health, help, sign out, delete account).
+- **Log a workout** by hand with any duration (− / + by 5 minutes, or a preset) and when you
+  finished, up to 14 days back (`src/lib/log-workout.ts`).
+- **Feed cards** all have the same shape: a square on the left (the first photo's thumbnail
+  with a "+N" badge, or the workout's icon), three single lines (who and what; duration,
+  heart rate and when; the note or where it was recorded), then Cheer and Verify. Tapping the
+  thumbnail opens the photos full screen (swipe, pinch to zoom, save).
 - **Partners tab** order: requests, workouts to cheer, partner cards, partner activity, then
   the league (only with 2+ partners) and the incentive intro. Tapping a partner card opens
   their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,
@@ -84,7 +96,13 @@ all of your workouts when you change the rules) so the database and the app agre
 mirror is `src/lib/what-counts.ts`. Logic: `supabase/migrations/20261022000000_what_counts.sql`
 (pgTAP in `supabase/tests/what_counts.test.sql`).
 
-## Incentives
+## Challenges (incentives in the code)
+
+In the app this is one idea, a **🎯 Challenge**, with two kinds: **Reward them** (an
+incentive: your partner works toward a goal and you treat them) and **Do it together** (a
+shared quest: both of your workouts count). Tables and functions keep the incentive names;
+pushes and messages say "challenge" (`20261025000000_challenge_wording.sql`).
+
 
 A partner can reward you for extra effort: **"Hit 5 workout days this week → ☕ Coffee on me"**.
 
@@ -106,7 +124,7 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   minutes), what's left and the days remaining, with the next action on the card: **Log a
   workout** for the recipient on Home, **Nudge** for the giver. The giver's partner card shows
   the same progress. The nudge banner also has **Log a workout**.
-- **Shared quests** (the **Shared quest** switch on the offer screen) work like Duolingo's Friends
+- **Do it together** (shared quests; the **Do it together** switch on the challenge screen) work like Duolingo's Friends
   Quest: both partners' workouts count toward one goal ("8 workout days between us this week →
   🍕 Pizza night together"). Workout days, workouts or minutes, with targets up to twice as high;
   not streak weeks. The quest card splits the pips by person (yours, then theirs). Finishing it
@@ -225,7 +243,7 @@ buddy** in the mood that matches your week.
 | Earn | XP |
 | --- | --- |
 | Workout (5+ min) | 10 + 1 per 2 min, up to 40 |
-| Check-in photo on a workout | +5 |
+| Check-in photo on a workout (once per workout) | +25 |
 | Hitting your weekly goal | +50 |
 | Earning a partner's incentive | +100 |
 | A partner verifies your workout (✅), once per workout | +5 |
@@ -369,9 +387,8 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 
 ### Next: after TestFlight testing (required before the App Store)
 
-- **App icon.** The app still uses Expo's placeholder icon (`assets/images/icon.png`). Replace it
-  with a Sigamos icon, e.g. Lotl on flame orange, using the same artwork as the website
-  (`website/img/lotl-*.svg`), plus a matching splash image. Needs a new build.
+- ~~**App icon.**~~ Lotl (blazing, in sunglasses) on flame orange, rendered from
+  `website/img/lotl-blazing.svg`; the splash is happy Lotl (`assets/images/`).
 - ~~**In-app account deletion**~~ (App Store guideline 5.1.1(v)): "Delete account" on the Me
   tab removes the user's files from storage, then `delete_my_account()` deletes the auth user and
   cascades their data. Still to do: revoke the Sign in with Apple token on deletion (Apple asks

@@ -131,3 +131,51 @@ export function useWeekDetail(weekStart: string) {
     },
   });
 }
+
+/**
+ * One month for the streak calendar (`month` is 0–11): your workouts, the
+ * status of each week the grid touches, and the XP you earned, by day.
+ */
+export function useStreakMonth(year: number, month: number) {
+  const userId = useAuth().session?.user.id;
+  return useQuery({
+    queryKey: ['home', 'month', userId, year, month],
+    enabled: !!userId,
+    queryFn: async () => {
+      const from = startOfWeek(new Date(year, month, 1));
+      const to = addDays(new Date(year, month + 1, 0), 1);
+      const [workouts, weeks, xp] = await Promise.all([
+        supabase
+          .from('workouts')
+          .select('id, started_at, duration_s, activity_type, counted')
+          .eq('user_id', userId!)
+          .is('duplicate_of', null)
+          .gte('started_at', from.toISOString())
+          .lt('started_at', to.toISOString())
+          .order('started_at'),
+        supabase
+          .from('streak_weeks')
+          .select('week_start, status, active_days, goal')
+          .eq('user_id', userId!)
+          .gte('week_start', dayKey(from))
+          .lt('week_start', dayKey(to)),
+        supabase
+          .from('xp_events')
+          .select('amount, created_at')
+          .eq('user_id', userId!)
+          .gte('created_at', from.toISOString())
+          .lt('created_at', to.toISOString()),
+      ]);
+      for (const r of [workouts, weeks, xp]) {
+        if (r.error) throw r.error;
+      }
+      // Keyed by local day; plain objects so the result stays JSON-friendly.
+      const xpByDay: Record<string, number> = {};
+      for (const e of xp.data ?? []) {
+        const key = dayKey(new Date(e.created_at));
+        xpByDay[key] = (xpByDay[key] ?? 0) + e.amount;
+      }
+      return { workouts: workouts.data ?? [], weeks: weeks.data ?? [], xpByDay };
+    },
+  });
+}

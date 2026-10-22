@@ -251,7 +251,7 @@ const ROW = 44;
 const styles = StyleSheet.create({
   monthRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.sm },
   monthTitle: { flex: 1, fontFamily: Font.rounded, fontSize: 24, lineHeight: 30, fontWeight: '800', color: Colors.text },
-  arrow: { padding: 4 },
+  arrow: { width: 40, height: 40, borderRadius: 20, alignItems: 'center', justifyContent: 'center', backgroundColor: Colors.cardRaised },
   tiles: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.sm },
   tile: {
     flex: 1,

@@ -331,6 +331,11 @@ function Table({ rows }: { rows: PublicLeagueRow[] }) {
           {ups > 0 && i === ups - 1 && i < n - 1 && <Divider label="Promotion zone" color={Colors.success} arrow="▲" />}
         </Fragment>
       ))}
+      {n > 1 && (
+        <AppText variant="caption" style={{ textAlign: 'center', marginTop: Spacing.xs }}>
+          Tap someone to report spam or cheating.
+        </AppText>
+      )}
       {n > 1 && demoteCount(n) === 0 && tier > 1 && (
         <AppText variant="caption" style={{ textAlign: 'center', marginTop: Spacing.xs }}>
           Only players with no XP move down in a group this small.

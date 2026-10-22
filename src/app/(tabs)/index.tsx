@@ -1,5 +1,4 @@
 import { Link } from 'expo-router';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -11,10 +10,10 @@ import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
 import { ProgressMini } from '@/components/progress-mini';
 import { StreakHero } from '@/components/streak-hero';
-import { AppText, Card } from '@/components/ui';
+import { ActionPill, AppText, Button, Card } from '@/components/ui';
 import { WeekDots } from '@/components/week-dots';
 import { WorkoutRow } from '@/components/workout-row';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Colors, Spacing } from '@/constants/theme';
 import { useHealthSync } from '@/hooks/use-health-sync';
 import { useMyIncentives } from '@/hooks/use-incentives';
 import { useLotl } from '@/hooks/use-lotl';
@@ -68,12 +67,7 @@ export default function HomeScreen() {
             )}
           </View>
           <Link href="/log" asChild>
-            <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel="Log a workout" style={styles.log}>
-              <SymbolView name="plus" size={14} weight="bold" tintColor="#000" />
-              <AppText variant="heading" color="#000" style={{ fontSize: 15 }}>
-                Log
-              </AppText>
-            </Pressable>
+            <ActionPill icon="plus" label="Log" accessibilityLabel="Log a workout" />
           </Link>
         </View>
 
@@ -137,9 +131,11 @@ export default function HomeScreen() {
                   <AppText variant="body">No workouts yet.</AppText>
                   <AppText variant="caption">
                     Workouts from Apple Watch, Fitness, Strava, or any app that writes to Apple
-                    Health will appear here automatically. Pull down to sync, or tap Log to add one
-                    by hand.
+                    Health will appear here automatically. Pull down to sync, or add one by hand.
                   </AppText>
+                  <Link href="/log" asChild>
+                    <Button title="+ Log a workout" style={{ marginTop: Spacing.xs }} />
+                  </Link>
                 </View>
               )}
             </Card>
@@ -166,13 +162,4 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   more: { alignItems: 'center', paddingTop: Spacing.xs },
-  log: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    height: 32,
-    paddingHorizontal: 12,
-    borderRadius: Radius.pill,
-    backgroundColor: Colors.flame,
-  },
 });

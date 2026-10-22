@@ -45,11 +45,18 @@ export default function PartnersScreen() {
         }>
         <View style={styles.titleRow}>
           <AppText variant="title">Partners</AppText>
-          <Link href="/add-partner" asChild>
-            <Pressable hitSlop={12} accessibilityLabel="Add partner">
-              <SymbolView name="person.badge.plus" size={26} tintColor={Colors.flame} />
-            </Pressable>
-          </Link>
+          <View style={styles.titleActions}>
+            <Link href="/league" asChild>
+              <Pressable hitSlop={12} accessibilityLabel="Leagues">
+                <SymbolView name="trophy" size={24} tintColor={Colors.flame} />
+              </Pressable>
+            </Link>
+            <Link href="/add-partner" asChild>
+              <Pressable hitSlop={12} accessibilityLabel="Add partner">
+                <SymbolView name="person.badge.plus" size={26} tintColor={Colors.flame} />
+              </Pressable>
+            </Link>
+          </View>
         </View>
 
         {incoming.map((p) => (
@@ -76,6 +83,8 @@ export default function PartnersScreen() {
         {accepted.map((p) => (
           <PartnerCard key={p.partnership_id} partner={p} />
         ))}
+
+        {partners.isSuccess && <LeagueEntry />}
 
         {accepted.length > 0 && <PushPrompt />}
 
@@ -111,7 +120,6 @@ export default function PartnersScreen() {
 
         {/* A league needs at least two partners to be more than a two-row table. */}
         {accepted.length > 1 && league.data && <LeagueCard rows={league.data} />}
-        <LeagueEntry />
 
         <IncentiveIntro partners={accepted} />
       </ScrollView>
@@ -147,6 +155,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
   titleRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  titleActions: { flexDirection: 'row', alignItems: 'center', gap: Spacing.lg },
   empty: { alignItems: 'stretch', gap: Spacing.md, padding: Spacing.lg, borderRadius: Radius.lg },
   pendingRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: 4 },
   actions: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.sm },

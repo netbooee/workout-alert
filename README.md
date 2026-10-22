@@ -90,7 +90,7 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
 
 - **Offer** from a partner's card (🎁 Offer an incentive), a partner's workout, or the intro card
   on the Partners tab. Goals: workout days, active minutes, a number of workouts (optionally one
-  type, e.g. 3 runs), or reaching a streak length; over 1, 2, or 4 weeks counted from this Sunday
+  type, e.g. 3 runs; **Strength** counts traditional, functional and core strength workouts), or reaching a streak length; over 1, 2, or 4 weeks counted from this Sunday
   in the recipient's timezone. Rewards are real-world text (no money in the app).
 - **Rewards**: eight favorite tiles plus **More…**, a searchable sheet of about 50 suggestions
   in groups (food, time together, pampering, chores, fitness, bigger stakes). Any pick is just

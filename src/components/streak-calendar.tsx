@@ -99,8 +99,11 @@ export function StreakCalendar() {
                 {band && (
                   <View style={[styles.band, span(first, last), { backgroundColor: band.fill }]} />
                 )}
+                {/* Back-to-back days join into a pill; a single day is a circle. */}
                 {workoutRuns(w.days).map(([a, b]) => (
-                  <View key={a} style={[styles.run, span(a, b)]} />
+                  <View key={a} style={[styles.runSlot, span(a, b)]}>
+                    <View style={[styles.run, a === b ? styles.runSingle : styles.runJoined]} />
+                  </View>
                 ))}
                 {w.days.map((d) => (
                   <Pressable
@@ -118,7 +121,7 @@ export function StreakCalendar() {
                       <View
                         style={[
                           styles.dayDot,
-                          d.today && styles.today,
+                          d.today && !d.worked && styles.today,
                           d.key === selected && !d.today && styles.selected,
                         ]}>
                         <AppText
@@ -247,6 +250,7 @@ function Legend({ color, label }: { color: ColorValue; label: string }) {
 }
 
 const ROW = 44;
+const RUN = 36;
 
 const styles = StyleSheet.create({
   monthRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.sm },
@@ -280,10 +284,13 @@ const styles = StyleSheet.create({
   week: { flexDirection: 'row', height: ROW, alignItems: 'center' },
   weekday: { flex: 1, textAlign: 'center', fontWeight: '700' },
   band: { position: 'absolute', top: 2, bottom: 2, borderRadius: ROW / 2 },
-  run: { position: 'absolute', top: 5, bottom: 5, borderRadius: ROW / 2, backgroundColor: Colors.flame },
+  runSlot: { position: 'absolute', top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
+  run: { height: RUN, borderRadius: RUN / 2, backgroundColor: Colors.flame },
+  runSingle: { width: RUN },
+  runJoined: { alignSelf: 'stretch' },
   cell: { flex: 1, height: ROW, alignItems: 'center', justifyContent: 'center' },
   dayDot: { width: 34, height: 34, borderRadius: 17, alignItems: 'center', justifyContent: 'center' },
-  today: { borderWidth: 2, borderColor: Colors.text },
+  today: { borderWidth: 2, borderColor: Colors.flame },
   selected: { borderWidth: 2, borderColor: Colors.textMuted },
   dayText: { fontFamily: Font.rounded, fontSize: 16, fontWeight: '700', fontVariant: ['tabular-nums'] },
   legend: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.md, justifyContent: 'center', marginTop: Spacing.xs },

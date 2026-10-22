@@ -137,8 +137,21 @@ export default function LeagueResultScreen() {
           </View>
         </Animated.View>
       </View>
-      <Animated.View entering={FadeInDown.delay(600)}>
+      <Animated.View entering={FadeInDown.delay(600)} style={{ gap: Spacing.sm }}>
         <Button title={result.result === 'down' ? 'Let’s go' : 'Continue'} loading={seen.isPending} onPress={done} />
+        {result.result === 'up' && (
+          <Button
+            title="📤 Share"
+            variant="secondary"
+            onPress={() => {
+              seen.mutate();
+              router.replace({
+                pathname: '/share',
+                params: { kind: 'league', tier: String(result.tier), up: '1', rank: String(result.final_rank) },
+              });
+            }}
+          />
+        )}
       </Animated.View>
     </SafeAreaView>
   );

@@ -1,11 +1,11 @@
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { ActivityIndicator, ScrollView, StyleSheet, View, type ColorValue } from 'react-native';
 
 import { FriendStreaks } from '@/components/friend-streaks';
 import { StreakCalendar } from '@/components/streak-calendar';
-import { AppText, Card, Segmented } from '@/components/ui';
+import { ActionPill, AppText, Card, Segmented } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
@@ -93,6 +93,15 @@ function PersonalStreak() {
               ⚡ {totalXp.toLocaleString()} XP · Level {levelFor(totalXp).level}
             </AppText>
           </View>
+        )}
+        {weeks > 0 && (
+          <ActionPill
+            icon="square.and.arrow.up"
+            label="Share"
+            quiet
+            accessibilityLabel="Share your streak"
+            onPress={() => router.push({ pathname: '/share', params: { kind: 'streak', weeks: String(weeks) } })}
+          />
         )}
       </View>
 
@@ -193,7 +202,7 @@ const styles = StyleSheet.create({
   },
   heroLabel: { fontFamily: Font.rounded, fontSize: 24, lineHeight: 30, fontWeight: '800', color: Colors.flame, marginTop: -6 },
   flame: { width: 120, height: 120, borderRadius: 60, alignItems: 'center', justifyContent: 'center' },
-  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', gap: Spacing.sm },
   chip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.pill, backgroundColor: Colors.cardRaised },
   tip: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, padding: Spacing.md + 2 },
   strong: { fontWeight: '800', color: Colors.flame },

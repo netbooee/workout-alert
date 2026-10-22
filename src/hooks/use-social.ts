@@ -129,6 +129,7 @@ export function usePartnerWorkouts(partnerId: string) {
 export function useWorkout(id: string) {
   return useQuery({
     queryKey: ['social', 'workout', id],
+    enabled: !!id,
     queryFn: async () => {
       let workout = unwrap(await supabase.from('workouts').select('*').eq('id', id).single());
       // A link to a copy another device's richer record replaced opens the one that counts.

@@ -193,8 +193,15 @@ function StreakStep({
         </Animated.View>
       </View>
 
-      <Animated.View entering={FadeInDown.delay(600)}>
+      <Animated.View entering={FadeInDown.delay(600)} style={{ gap: Spacing.sm }}>
         <Button title="Keep it going" onPress={() => router.back()} />
+        {weekGoal && isMilestone(weeks) && (
+          <Button
+            title="📤 Share my streak"
+            variant="secondary"
+            onPress={() => router.replace({ pathname: '/share', params: { kind: 'streak', weeks: String(weeks) } })}
+          />
+        )}
       </Animated.View>
     </SafeAreaView>
   );

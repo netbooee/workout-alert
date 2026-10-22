@@ -14,6 +14,7 @@ export function StreakHero({
   state,
   resting = false,
   xp,
+  league,
   showChevron = false,
   children,
 }: {
@@ -22,6 +23,8 @@ export function StreakHero({
   resting?: boolean;
   /** Your total XP, shown as a square on the right that opens How XP works. */
   xp?: number;
+  /** Your public league this week (opens Leagues), or `joined: false` for an invitation. */
+  league?: { joined: boolean; emoji: string; name: string; rank?: number; size?: number };
   /** Hints that the card opens the streak screen. */
   showChevron?: boolean;
   /** Rendered between the streak and the status line (Home puts the week dots here). */
@@ -30,54 +33,79 @@ export function StreakHero({
   const weeks = streak?.current_weeks ?? 0;
   const lit = weeks > 0 || state.kind === 'done';
 
+  // Same look as the streak screen (Duolingo-style), at Home size.
   return (
     <Card style={styles.card}>
       <View style={styles.row}>
+        <View style={{ flex: 1 }}>
+          <AppText style={[styles.number, !lit && { color: Colors.textMuted }]}>{weeks}</AppText>
+          <AppText style={[styles.label, !lit && { color: Colors.textMuted }]}>
+            week streak{lit ? '!' : ''}
+          </AppText>
+        </View>
         <View style={[styles.flame, { backgroundColor: lit ? Colors.flameSoft : Colors.cardRaised }]}>
           <SymbolView
             name="flame.fill"
-            size={38}
+            size={52}
             tintColor={lit ? Colors.flame : Colors.textMuted}
             animationSpec={lit ? { effect: { type: 'bounce' } } : undefined}
           />
         </View>
-        <View style={{ flex: 1 }}>
-          <AppText variant="display">{weeks}</AppText>
-          <AppText variant="caption">week streak</AppText>
-        </View>
-        {xp != null && <XpSquare xp={xp} />}
         {showChevron && <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />}
       </View>
+      {(xp != null || league) && (
+        <View style={styles.chips}>
+          {xp != null && <XpChip xp={xp} />}
+          {league && <LeagueChip {...league} />}
+        </View>
+      )}
       {children}
-      <AppText variant="body" color={resting ? Colors.rest : messageColor(state)}>
-        {resting
-          ? 'Rest mode is on. Your streak is protected 😴'
-          : message(state, weeks, streak?.freezes_banked ?? 0)}
-      </AppText>
+      <View style={styles.tip}>
+        <SymbolView
+          name={resting ? 'moon.zzz.fill' : 'flame.fill'}
+          size={20}
+          tintColor={resting ? Colors.rest : state.kind === 'done' ? Colors.success : Colors.flame}
+        />
+        <AppText variant="body" color={resting ? Colors.rest : messageColor(state)} style={{ flex: 1 }}>
+          {resting
+            ? 'Rest mode is on. Your streak is protected 😴'
+            : message(state, weeks, streak?.freezes_banked ?? 0)}
+        </AppText>
+      </View>
     </Card>
   );
 }
 
-function XpSquare({ xp }: { xp: number }) {
+function LeagueChip({ joined, emoji, name, rank, size }: NonNullable<Parameters<typeof StreakHero>[0]['league']>) {
+  const label = !joined
+    ? '🏆 Join a league'
+    : `${emoji} ${name}${rank ? ` · #${rank}${size && size > 1 ? ` of ${size}` : ''}` : ''}`;
+  return (
+    <Pressable
+      onPress={() => router.push('/league')}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={joined ? `${name} League${rank ? `, place ${rank}` : ''}` : 'Join a public league'}
+      style={({ pressed }) => [styles.chip, styles.leagueChip, pressed && { opacity: 0.7 }]}>
+      <AppText variant="caption" color={Colors.text} numberOfLines={1} style={styles.chipText}>
+        {label}
+      </AppText>
+    </Pressable>
+  );
+}
+
+function XpChip({ xp }: { xp: number }) {
   const info = levelFor(xp);
   return (
     <Pressable
       onPress={() => router.push('/xp')}
+      hitSlop={8}
       accessibilityRole="button"
       accessibilityLabel={`${xp} XP, level ${info.level}, ${info.title}`}
       accessibilityHint="Shows how XP works"
-      style={({ pressed }) => [styles.xp, pressed && { opacity: 0.7 }]}>
-      <View style={styles.xpTop}>
-        <SymbolView name="bolt.fill" size={14} tintColor={Colors.xp} />
-        <AppText variant="caption" color={Colors.text} style={styles.xpUnit}>
-          XP
-        </AppText>
-      </View>
-      <AppText style={styles.xpNumber} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>
-        {xp.toLocaleString()}
-      </AppText>
-      <AppText variant="caption" style={{ fontSize: 11, lineHeight: 14 }}>
-        Level {info.level}
+      style={({ pressed }) => [styles.chip, styles.xpChip, pressed && { opacity: 0.7 }]}>
+      <AppText variant="caption" color={Colors.text} style={styles.chipText}>
+        ⚡ {xp.toLocaleString()} XP · Level {info.level}
       </AppText>
     </Pressable>
   );
@@ -116,35 +144,28 @@ function messageColor(state: WeekState): ColorValue {
 const styles = StyleSheet.create({
   card: { padding: Spacing.md + 4, gap: Spacing.md },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
-  flame: {
-    width: 64,
-    height: 64,
-    borderRadius: Radius.lg,
-    borderCurve: 'continuous',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  xp: {
-    width: 84,
-    height: 84,
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 0,
-    paddingHorizontal: 6,
-    borderRadius: Radius.lg,
-    borderCurve: 'continuous',
-    borderWidth: 1.5,
-    borderColor: Colors.xp,
-    backgroundColor: Colors.xpSoft,
-  },
-  xpTop: { flexDirection: 'row', alignItems: 'center', gap: 2 },
-  xpUnit: { fontSize: 12, lineHeight: 15, fontWeight: '800' },
-  xpNumber: {
+  number: {
     fontFamily: Font.rounded,
-    fontSize: 24,
-    lineHeight: 30,
-    fontWeight: '800',
-    color: Colors.text,
+    fontSize: 60,
+    lineHeight: 66,
+    fontWeight: '900',
+    color: Colors.flame,
     fontVariant: ['tabular-nums'],
+  },
+  label: { fontFamily: Font.rounded, fontSize: 19, lineHeight: 24, fontWeight: '800', color: Colors.flame, marginTop: -4 },
+  flame: { width: 84, height: 84, borderRadius: 42, alignItems: 'center', justifyContent: 'center' },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
+  chip: { paddingHorizontal: 10, paddingVertical: 5, borderRadius: Radius.pill },
+  xpChip: { backgroundColor: Colors.xpSoft },
+  leagueChip: { backgroundColor: Colors.flameSoft },
+  chipText: { fontSize: 13, lineHeight: 17, fontWeight: '700' },
+  tip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    padding: Spacing.sm + 4,
+    borderRadius: Radius.md,
+    borderWidth: 1.5,
+    borderColor: Colors.border,
   },
 });

@@ -4,8 +4,10 @@ import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import { LevelBar } from '@/components/level-bar';
 import { AppText } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
 import { levelFor, levelStart, TITLES } from '@/lib/levels';
+import { nextStepTier, STEP_TIERS, stepXp } from '@/lib/step-xp';
 import { XP_RULES } from '@/lib/xp-rules';
 
 /** "How XP works": opened by tapping the level bar. */
@@ -46,6 +48,8 @@ export default function XpScreen() {
           ))}
         </View>
 
+        <StepBonus />
+
         <AppText variant="label">What resets</AppText>
         <View style={styles.card}>
           <AppText variant="body">
@@ -56,9 +60,10 @@ export default function XpScreen() {
           </AppText>
           <AppText variant="body">
             <AppText variant="body" style={styles.bold}>
-              The weekly league starts over every Sunday
+              Leagues start over every Sunday
             </AppText>{' '}
-            at midnight, counting only XP earned that week.
+            at midnight, counting only XP earned that week. In public leagues, hand-logged
+            workouts without a photo count half.
           </AppText>
           <AppText variant="body">
             <AppText variant="body" style={styles.bold}>
@@ -91,6 +96,42 @@ export default function XpScreen() {
   );
 }
 
+/** The daily step tiers, with how far today's steps have got. */
+function StepBonus() {
+  const { data } = useHomeData();
+  const steps = data?.today?.steps ?? 0;
+  const next = nextStepTier(steps);
+  return (
+    <>
+      <AppText variant="label">Step bonus, every day</AppText>
+      <View style={styles.card}>
+        {STEP_TIERS.map((t) => {
+          const done = steps >= t.steps;
+          return (
+            <View key={t.steps} style={styles.row}>
+              <AppText style={styles.emoji}>{done ? '✅' : '👟'}</AppText>
+              <AppText variant="body" style={[{ flex: 1 }, done && styles.bold]}>
+                {t.steps.toLocaleString()} steps
+              </AppText>
+              <AppText variant="heading" color={done ? Colors.success : Colors.xp}>
+                +{t.xp}
+              </AppText>
+            </View>
+          );
+        })}
+        <AppText variant="caption">
+          Today: {steps.toLocaleString()} steps · +{stepXp(steps)} XP
+          {next ? ` · ${(next.steps - steps).toLocaleString()} more for +${next.xp}` : ' · every bonus earned 🎉'}
+        </AppText>
+        <AppText variant="caption">
+          Up to 25 XP a day from Apple Health’s step count. Steps earn XP only; they don’t count
+          toward your streak or challenges.
+        </AppText>
+      </View>
+    </>
+  );
+}
+
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
   header: {
@@ -103,6 +144,6 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.lg, paddingTop: 0, gap: Spacing.md },
   card: { gap: Spacing.md, padding: Spacing.md, borderRadius: Radius.md, backgroundColor: Colors.card },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  emoji: { fontSize: 22, width: 30 },
+  emoji: { fontSize: 22, lineHeight: 28, width: 30 },
   bold: { fontWeight: '700', color: Colors.text },
 });

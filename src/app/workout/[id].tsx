@@ -20,7 +20,7 @@ import { Comments } from '@/components/comments';
 import { EvidenceBadges } from '@/components/evidence-badges';
 import { PhotoViewer } from '@/components/photo-viewer';
 import { ReactionBar, REACTIONS } from '@/components/reaction-bar';
-import { AppText, Button, Card } from '@/components/ui';
+import { ActionPill, AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useMyIncentives } from '@/hooks/use-incentives';
 import { useNames, useWorkout } from '@/hooks/use-social';
@@ -73,6 +73,15 @@ export default function WorkoutScreen() {
               {started.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
             </AppText>
           </View>
+          {isOwner && w.counted && (
+            <ActionPill
+              icon="square.and.arrow.up"
+              label="Share"
+              quiet
+              accessibilityLabel="Share this workout"
+              onPress={() => router.push({ pathname: '/share', params: { kind: 'workout', id: w.id } })}
+            />
+          )}
         </View>
 
         <View style={styles.stats}>

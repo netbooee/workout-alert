@@ -119,7 +119,7 @@ export default function HomeScreen() {
                   {data.recentWorkouts.slice(0, RECENT_COUNT).map((w) => (
                     <Link key={w.id} href={{ pathname: '/workout/[id]', params: { id: w.id } }} asChild>
                       <Pressable>
-                        <WorkoutRow workout={w} showXp verified={data.verifiedIds.has(w.id)} />
+                        <WorkoutRow workout={w} showXp verified={!!data.verifiedIds?.includes(w.id)} />
                       </Pressable>
                     </Link>
                   ))}

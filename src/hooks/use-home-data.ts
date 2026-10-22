@@ -54,7 +54,8 @@ export function useHomeData() {
         streak: streak.data,
         weekWorkouts: weekWorkouts.data ?? [],
         recentWorkouts: recent.data ?? [],
-        verifiedIds: new Set(verified.data.map((r) => r.workout_id)),
+        // A plain array: the query cache is saved to disk as JSON.
+        verifiedIds: verified.data.map((r) => r.workout_id),
         today: today.data,
       };
     },

@@ -1,10 +1,12 @@
 import * as Haptics from 'expo-haptics';
 import { useQueryClient } from '@tanstack/react-query';
 import { Link } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Avatar } from '@/components/avatar';
 import { LevelBar } from '@/components/level-bar';
 import { MascotPicker } from '@/components/mascot-picker';
 import { Mascot } from '@/components/mascots';
@@ -81,14 +83,25 @@ export default function MeScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Pressable onPress={editName} accessibilityRole="button" accessibilityHint="Change the name partners see" style={styles.nameRow}>
-          <AppText variant="title" style={{ flexShrink: 1 }} numberOfLines={1}>
-            {profile.display_name ?? 'Add your name'}
-          </AppText>
-          <AppText variant="caption" color={Colors.flame}>
-            Edit
-          </AppText>
-        </Pressable>
+        <Card style={styles.nameCard}>
+          <Avatar id={profile.id} name={profile.display_name} size={52} />
+          <View style={{ flex: 1, gap: 2 }}>
+            <AppText variant="title" numberOfLines={1}>
+              {profile.display_name ?? 'Add your name'}
+            </AppText>
+            <AppText variant="caption">This is how partners see you</AppText>
+          </View>
+          <Pressable
+            onPress={editName}
+            accessibilityRole="button"
+            accessibilityLabel={profile.display_name ? 'Edit name' : 'Add your name'}
+            style={styles.editName}>
+            <SymbolView name="pencil" size={14} weight="semibold" tintColor={Colors.flame} />
+            <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+              {profile.display_name ? 'Edit' : 'Add'}
+            </AppText>
+          </Pressable>
+        </Card>
         <Card>
           <LevelBar xp={xp ?? 0} />
           <AppText variant="caption">
@@ -353,7 +366,18 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
 
 const styles = StyleSheet.create({
   deleteAccount: { alignSelf: 'center', padding: Spacing.sm },
-  nameRow: { flexDirection: 'row', alignItems: 'baseline', gap: Spacing.sm },
+  nameCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  editName: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    minHeight: 36,
+    paddingHorizontal: 14,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.flameSoft,
+    borderWidth: 1,
+    borderColor: Colors.flame,
+  },
   appearanceRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   container: { flex: 1, backgroundColor: Colors.background },
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },

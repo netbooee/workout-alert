@@ -144,8 +144,10 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week â†’ â
 
 ## Onboarding
 
-**Onboarding** has a progress bar and the buddy speaking on every step: a name (skipped when
-Sign in with Apple provides one), the weekly goal, Apple Health, notifications, and finally a
+**Onboarding** has a progress bar and the buddy speaking on every step. It starts with picking
+your buddy (`src/components/buddy-chooser.tsx`): the chosen character springs onto a stage,
+wiggles, and sparkles burst around it while the others nap in their tiles; that buddy then
+asks the rest. Then a name (skipped when Sign in with Apple provides one), the weekly goal, Apple Health, notifications, and finally a
 partner step to share an invite or enter a code. An invite link opened before sign-in or
 onboarding is kept (`src/lib/pending-invite.ts`) and offered on that last step. Invites are
 shared as `https://sigamos.cloud/invite/CODE`, which opens the app or offers the beta.
@@ -259,7 +261,7 @@ buddy** in the mood that matches your week.
 ```
 src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
-  onboarding.tsx         Name (if missing), goal, Apple Health, notifications, invite a partner
+  onboarding.tsx         Buddy, name (if missing), goal, Apple Health, notifications, invite a partner
   (tabs)/index.tsx       Home: streak + week dots, rings, 8-week trend, recent workouts
   (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code

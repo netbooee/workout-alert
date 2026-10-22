@@ -1,3 +1,5 @@
+import { DatePicker, Host } from '@expo/ui/swift-ui';
+import { datePickerStyle } from '@expo/ui/swift-ui/modifiers';
 import { useQueryClient } from '@tanstack/react-query';
 import { Image } from 'expo-image';
 import { router } from 'expo-router';
@@ -11,6 +13,7 @@ import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { useProfile } from '@/lib/auth';
 import { showCelebrationIfEarned } from '@/lib/celebrate';
 import { addEvidencePhotos, MAX_PHOTOS, pickPhoto } from '@/lib/evidence';
+import { clampMinutes, LOG_BACK_DAYS, LOG_MINUTES_STEP, logWindow, minutesLabel } from '@/lib/log-workout';
 import { supabase } from '@/lib/supabase';
 import { workoutIcon, workoutLabel } from '@/lib/workout-types';
 
@@ -27,7 +30,10 @@ const TYPES = [
 ] as const;
 const DURATIONS = [15, 30, 45, 60, 90];
 
-/** Log a workout by hand, e.g. a gym session without a watch. Photos make it verifiable. */
+/**
+ * Log a workout by hand, e.g. a gym session without a watch: any duration, and
+ * finished any time in the last two weeks. Photos make it verifiable.
+ */
 export default function LogWorkoutScreen() {
   const profile = useProfile();
   const queryClient = useQueryClient();
@@ -35,6 +41,8 @@ export default function LogWorkoutScreen() {
   const scrollRef = useRef<ScrollView>(null);
   const [type, setType] = useState<(typeof TYPES)[number]>('traditionalStrengthTraining');
   const [minutes, setMinutes] = useState(45);
+  const [now] = useState(() => new Date());
+  const [finishedAt, setFinishedAt] = useState(now);
   const [photos, setPhotos] = useState<string[]>([]);
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
@@ -51,8 +59,7 @@ export default function LogWorkoutScreen() {
   const save = async () => {
     setSaving(true);
     try {
-      const ended = new Date();
-      const started = new Date(ended.getTime() - minutes * 60_000);
+      const { started, ended } = logWindow(finishedAt, minutes);
       const { data: workout, error } = await supabase
         .from('workouts')
         .insert({
@@ -107,6 +114,11 @@ export default function LogWorkoutScreen() {
         </View>
 
         <AppText variant="label">How long?</AppText>
+        <Card style={styles.stepper}>
+          <StepButton label="−" onPress={() => setMinutes((m) => clampMinutes(m - LOG_MINUTES_STEP))} />
+          <AppText variant="title">{minutesLabel(minutes)}</AppText>
+          <StepButton label="+" onPress={() => setMinutes((m) => clampMinutes(m + LOG_MINUTES_STEP))} />
+        </Card>
         <View style={styles.durations}>
           {DURATIONS.map((m) => (
             <Pressable key={m} onPress={() => setMinutes(m)} style={[styles.duration, m === minutes && styles.selected]}>
@@ -120,6 +132,21 @@ export default function LogWorkoutScreen() {
           ))}
         </View>
 
+        <AppText variant="label">When did you finish?</AppText>
+        <Card style={styles.when}>
+          <Host matchContents style={{ alignSelf: 'stretch' }}>
+            <DatePicker
+              title="Finished"
+              selection={finishedAt}
+              displayedComponents={['date', 'hourAndMinute']}
+              range={{ start: new Date(now.getTime() - LOG_BACK_DAYS * 24 * 3600 * 1000), end: now }}
+              onDateChange={setFinishedAt}
+              modifiers={[datePickerStyle('compact')]}
+            />
+          </Host>
+          <AppText variant="caption">Up to {LOG_BACK_DAYS} days back, so you can add yesterday’s workout.</AppText>
+        </Card>
+
         <Card>
           <View style={styles.evidenceHeader}>
             <AppText variant="label">Check-in</AppText>
@@ -129,7 +156,7 @@ export default function LogWorkoutScreen() {
           </View>
           <AppText variant="caption">
             Add a check-in photo so your partners can cheer you on: the gym, your screen, a
-            sweaty selfie. Without one, it shows as self-reported.
+            sweaty selfie. Without one, it shows as self-reported. Hold a photo to remove it.
           </AppText>
           <View style={styles.photos}>
             {photos.map((uri) => (
@@ -164,13 +191,31 @@ export default function LogWorkoutScreen() {
       </ScrollView>
 
       <View style={[styles.footer, keyboardHeight > 0 && { paddingBottom: Spacing.md }]}>
-        <Button title={`Log ${minutes} min ${workoutLabel(type)}`} loading={saving} onPress={save} />
+        <Button title={`Log ${minutesLabel(minutes)} ${workoutLabel(type)}`} loading={saving} onPress={save} />
       </View>
     </View>
   );
 }
 
+function StepButton({ label, onPress }: { label: string; onPress: () => void }) {
+  return (
+    <Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label === '+' ? 'Longer' : 'Shorter'} style={styles.step}>
+      <AppText variant="title">{label}</AppText>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  stepper: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
+  step: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: Colors.cardRaised,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  when: { gap: Spacing.xs },
   container: { flex: 1, backgroundColor: Colors.background },
   header: {
     flexDirection: 'row',

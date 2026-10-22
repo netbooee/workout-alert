@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/lib/auth';
+import { needsCheer } from '@/lib/cheers';
 import type { Partner, ReactionKind, Workout } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
 
@@ -80,6 +81,35 @@ export function usePartnerFeed() {
           .eq('counted', true)
           .order('started_at', { ascending: false })
           .limit(30),
+      );
+      return withReactions(workouts);
+    },
+  });
+}
+
+/** Partners' recent workouts you haven't cheered or verified yet, newest first. */
+export function useCheerQueue(): FeedItem[] {
+  const me = useAuth().session?.user.id;
+  const { data } = usePartnerFeed();
+  return me && data ? needsCheer(data, me) : [];
+}
+
+/** One partner's recent workouts that count, with reactions. */
+export function usePartnerWorkouts(partnerId: string) {
+  const userId = useAuth().session?.user.id;
+  return useQuery({
+    queryKey: ['social', 'partner-workouts', userId, partnerId],
+    enabled: !!userId && !!partnerId,
+    queryFn: async () => {
+      const workouts = unwrap(
+        await supabase
+          .from('workouts')
+          .select('*')
+          .eq('user_id', partnerId)
+          .is('duplicate_of', null)
+          .eq('counted', true)
+          .order('started_at', { ascending: false })
+          .limit(20),
       );
       return withReactions(workouts);
     },

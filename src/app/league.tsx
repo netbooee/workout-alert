@@ -17,6 +17,7 @@ import {
 import { useLeague } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
 import type { PublicLeagueRow } from '@/lib/database.types';
+import { friendlyError } from '@/lib/errors';
 import {
   demoteCount,
   MEDALS,
@@ -32,7 +33,7 @@ import {
 import { mascotKind } from '@/lib/mascots';
 import { dayKey } from '@/lib/week';
 
-const fail = (title: string) => (e: unknown) => Alert.alert(title, e instanceof Error ? e.message : String(e));
+const fail = (title: string) => (e: unknown) => Alert.alert(title, friendlyError(e));
 
 /**
  * Leagues. Public: an opt-in weekly group of up to 20 people at your tier,

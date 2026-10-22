@@ -1,4 +1,5 @@
 import type { Session } from '@supabase/supabase-js';
+import * as AppleAuthentication from 'expo-apple-authentication';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { createContext, useContext, useEffect, useState, type PropsWithChildren } from 'react';
 
@@ -121,8 +122,12 @@ export async function signOut() {
  * Permanently deletes the account: the user's photos and voice messages
  * first (storage objects can't be removed from SQL), then the auth user,
  * which cascades through every table. Ends signed out.
+ *
+ * Someone who signed in with Apple confirms with Apple once more first, so the
+ * app's access to their Apple ID can be revoked (cancelling stops the deletion).
  */
 export async function deleteAccount(userId: string) {
+  await revokeAppleSignIn();
   await unregisterDevice().catch(() => {});
   const paths = await listFiles(EVIDENCE_BUCKET, userId);
   for (let i = 0; i < paths.length; i += 100) {
@@ -136,6 +141,24 @@ export async function deleteAccount(userId: string) {
   await signOutOfGoogle();
   // The server session went with the user, so only clear the local one.
   await supabase.auth.signOut({ scope: 'local' });
+}
+
+/**
+ * App Store Review Guideline 5.1.1(v): deleting an account made with Sign in
+ * with Apple must revoke the app's Apple token. Apple only hands out a code
+ * when asked, so ask, and let the revoke-apple Edge Function trade it in.
+ * A failure on our side doesn't block deleting the account.
+ */
+async function revokeAppleSignIn() {
+  const { data } = await supabase.auth.getSession();
+  const usedApple = data.session?.user.identities?.some((i) => i.provider === 'apple');
+  if (!usedApple || !(await AppleAuthentication.isAvailableAsync())) return;
+
+  // Throws ERR_REQUEST_CANCELED if they back out, which stops the deletion.
+  const { authorizationCode } = await AppleAuthentication.signInAsync({ requestedScopes: [] });
+  if (!authorizationCode) return;
+  const { error } = await supabase.functions.invoke('revoke-apple', { body: { code: authorizationCode } });
+  if (error) console.warn('Could not revoke Sign in with Apple', error);
 }
 
 const EVIDENCE_BUCKET = 'evidence';

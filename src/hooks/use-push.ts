@@ -4,6 +4,7 @@ import { router, type Href } from 'expo-router';
 import { useEffect } from 'react';
 import { Alert, AppState } from 'react-native';
 
+import { friendlyError } from '@/lib/errors';
 import { reactionForAction, workoutIdFromUrl } from '@/lib/notification-actions';
 import {
   enablePush,
@@ -77,7 +78,7 @@ async function respond(response: Notifications.NotificationResponse, queryClient
       await reactFromNotification(workoutId, reaction);
       await queryClient.invalidateQueries({ queryKey: ['social'] });
     } catch (e) {
-      Alert.alert('Could not save', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not save', friendlyError(e));
     }
   }
   if (typeof url === 'string' && url.startsWith('/')) router.push(url as Href);

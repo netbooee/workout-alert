@@ -8,6 +8,7 @@ import { useToggleReaction } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import { CHEER_KINDS } from '@/lib/cheers';
 import type { ReactionKind } from '@/lib/database.types';
+import { friendlyError } from '@/lib/errors';
 
 export const REACTIONS: { kind: ReactionKind; emoji: string; label: string }[] = [
   { kind: 'clap', emoji: '👏', label: 'Clap' },
@@ -46,7 +47,7 @@ export function ReactionBar({
     (c) => c.count > 0,
   );
 
-  const fail = (e: unknown) => Alert.alert('Could not save', e instanceof Error ? e.message : String(e));
+  const fail = (e: unknown) => Alert.alert('Could not save', friendlyError(e));
 
   const cheer = async (kind: ReactionKind = 'clap') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

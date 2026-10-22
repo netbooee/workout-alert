@@ -19,6 +19,7 @@ import { useAddComment, useComments, useDeleteComment } from '@/hooks/use-commen
 import { useNames } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import type { Workout, WorkoutComment } from '@/lib/database.types';
+import { friendlyError } from '@/lib/errors';
 import { useEvidenceUrls } from '@/lib/evidence';
 import { timeAgo } from '@/lib/time-ago';
 import { formatClip, MAX_VOICE_SECONDS, MIN_VOICE_MS } from '@/lib/voice';
@@ -48,7 +49,7 @@ export function Comments({ workout }: { workout: Workout }) {
         style: 'destructive',
         onPress: () =>
           remove.mutate(comment, {
-            onError: (e) => Alert.alert('Could not delete', e instanceof Error ? e.message : String(e)),
+            onError: (e) => Alert.alert('Could not delete', friendlyError(e)),
           }),
       },
     ]);
@@ -153,7 +154,7 @@ function Composer({ workoutId, isOwner }: { workoutId: string; isOwner: boolean 
           setClip(null);
           setPhase('idle');
         },
-        onError: (e) => Alert.alert('Could not send', e instanceof Error ? e.message : String(e)),
+        onError: (e) => Alert.alert('Could not send', friendlyError(e)),
       },
     );
   };

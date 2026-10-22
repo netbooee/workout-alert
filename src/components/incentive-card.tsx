@@ -11,10 +11,11 @@ import { useMarkIncentiveDelivered, useRespondToIncentive } from '@/hooks/use-in
 import { useNames, useNudge, usePartners } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import type { Incentive } from '@/lib/database.types';
+import { friendlyError } from '@/lib/errors';
 import { goalOption, incentiveGoalText, progressFraction, timeLeft } from '@/lib/incentives';
 
 const fail = (title: string) => (e: unknown) =>
-  Alert.alert(title, e instanceof Error ? e.message : String(e));
+  Alert.alert(title, friendlyError(e));
 
 /**
  * An incentive from either side: what you were offered (accept, track, earn)

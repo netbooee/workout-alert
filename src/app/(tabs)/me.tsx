@@ -21,6 +21,7 @@ import { useLeagueSettings } from '@/hooks/use-league';
 import { useXpTotal } from '@/hooks/use-social';
 import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { deleteAccount, signOut, useProfile, useUpdateProfile } from '@/lib/auth';
+import { friendlyError } from '@/lib/errors';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 import { mascotKind } from '@/lib/mascots';
 import {
@@ -55,7 +56,7 @@ export default function MeScreen() {
     try {
       await updateProfile({ weekly_goal: goal });
     } catch (e) {
-      Alert.alert('Could not update goal', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not update goal', friendlyError(e));
     }
   };
 
@@ -69,7 +70,7 @@ export default function MeScreen() {
         try {
           await updateProfile({ display_name: name });
         } catch (e) {
-          Alert.alert('Could not save your name', e instanceof Error ? e.message : String(e));
+          Alert.alert('Could not save your name', friendlyError(e));
         }
       },
       'plain-text',
@@ -83,7 +84,7 @@ export default function MeScreen() {
       await syncHealthData(profile.id);
       await refetch();
     } catch (e) {
-      Alert.alert('Sync failed', e instanceof Error ? e.message : String(e));
+      Alert.alert('Sync failed', friendlyError(e));
     } finally {
       setResyncing(false);
     }
@@ -276,7 +277,7 @@ function WhatCountsCard() {
     try {
       await updateProfile(patch);
     } catch (e) {
-      Alert.alert('Could not save', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not save', friendlyError(e));
     }
     setSaving(false);
   };
@@ -321,16 +322,18 @@ function confirmSignOut() {
 function confirmDeleteAccount(userId: string) {
   Alert.alert(
     'Delete your account?',
-    'This permanently deletes your streak, workouts, photos, messages, partners and rewards. It can’t be undone. Workouts in Apple Health are not touched.',
+    'This permanently deletes your streak, workouts, photos, messages, partners and rewards. It can’t be undone. Workouts in Apple Health are not touched. If you signed in with Apple, you’ll confirm with Apple once more.',
     [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete account',
         style: 'destructive',
         onPress: () =>
-          deleteAccount(userId).catch((e) =>
-            Alert.alert('Could not delete your account', e instanceof Error ? e.message : String(e)),
-          ),
+          deleteAccount(userId).catch((e) => {
+            // Backing out of Apple's confirmation just cancels.
+            if (e && typeof e === 'object' && 'code' in e && e.code === 'ERR_REQUEST_CANCELED') return;
+            Alert.alert('Could not delete your account', friendlyError(e));
+          }),
       },
     ],
   );
@@ -415,7 +418,7 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
         value={value}
         trackColor={{ true: Colors.flame }}
         onValueChange={(v) => {
-          onChange(v).catch((e) => Alert.alert('Could not save', e instanceof Error ? e.message : String(e)));
+          onChange(v).catch((e) => Alert.alert('Could not save', friendlyError(e)));
         }}
       />
     </View>

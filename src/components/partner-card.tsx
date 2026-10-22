@@ -72,11 +72,15 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
           accessibilityRole="button"
           accessibilityLabel={`Friend streak with ${firstName}: ${partner.friend_streak} weeks`}
           style={styles.friendStreak}>
-          <AppText variant="title" color={partner.friend_streak ? Colors.xp : Colors.textMuted} style={{ fontSize: 22 }}>
-            🔥{partner.friend_streak}
-          </AppText>
-          <AppText variant="caption" style={{ fontSize: 10 }}>
-            wk together
+          <View style={styles.friendStreakCount}>
+            <AppText style={{ fontSize: 14 }}>🔥</AppText>
+            <AppText variant="title" color={partner.friend_streak ? Colors.xp : Colors.textMuted} style={{ fontSize: 20 }}>
+              {partner.friend_streak}
+            </AppText>
+          </View>
+          <AppText variant="caption" style={styles.friendStreakLabel}>
+            {partner.friend_streak === 1 ? 'week' : 'weeks'}
+            {'\n'}together
           </AppText>
         </Pressable>
       </Pressable>
@@ -156,11 +160,14 @@ const styles = StyleSheet.create({
   stat: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   friendStreak: {
     alignItems: 'center',
-    minWidth: 56,
-    paddingVertical: 4,
+    minWidth: 64,
+    paddingVertical: 6,
+    paddingHorizontal: 8,
     borderRadius: Radius.sm,
     backgroundColor: Colors.xpSoft,
   },
+  friendStreakCount: { flexDirection: 'row', alignItems: 'center', gap: 2 },
+  friendStreakLabel: { fontSize: 10, lineHeight: 12, textAlign: 'center' },
   actions: { flexDirection: 'row', gap: Spacing.sm },
   offer: { backgroundColor: Colors.flameSoft },
   incentive: {

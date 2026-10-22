@@ -253,7 +253,7 @@ export type Database = {
       xp_events: {
         Row: {
           user_id: string;
-          kind: 'workout' | 'evidence' | 'week_goal' | 'incentive';
+          kind: 'workout' | 'evidence' | 'week_goal' | 'incentive' | 'verified' | 'verifier' | 'steps';
           ref: string;
           amount: number;
           created_at: string;

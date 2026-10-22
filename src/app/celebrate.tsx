@@ -7,20 +7,24 @@ import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { LevelBar } from '@/components/level-bar';
+import { Mascot } from '@/components/mascots';
 import { AppText, Button } from '@/components/ui';
 import { WeekDots } from '@/components/week-dots';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
+import { buddyLine, celebrationMood, celebrationTitle } from '@/lib/celebration-copy';
 import type { Streak } from '@/lib/database.types';
 import { levelFor } from '@/lib/levels';
+import { mascotKind } from '@/lib/mascots';
 import { earnedFreezeAt, isMilestone, milestoneLabel } from '@/lib/streak';
 import { buildWeek, weekState, type WeekState, type WorkoutLike } from '@/lib/week';
 
 /**
- * The Duolingo-style "lesson complete" moment after new activity earns XP.
- * New workouts get a second step showing the streak and what comes next.
+ * The Duolingo-style "lesson complete" moment after new activity earns XP:
+ * your buddy calls out what happened (a workout, a photo, a step tier...)
+ * over the XP count. New workouts get a second step showing the streak.
  */
 export default function CelebrateScreen() {
   const params = useLocalSearchParams<{
@@ -29,11 +33,14 @@ export default function CelebrateScreen() {
     weekGoal: string;
     evidence: string;
     incentive: string;
+    steps: string;
   }>();
+  const profile = useProfile();
   const earned = Number(params.xp) || 0;
   const workouts = Number(params.workouts) || 0;
   const weekGoal = params.weekGoal === '1';
   const incentive = params.incentive === '1';
+  const steps = Number(params.steps) || 0;
   const { data: total } = useXpTotal();
   const { data: home } = useHomeData();
   const shown = useCountUp(earned);
@@ -45,15 +52,14 @@ export default function CelebrateScreen() {
   }, []);
 
   const leveledUp = total != null && levelFor(total - earned).level < levelFor(total).level;
-  const title = incentive
-    ? 'Challenge complete! 🎯'
-    : weekGoal
-      ? 'Week goal hit!'
-      : workouts > 1
-        ? `${workouts} workouts logged!`
-        : workouts === 1
-          ? 'Workout logged!'
-          : 'Check-in added!';
+  const facts = {
+    workouts,
+    weekGoal,
+    evidence: params.evidence === '1',
+    incentive,
+    steps,
+    newLevel: leveledUp ? levelFor(total!).level : null,
+  };
 
   if (step === 'streak' && home?.streak) {
     return <StreakStep streak={home.streak} weekWorkouts={home.weekWorkouts} weekGoal={weekGoal} />;
@@ -62,22 +68,32 @@ export default function CelebrateScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.body}>
-        <Animated.View entering={ZoomIn.springify().damping(9)} style={styles.burst}>
-          <SymbolView
-            name={weekGoal ? 'flame.fill' : leveledUp ? 'star.fill' : 'bolt.fill'}
-            size={96}
-            tintColor={weekGoal ? Colors.flame : Colors.xp}
-          />
+        <Animated.View entering={FadeInDown.delay(250)} style={styles.bubble}>
+          <AppText variant="heading" style={{ textAlign: 'center' }}>
+            {buddyLine(facts)}
+          </AppText>
+          <View style={styles.bubbleTail} />
+        </Animated.View>
+        <Animated.View
+          entering={ZoomIn.springify().damping(9)}
+          style={[styles.burst, weekGoal && styles.flameBurst]}>
+          <Mascot kind={mascotKind(profile.mascot)} mood={celebrationMood(facts)} size={150} />
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(150)} style={styles.center}>
           <AppText variant="title" style={{ fontSize: 32, textAlign: 'center' }}>
-            {leveledUp ? `Level ${levelFor(total!).level}!` : title}
+            {celebrationTitle(facts)}
           </AppText>
           <AppText variant="display" color={Colors.xp}>
             +{shown} XP
           </AppText>
         </Animated.View>
+
+        {steps > 0 && (workouts > 0 || weekGoal || facts.evidence || incentive) && (
+          <Animated.View entering={FadeInDown.delay(300)} style={[styles.pill, { backgroundColor: Colors.xpSoft }]}>
+            <AppText variant="heading">👟 {steps.toLocaleString()} steps today</AppText>
+          </Animated.View>
+        )}
 
         {weekGoal && home?.streak && (
           <Animated.View entering={FadeInDown.delay(350)} style={styles.pill}>
@@ -211,6 +227,28 @@ function useCountUp(target: number, durationMs = 700) {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background, padding: Spacing.lg },
   body: { flex: 1, alignItems: 'center', justifyContent: 'center', gap: Spacing.lg },
+  bubble: {
+    maxWidth: 300,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm + 2,
+    borderRadius: Radius.lg,
+    backgroundColor: Colors.card,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.border,
+    marginBottom: -Spacing.sm,
+  },
+  bubbleTail: {
+    position: 'absolute',
+    bottom: -7,
+    alignSelf: 'center',
+    width: 14,
+    height: 14,
+    transform: [{ rotate: '45deg' }],
+    backgroundColor: Colors.card,
+    borderRightWidth: StyleSheet.hairlineWidth,
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.border,
+  },
   burst: {
     width: 180,
     height: 180,

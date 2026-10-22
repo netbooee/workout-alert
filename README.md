@@ -41,8 +41,10 @@ they're consistent across devices and can't be edited by the client.
   **Verify** it (you saw them do it; explained the first time; you can't verify your own).
 - **Cheer on your partners**: partner workouts from the last 3 days you haven't cheered or
   verified show on Home (up to 3) and at the top of the Partners tab, with Cheer and Verify
-  on each row; the Partners tab icon shows how many are waiting, plus partner requests
-  (`src/lib/cheers.ts`, `src/components/cheer-card.tsx`).
+  on each row. A row stays after a cheer so you can still verify; it leaves when you verify,
+  when you dismiss it with ✕ (remembered on the phone), or next time you open the app if you
+  only cheered. The Partners tab icon counts workouts you haven't touched, plus partner
+  requests (`src/lib/cheers.ts`, `src/lib/cheer-list-store.ts`, `src/components/cheer-card.tsx`).
 - **"Just worked out" pushes** have **👏 Cheer** and **✅ Verify** buttons (long-press or pull
   down the notification). Tapping one saves the reaction and opens the workout showing it.
   The server sends these pushes with the `partner_workout` category

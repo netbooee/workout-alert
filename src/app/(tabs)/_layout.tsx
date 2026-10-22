@@ -3,7 +3,7 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Colors } from '@/constants/theme';
 import { useDailyGreeting } from '@/hooks/use-lotl';
 import { usePushLifecycle } from '@/hooks/use-push';
-import { useCheerQueue, usePartners } from '@/hooks/use-social';
+import { useCheerBadgeCount, usePartners } from '@/hooks/use-social';
 import { useWidgetSync } from '@/hooks/use-widget-sync';
 import { useAuth } from '@/lib/auth';
 
@@ -21,7 +21,7 @@ function Tabs() {
   useDailyGreeting();
   useWidgetSync();
   // Partner workouts waiting for your cheer, plus partner requests waiting for an answer.
-  const cheers = useCheerQueue().length;
+  const cheers = useCheerBadgeCount();
   const requests = (usePartners().data ?? []).filter((p) => p.status === 'pending' && p.incoming).length;
   const badge = cheers + requests;
 

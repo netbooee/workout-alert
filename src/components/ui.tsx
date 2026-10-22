@@ -82,18 +82,21 @@ const textStyles = StyleSheet.create({
   label: { fontSize: 12, fontWeight: '600', color: Colors.textSecondary, letterSpacing: 0.6, textTransform: 'uppercase' },
 });
 
-/** A compact pill-style segmented control. */
+/** A pill-style segmented control: compact by default, or `large` for switching a whole screen's section. */
 export function Segmented<T extends string>({
   options,
   value,
   onChange,
+  size = 'small',
 }: {
   options: { key: T; label: string }[];
   value: T;
   onChange: (key: T) => void;
+  size?: 'small' | 'large';
 }) {
+  const large = size === 'large';
   return (
-    <View style={styles.segmented}>
+    <View style={[styles.segmented, large && styles.segmentedLarge]}>
       {options.map((o) => {
         const selected = o.key === value;
         return (
@@ -106,11 +109,11 @@ export function Segmented<T extends string>({
             }}
             accessibilityRole="button"
             accessibilityState={{ selected }}
-            style={[styles.segment, selected && styles.segmentSelected]}>
+            style={[styles.segment, large && styles.segmentLarge, selected && styles.segmentSelected]}>
             <AppText
               variant="caption"
               color={selected ? Colors.text : Colors.textSecondary}
-              style={{ fontSize: 12 }}>
+              style={large ? styles.segmentLargeText : { fontSize: 12 }}>
               {o.label}
             </AppText>
           </Pressable>
@@ -133,6 +136,9 @@ const styles = StyleSheet.create({
     borderRadius: Radius.pill,
   },
   segmentSelected: { backgroundColor: Colors.border },
+  segmentedLarge: { padding: 3 },
+  segmentLarge: { flex: 1, minHeight: 40, alignItems: 'center', justifyContent: 'center', paddingVertical: 8 },
+  segmentLargeText: { fontSize: 15, fontWeight: '600' },
   card: {
     backgroundColor: Colors.card,
     borderRadius: Radius.lg,

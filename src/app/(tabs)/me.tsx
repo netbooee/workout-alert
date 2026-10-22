@@ -118,6 +118,7 @@ export default function MeScreen() {
           ]}
           value={section}
           onChange={setSection}
+          size="large"
         />
 
         {section === 'you' && (

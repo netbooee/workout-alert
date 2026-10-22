@@ -1,6 +1,8 @@
 import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
-import { Alert, Pressable, StyleSheet, View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { useState } from 'react';
+import { Alert, LayoutAnimation, Pressable, StyleSheet, View } from 'react-native';
 
 import { QuestProgress } from '@/components/quest-progress';
 import { AppText, Button, Card } from '@/components/ui';
@@ -9,7 +11,7 @@ import { useMarkIncentiveDelivered, useRespondToIncentive } from '@/hooks/use-in
 import { useNames, useNudge, usePartners } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import type { Incentive } from '@/lib/database.types';
-import { incentiveGoalText, timeLeft } from '@/lib/incentives';
+import { goalOption, incentiveGoalText, progressFraction, timeLeft } from '@/lib/incentives';
 
 const fail = (title: string) => (e: unknown) =>
   Alert.alert(title, e instanceof Error ? e.message : String(e));
@@ -19,8 +21,19 @@ const fail = (title: string) => (e: unknown) =>
  * or what you offered a partner (track, nudge, mark delivered). An active one
  * reads like Duolingo's Friends Quest: progress and what's left, with the next
  * action on the card. Tapping opens the detail screen unless `linked` is false.
+ * With `collapsible` (Home), an active one starts as a single compact row that
+ * expands to the full card; ones waiting on you stay open.
  */
-export function IncentiveCard({ incentive: i, linked = true }: { incentive: Incentive; linked?: boolean }) {
+export function IncentiveCard({
+  incentive: i,
+  linked = true,
+  collapsible = false,
+}: {
+  incentive: Incentive;
+  linked?: boolean;
+  collapsible?: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
   const me = useAuth().session?.user.id;
   const nameOf = useNames();
   const respond = useRespondToIncentive();
@@ -43,6 +56,41 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
   const split = i.shared
     ? { mine: i.progress - theirShare, theirs: theirShare, otherName: other }
     : undefined;
+  const canCollapse = collapsible && i.status === 'active';
+  const toggle = () => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setExpanded((e) => !e);
+  };
+
+  if (canCollapse && !expanded) {
+    return (
+      <Pressable
+        onPress={toggle}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: false }}
+        accessibilityHint="Shows the whole challenge">
+        <Card style={styles.compact}>
+          <View style={styles.compactEmoji}>
+            <AppText style={{ fontSize: 20 }}>{i.reward_emoji}</AppText>
+          </View>
+          <View style={{ flex: 1, gap: 4 }}>
+            <AppText variant="heading" numberOfLines={1} style={{ fontSize: 15 }}>
+              {i.reward}
+            </AppText>
+            <View style={styles.compactTrack}>
+              <View style={[styles.compactFill, { width: `${progressFraction(i) * 100}%` }]} />
+            </View>
+            <AppText variant="caption" numberOfLines={1} style={{ fontSize: 12 }}>
+              {i.shared ? '🤝' : '🎯'} {Math.min(i.progress, i.goal_target)}/{i.goal_target}{' '}
+              {goalOption(i.goal_kind).unit} · {timeLeft(i.ends_at)} · {title}
+            </AppText>
+          </View>
+          <SymbolView name="chevron.down" size={14} weight="semibold" tintColor={Colors.textMuted} />
+        </Card>
+      </Pressable>
+    );
+  }
+
   const card = (
     <Card style={[styles.card, i.status === 'earned' && styles.earned]}>
       <View style={styles.header}>
@@ -61,6 +109,17 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
             {i.verified_only ? ' · verified only' : ''}
           </AppText>
         </View>
+        {canCollapse && (
+          <Pressable
+            onPress={toggle}
+            hitSlop={12}
+            accessibilityRole="button"
+            accessibilityLabel="Show less"
+            accessibilityState={{ expanded: true }}
+            style={styles.collapse}>
+            <SymbolView name="chevron.up" size={14} weight="semibold" tintColor={Colors.textMuted} />
+          </Pressable>
+        )}
       </View>
 
       {i.notes ? (
@@ -189,4 +248,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', gap: Spacing.sm },
+  collapse: { alignSelf: 'flex-start', padding: 4 },
+  compact: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, paddingVertical: Spacing.sm + 2 },
+  compactEmoji: {
+    width: 40,
+    height: 40,
+    borderRadius: Radius.sm,
+    backgroundColor: Colors.flameSoft,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  compactTrack: { height: 6, borderRadius: 3, backgroundColor: Colors.cardRaised, overflow: 'hidden' },
+  compactFill: { height: '100%', borderRadius: 3, backgroundColor: Colors.flame },
 });

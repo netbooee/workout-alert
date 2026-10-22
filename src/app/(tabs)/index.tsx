@@ -107,7 +107,7 @@ export default function HomeScreen() {
         <NudgeBanner />
         <CheerCard />
         {incentives.map((i) => (
-          <IncentiveCard key={i.id} incentive={i} />
+          <IncentiveCard key={i.id} incentive={i} collapsible />
         ))}
 
         {!isPending && (

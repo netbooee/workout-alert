@@ -207,7 +207,7 @@ function widgetReminder(
     return {
       icon: 'gift',
       text: `${i.incentiveOffer.from} offered: ${i.incentiveOffer.reward}`,
-      privateText: 'An incentive offer is waiting',
+      privateText: 'A challenge is waiting',
       url: `sigamos:///incentive/${i.incentiveOffer.id}`,
     };
   }

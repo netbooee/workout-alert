@@ -46,7 +46,7 @@ export default function CelebrateScreen() {
 
   const leveledUp = total != null && levelFor(total - earned).level < levelFor(total).level;
   const title = incentive
-    ? 'Incentive earned! 🎁'
+    ? 'Challenge complete! 🎯'
     : weekGoal
       ? 'Week goal hit!'
       : workouts > 1

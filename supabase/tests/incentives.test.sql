@@ -58,12 +58,12 @@ select is((select status from offer), 'offered', 'a partner can offer an incenti
 select is((select notes from offer), 'Gym sessions count double. You pick the café!', 'the offer keeps its rules and notes, trimmed');
 select throws_ok(
   $$select public.offer_incentive('00000000-0000-0000-0000-00000000000b', 'active_minutes', 60, 1, 'Pizza')$$,
-  'P0001', 'You already have an incentive going with them', 'only one open incentive per partner');
+  'P0001', 'You already have a challenge going with them', 'only one open incentive per partner');
 
 reset role;
 select results_eq(
   $$select user_id, title, body from public.notifications where kind = 'incentive'$$,
-  $$values ('00000000-0000-0000-0000-00000000000b'::uuid, 'Sam offered you an incentive 🎁'::text,
+  $$values ('00000000-0000-0000-0000-00000000000b'::uuid, 'Sam challenged you 🎯'::text,
             'Hit 3 workout days this week → ☕ Coffee on me · Gym sessions count double. You pick the café!'::text)$$,
   'the recipient is notified of the offer');
 select is(
@@ -93,7 +93,7 @@ select is((public.respond_to_incentive((select id from offer), true)).progress, 
 reset role;
 select results_eq(
   $$select user_id, title from public.notifications$$,
-  $$values ('00000000-0000-0000-0000-00000000000a'::uuid, 'Jo accepted your incentive 🎁'::text)$$,
+  $$values ('00000000-0000-0000-0000-00000000000a'::uuid, 'Jo accepted your challenge 🎯'::text)$$,
   'the giver is told it was accepted');
 
 select pg_temp.workout('00000000-0000-0000-0000-00000000000b', 0);
@@ -107,8 +107,8 @@ select is((select amount from public.xp_events where kind = 'incentive'), 100, '
 select bag_eq(
   $$select user_id, title, body from public.notifications$$,
   $$values
-    ('00000000-0000-0000-0000-00000000000b'::uuid, 'You earned Sam’s incentive! 🎉'::text, '☕ Coffee on me · +100 XP'::text),
-    ('00000000-0000-0000-0000-00000000000a'::uuid, 'Jo earned your incentive 🎉'::text, 'Time to deliver: ☕ Coffee on me'::text)$$,
+    ('00000000-0000-0000-0000-00000000000b'::uuid, 'You completed Sam’s challenge! 🎉'::text, '☕ Coffee on me · +100 XP'::text),
+    ('00000000-0000-0000-0000-00000000000a'::uuid, 'Jo completed your challenge 🎉'::text, 'Time to deliver: ☕ Coffee on me'::text)$$,
   'both people are notified when it is earned');
 
 delete from public.workouts where user_id = '00000000-0000-0000-0000-00000000000b'

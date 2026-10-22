@@ -41,19 +41,19 @@ export function IncentiveIntro({ partners }: { partners: PartnerState[] }) {
     <Card style={styles.card}>
       <View style={styles.row}>
         <AppText variant="title" style={{ fontSize: 30 }}>
-          🎁
+          🎯
         </AppText>
         <View style={{ flex: 1, gap: 2 }}>
-          <AppText variant="heading">New: reward extra effort</AppText>
+          <AppText variant="heading">Challenge a partner</AppText>
           <AppText variant="caption">
-            Offer a partner a treat for a stretch goal: “4 workouts this week → coffee on me.”
-            Sigamos tracks it and they get +100 XP when they earn it.
+            Reward a stretch goal (“4 workouts this week → coffee on me”) or do one together
+            (“8 workout days between us → pizza night”). Sigamos tracks it, worth +100 XP.
           </AppText>
         </View>
       </View>
       <View style={{ gap: Spacing.sm }}>
         <Button
-          title={`Offer ${name} an incentive`}
+          title={`Challenge ${name}`}
           style={{ height: 48 }}
           onPress={() => router.push({ pathname: '/incentive/new', params: { to: pick.partner_id } })}
         />

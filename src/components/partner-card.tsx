@@ -123,7 +123,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
               router.push({ pathname: '/incentive/new', params: { to: partner.partner_id } });
             }}
             accessibilityRole="button"
-            accessibilityLabel={`Offer ${firstName} an incentive`}
+            accessibilityLabel={`Challenge ${firstName}`}
             style={[styles.action, styles.offer]}>
             <AppText
               variant="heading"
@@ -132,7 +132,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
               numberOfLines={1}
               adjustsFontSizeToFit
               minimumFontScale={0.75}>
-              🎁 Incentive
+              🎯 Challenge
             </AppText>
           </Pressable>
         )}

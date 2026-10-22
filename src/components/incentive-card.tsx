@@ -34,10 +34,10 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
   const reached = i.progress >= i.goal_target;
 
   const title = i.shared
-    ? `Shared quest with ${other}`
+    ? `Together with ${other}`
     : received
-      ? `${other}’s incentive for you`
-      : `Your incentive for ${other}`;
+      ? `${other}’s challenge for you`
+      : `Your challenge for ${other}`;
   const otherId = received ? i.from_id : i.to_id;
   const theirShare = i.shared ? (received ? i.from_progress : i.progress - i.from_progress) : 0;
   const split = i.shared
@@ -53,7 +53,7 @@ export function IncentiveCard({ incentive: i, linked = true }: { incentive: Ince
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <AppText variant="caption" style={{ fontSize: 12 }}>
-            {i.shared ? '🤝' : '🎁'} {title}
+            {i.shared ? '🤝' : '🎯'} {title}
           </AppText>
           <AppText variant="heading">{i.reward}</AppText>
           <AppText variant="caption">

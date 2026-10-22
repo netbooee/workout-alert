@@ -208,7 +208,7 @@ export default function MeScreen() {
                 onChange={(v) => updateProfile({ notify_verifications: v })}
               />
               <Toggle
-                label="Incentives"
+                label="Challenges"
                 value={profile.notify_incentives}
                 onChange={(v) => updateProfile({ notify_incentives: v })}
               />
@@ -236,7 +236,7 @@ export default function MeScreen() {
 
             <Card>
               <AppText variant="label">Help</AppText>
-              <AppText variant="caption">A quick tour of streaks, partners, incentives, and your buddy.</AppText>
+              <AppText variant="caption">A quick tour of streaks, partners, challenges, and your buddy.</AppText>
               <Link href="/welcome" asChild>
                 <Button title="Show the welcome tour" variant="secondary" />
               </Link>

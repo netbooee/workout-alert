@@ -37,7 +37,16 @@ they're consistent across devices and can't be edited by the client.
   Apple Watch"). Add up to 4 photos and a note to any workout, or **log a workout by hand**
   with photos (the + on Home) for sessions without a watch. Hand-logged workouts without a
   photo are labelled *self-reported*.
-- Partners react 🔥 💪 👏 or ✅ **Verify** (you can't verify your own).
+- Partners **Cheer** a workout (👏, or hold for 🔥 or 💪; tap again to take it back) or
+  **Verify** it (you saw them do it; explained the first time; you can't verify your own).
+- **Cheer on your partners**: partner workouts from the last 3 days you haven't cheered or
+  verified show on Home (up to 3) and at the top of the Partners tab, with Cheer and Verify
+  on each row; the Partners tab icon shows how many are waiting, plus partner requests
+  (`src/lib/cheers.ts`, `src/components/cheer-card.tsx`).
+- **Partners tab** order: requests, workouts to cheer, partner cards, partner activity, then
+  the league (only with 2+ partners) and the incentive intro. Tapping a partner card opens
+  their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,
+  Incentive, anything going on between you, and their recent workouts.
 - **Delete** a hand-logged workout from its detail screen (its photos, reactions, and XP go
   with it). Apple Health workouts are deleted in the Health app and disappear on the next sync.
 - **Comments and voice messages** on any workout you can see: type encouragement or tap the mic
@@ -246,7 +255,8 @@ src/app/                 Screens (Expo Router)
   (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code
   week/[start].tsx       One week from the progress chart: totals and workouts by day
-  workout/[id].tsx       Workout detail: check-in photos, note, reactions
+  workout/[id].tsx       Workout detail: check-in photos, note, cheers
+  partner/[id].tsx       A partner's page: streaks, actions, recent workouts
   log.tsx                Log a workout by hand with a check-in photo
   add-partner.tsx        Share your code / enter someone else's
   invite/[code].tsx      Deep link handler for invites

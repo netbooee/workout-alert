@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, V
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityRings } from '@/components/activity-rings';
+import { CheerCard } from '@/components/cheer-card';
 import { IncentiveCard } from '@/components/incentive-card';
 import { LevelBar } from '@/components/level-bar';
 import { Mascot } from '@/components/mascots';
@@ -75,6 +76,7 @@ export default function HomeScreen() {
         </View>
         <LevelBar xp={xp ?? 0} />
         <NudgeBanner />
+        <CheerCard />
         {incentives.map((i) => (
           <IncentiveCard key={i.id} incentive={i} />
         ))}

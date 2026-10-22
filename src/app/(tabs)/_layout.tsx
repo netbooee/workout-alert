@@ -3,6 +3,7 @@ import { NativeTabs } from 'expo-router/unstable-native-tabs';
 import { Colors } from '@/constants/theme';
 import { useDailyGreeting } from '@/hooks/use-lotl';
 import { usePushLifecycle } from '@/hooks/use-push';
+import { useCheerQueue, usePartners } from '@/hooks/use-social';
 import { useWidgetSync } from '@/hooks/use-widget-sync';
 import { useAuth } from '@/lib/auth';
 
@@ -19,6 +20,10 @@ export default function TabsLayout() {
 function Tabs() {
   useDailyGreeting();
   useWidgetSync();
+  // Partner workouts waiting for your cheer, plus partner requests waiting for an answer.
+  const cheers = useCheerQueue().length;
+  const requests = (usePartners().data ?? []).filter((p) => p.status === 'pending' && p.incoming).length;
+  const badge = cheers + requests;
 
   return (
     <NativeTabs tintColor={Colors.flame}>
@@ -29,6 +34,7 @@ function Tabs() {
       <NativeTabs.Trigger name="partners">
         <NativeTabs.Trigger.Label>Partners</NativeTabs.Trigger.Label>
         <NativeTabs.Trigger.Icon sf={{ default: 'person.2', selected: 'person.2.fill' }} />
+        <NativeTabs.Trigger.Badge hidden={badge === 0}>{String(badge)}</NativeTabs.Trigger.Badge>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="me">
         <NativeTabs.Trigger.Label>Me</NativeTabs.Trigger.Label>

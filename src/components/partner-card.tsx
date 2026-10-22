@@ -46,7 +46,12 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
 
   return (
     <Card>
-      <Pressable onLongPress={confirmRemove} style={styles.row}>
+      <Pressable
+        onPress={() => router.push({ pathname: '/partner/[id]', params: { id: partner.partner_id } })}
+        onLongPress={confirmRemove}
+        accessibilityRole="button"
+        accessibilityHint={`Opens ${firstName}’s workouts`}
+        style={styles.row}>
         <Avatar id={partner.partner_id} name={partner.display_name} size={44} />
         <View style={{ flex: 1, gap: 2 }}>
           <AppText variant="heading">{partner.display_name ?? 'Partner'}</AppText>

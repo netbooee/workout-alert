@@ -93,6 +93,15 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="partner/[id]"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.flame,
+            headerTitleStyle: { color: Colors.text },
+          }}
+        />
+        <Stack.Screen
           name="streak"
           options={{
             headerShown: true,

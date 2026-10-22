@@ -90,7 +90,7 @@ export default function WorkoutScreen() {
         </Card>
 
         <Card>
-          <AppText variant="label">{isOwner ? 'Partner reactions' : 'React'}</AppText>
+          <AppText variant="label">{isOwner ? 'Partner cheers' : 'Cheer'}</AppText>
           <ReactionBar workoutId={w.id} ownerId={w.user_id} reactions={data.reactions} />
           {data.reactions.length > 0 && (
             <AppText variant="caption">

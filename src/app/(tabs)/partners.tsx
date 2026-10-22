@@ -4,6 +4,7 @@ import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from '
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
+import { CheerCard } from '@/components/cheer-card';
 import { FeedCard } from '@/components/feed-card';
 import { IncentiveIntro } from '@/components/incentive-intro';
 import { LeagueCard } from '@/components/league-card';
@@ -69,15 +70,13 @@ export default function PartnersScreen() {
           </Card>
         )}
 
-        {accepted.length > 0 && <PushPrompt />}
-
-        <IncentiveIntro partners={accepted} />
-
-        {accepted.length > 0 && league.data && <LeagueCard rows={league.data} />}
+        {accepted.length > 0 && <CheerCard max={10} />}
 
         {accepted.map((p) => (
           <PartnerCard key={p.partnership_id} partner={p} />
         ))}
+
+        {accepted.length > 0 && <PushPrompt />}
 
         {outgoing.length > 0 && (
           <Card>
@@ -108,6 +107,11 @@ export default function PartnersScreen() {
             )}
           </>
         )}
+
+        {/* A league needs at least two partners to be more than a two-row table. */}
+        {accepted.length > 1 && league.data && <LeagueCard rows={league.data} />}
+
+        <IncentiveIntro partners={accepted} />
       </ScrollView>
     </SafeAreaView>
   );

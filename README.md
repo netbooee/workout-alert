@@ -369,9 +369,8 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 
 ### Next: after TestFlight testing (required before the App Store)
 
-- **App icon.** The app still uses Expo's placeholder icon (`assets/images/icon.png`). Replace it
-  with a Sigamos icon, e.g. Lotl on flame orange, using the same artwork as the website
-  (`website/img/lotl-*.svg`), plus a matching splash image. Needs a new build.
+- ~~**App icon.**~~ Lotl (blazing, in sunglasses) on flame orange, rendered from
+  `website/img/lotl-blazing.svg`; the splash is happy Lotl (`assets/images/`).
 - ~~**In-app account deletion**~~ (App Store guideline 5.1.1(v)): "Delete account" on the Me
   tab removes the user's files from storage, then `delete_my_account()` deletes the auth user and
   cascades their data. Still to do: revoke the Sign in with Apple token on deletion (Apple asks

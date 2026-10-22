@@ -11,8 +11,10 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { BuddyChooser } from '@/components/buddy-chooser';
 import { Mascot } from '@/components/mascots';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -35,13 +37,13 @@ const GOAL_HINTS: Record<number, string> = {
   7: 'Every single day',
 };
 
-type Step = 'name' | 'goal' | 'health' | 'notify' | 'partner';
+type Step = 'buddy' | 'name' | 'goal' | 'health' | 'notify' | 'partner';
 /** Someone new only meets the buddy's friendly side; fired up, worried and sleepy are for later. */
 type WelcomeMood = Extract<LotlMood, 'happy' | 'ready' | 'blazing'>;
 
 /**
- * First-run setup, Duolingo style: a progress bar, the buddy talking on every
- * step, and it ends by inviting the person who'll keep you honest.
+ * First-run setup, Duolingo style: pick your buddy first, then that buddy asks
+ * every question, and it ends by inviting the person who'll keep you honest.
  */
 export default function OnboardingScreen() {
   const { profile } = useAuth();
@@ -49,15 +51,15 @@ export default function OnboardingScreen() {
   // Apple sign-in fills the name; Google and email sign-ins ask for it.
   const [steps] = useState<Step[]>(() =>
     profile?.display_name?.trim()
-      ? ['goal', 'health', 'notify', 'partner']
-      : ['name', 'goal', 'health', 'notify', 'partner'],
+      ? ['buddy', 'goal', 'health', 'notify', 'partner']
+      : ['buddy', 'name', 'goal', 'health', 'notify', 'partner'],
   );
   const [index, setIndex] = useState(0);
   const [name, setName] = useState(profile?.display_name ?? '');
   const [goal, setGoal] = useState(profile?.weekly_goal ?? 3);
   const [saving, setSaving] = useState(false);
   const step = steps[index]!;
-  const buddy = mascotKind(profile?.mascot);
+  const [buddy, setBuddy] = useState<MascotKind>(() => mascotKind(profile?.mascot));
   const next = () => setIndex((i) => Math.min(i + 1, steps.length - 1));
   const back = () => setIndex((i) => Math.max(i - 1, 0));
 
@@ -78,6 +80,7 @@ export default function OnboardingScreen() {
     try {
       await updateProfile({
         ...(name.trim() ? { display_name: name.trim() } : {}),
+        mascot: buddy,
         weekly_goal: goal,
         timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       });
@@ -120,11 +123,21 @@ export default function OnboardingScreen() {
           </View>
         </View>
 
-        {step === 'name' ? (
+        {step === 'buddy' ? (
+          <StepLayout
+            says={MASCOTS[buddy].intro}
+            saysKey={buddy}
+            footer={<Button title={`Team up with ${MASCOTS[buddy].name}`} onPress={next} />}>
+            <AppText variant="caption" style={styles.center}>
+              Pick your streak buddy. Their mood follows your week, and you can switch any time.
+            </AppText>
+            <BuddyChooser value={buddy} onChange={setBuddy} />
+          </StepLayout>
+        ) : step === 'name' ? (
           <StepLayout
             buddy={buddy}
             mood="happy"
-            says={`Hi, I’m ${MASCOTS[buddy].name}! What should your partners call you?`}
+            says="Nice to meet you! What should your partners call you?"
             footer={<Button title="Continue" disabled={!name.trim()} onPress={next} />}>
             <TextInput
               style={styles.nameInput}
@@ -337,14 +350,18 @@ function PartnerStep({
 
 function StepLayout({
   buddy,
-  mood,
+  mood = 'happy',
   says,
+  saysKey,
   footer,
   children,
 }: {
-  buddy: MascotKind;
-  mood: WelcomeMood;
+  /** Left out on the buddy step, where the buddy is on its own stage. */
+  buddy?: MascotKind;
+  mood?: WelcomeMood;
   says: string;
+  /** Changing it fades the speech bubble's words in again (the buddy step). */
+  saysKey?: string;
   footer: ReactNode;
   children: ReactNode;
 }) {
@@ -352,9 +369,11 @@ function StepLayout({
     <>
       <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
         <View style={styles.speech}>
-          <Mascot kind={buddy} mood={mood} size={84} />
+          {buddy && <Mascot kind={buddy} mood={mood} size={84} />}
           <View style={styles.bubble}>
-            <AppText variant="heading">{says}</AppText>
+            <Animated.View key={saysKey} entering={FadeIn.duration(250)}>
+              <AppText variant="heading">{says}</AppText>
+            </Animated.View>
           </View>
         </View>
         {children}

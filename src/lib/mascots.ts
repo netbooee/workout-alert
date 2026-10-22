@@ -7,11 +7,31 @@ import type { LotlMood } from '@/lib/lotl';
 
 export type MascotKind = 'lotl' | 'capybara' | 'sloth' | 'red_panda';
 
-export const MASCOTS: Record<MascotKind, { name: string; species: string; vibe: string }> = {
-  lotl: { name: 'Lotl', species: 'Axolotl', vibe: 'Playful and bubbly' },
-  capybara: { name: 'Capi', species: 'Capybara', vibe: 'Calm, zero pressure' },
-  sloth: { name: 'Lento', species: 'Sloth', vibe: 'Slow and steady still counts' },
-  red_panda: { name: 'Canela', species: 'Red panda', vibe: 'Cozy and cheerful' },
+export const MASCOTS: Record<MascotKind, { name: string; species: string; vibe: string; intro: string }> = {
+  lotl: {
+    name: 'Lotl',
+    species: 'Axolotl',
+    vibe: 'Playful and bubbly',
+    intro: 'Hi, I’m Lotl! Bubbly, a little extra, and always cheering you on.',
+  },
+  capybara: {
+    name: 'Capi',
+    species: 'Capybara',
+    vibe: 'Calm, zero pressure',
+    intro: 'I’m Capi. Zero pressure. We’ll get there together.',
+  },
+  sloth: {
+    name: 'Lento',
+    species: 'Sloth',
+    vibe: 'Slow and steady still counts',
+    intro: 'I’m Lento. Slow and steady still counts.',
+  },
+  red_panda: {
+    name: 'Canela',
+    species: 'Red panda',
+    vibe: 'Cozy and cheerful',
+    intro: 'I’m Canela! Cozy vibes, big cheers.',
+  },
 };
 
 export const MASCOT_KINDS = Object.keys(MASCOTS) as MascotKind[];

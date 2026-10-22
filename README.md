@@ -251,7 +251,14 @@ buddy** in the mood that matches your week.
 | Verifying a partner's workout (up to 3 a day) | +2 |
 
 - **Levels** get progressively longer: L2 at 100 XP, L3 at 300, L5 at 1,000, L10 at 4,500.
-- **Weekly league**: you and your partners ranked by XP earned this week (Mon–Sun).
+- **Weekly league**: you and your partners ranked by XP earned this week (Sun–Sat).
+- **Public leagues** (opt in from Partners → Public leagues, or Me → Settings → Privacy):
+  - Each week your first XP puts you in a group of up to 20 people at your tier, matched by time zone band so the week ends at about the same time for everyone.
+  - Tiers: ✨ Spark → 🔸 Ember → 🔥 Flame → ☄️ Blaze → 🌋 Inferno. At the end of the week the top quarter (up to 5) move up. The bottom 15% (up to 3) move down, along with anyone with no XP; nobody drops out of Spark.
+  - Strangers see only a first name or nickname, your buddy, your weekly XP and your tier. Never workouts, photos, streaks or partners.
+  - To keep it fair, hand-logged workouts without a photo count half in public leagues.
+  - Anyone in your group can be reported. Reports land in `league_reports`.
+  - Groups close hourly once the week is over everywhere (`close_league_weeks`, via pg_cron).
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
 - A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo),
@@ -283,6 +290,7 @@ src/app/                 Screens (Expo Router)
   onboarding.tsx         Buddy, name (if missing), goal, Apple Health, notifications, invite a partner
   (tabs)/index.tsx       Home: streak + week dots, rings, 8-week trend, recent workouts
   (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
+  league.tsx             Public leagues (join, group table, results) and the partner league
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code
   week/[start].tsx       One week from the progress chart: totals and workouts by day
   workout/[id].tsx       Workout detail: check-in photos, note, cheers

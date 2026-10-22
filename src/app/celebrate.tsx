@@ -12,6 +12,7 @@ import { AppText, Button } from '@/components/ui';
 import { WeekDots } from '@/components/week-dots';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData } from '@/hooks/use-home-data';
+import { useLeagueSettings } from '@/hooks/use-league';
 import { useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
 import { buddyLine, celebrationMood, celebrationTitle } from '@/lib/celebration-copy';
@@ -44,6 +45,9 @@ export default function CelebrateScreen() {
   const { data: total } = useXpTotal();
   const { data: home } = useHomeData();
   const shown = useCountUp(earned);
+  const league = useLeagueSettings();
+  // A week goal is a good moment to suggest competing beyond your partners.
+  const inviteToLeague = weekGoal && league.isSuccess && !league.data;
   const [step, setStep] = useState<'xp' | 'streak'>('xp');
   const hasStreakStep = (workouts > 0 || weekGoal) && !!home?.streak;
 
@@ -110,8 +114,15 @@ export default function CelebrateScreen() {
         )}
       </View>
 
-      <Animated.View entering={FadeInDown.delay(700)}>
+      <Animated.View entering={FadeInDown.delay(700)} style={{ gap: Spacing.sm }}>
         <Button title="Continue" onPress={() => (hasStreakStep ? setStep('streak') : router.back())} />
+        {inviteToLeague && (
+          <Button
+            title="🏆 Compete in public leagues"
+            variant="secondary"
+            onPress={() => router.replace('/league')}
+          />
+        )}
       </Animated.View>
     </SafeAreaView>
   );

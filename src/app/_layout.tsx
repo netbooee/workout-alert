@@ -110,6 +110,15 @@ function RootNavigator() {
             headerTitleStyle: { color: Colors.text },
           }}
         />
+        <Stack.Screen
+          name="league"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.flame,
+            headerTitleStyle: { color: Colors.text },
+          }}
+        />
         <Stack.Screen name="log" options={{ presentation: 'modal' }} />
         <Stack.Screen name="incentive/new" options={{ presentation: 'modal' }} />
         <Stack.Screen name="incentive/[id]" options={{ presentation: 'modal' }} />

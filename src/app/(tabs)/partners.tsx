@@ -8,6 +8,7 @@ import { CheerCard } from '@/components/cheer-card';
 import { FeedCard } from '@/components/feed-card';
 import { IncentiveIntro } from '@/components/incentive-intro';
 import { LeagueCard } from '@/components/league-card';
+import { LeagueEntry } from '@/components/league-entry';
 import { PartnerCard } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
 import { AppText, Button, Card } from '@/components/ui';
@@ -110,6 +111,7 @@ export default function PartnersScreen() {
 
         {/* A league needs at least two partners to be more than a two-row table. */}
         {accepted.length > 1 && league.data && <LeagueCard rows={league.data} />}
+        <LeagueEntry />
 
         <IncentiveIntro partners={accepted} />
       </ScrollView>

@@ -104,6 +104,7 @@ export default function HomeScreen() {
 
         <NudgeBanner />
         <CheerCard />
+        {incentives.length > 0 && <AppText variant="label">Challenges</AppText>}
         {incentives.map((i) => (
           <IncentiveCard key={i.id} incentive={i} collapsible />
         ))}

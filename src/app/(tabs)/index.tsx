@@ -7,7 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityRings } from '@/components/activity-rings';
 import { CheerCard } from '@/components/cheer-card';
 import { IncentiveCard } from '@/components/incentive-card';
-import { LevelBar } from '@/components/level-bar';
+import { LevelChip } from '@/components/level-bar';
 import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
 import { ProgressMini } from '@/components/progress-mini';
@@ -15,7 +15,7 @@ import { StreakHero } from '@/components/streak-hero';
 import { AppText, Card } from '@/components/ui';
 import { WeekDots } from '@/components/week-dots';
 import { WorkoutRow } from '@/components/workout-row';
-import { Colors, Spacing } from '@/constants/theme';
+import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHealthSync } from '@/hooks/use-health-sync';
 import { useMyIncentives } from '@/hooks/use-incentives';
 import { useLotl } from '@/hooks/use-lotl';
@@ -68,18 +68,16 @@ export default function HomeScreen() {
               </AppText>
             )}
           </View>
+          <LevelChip xp={xp ?? 0} />
           <Link href="/log" asChild>
-            <Pressable hitSlop={12} accessibilityLabel="Log a workout">
-              <SymbolView name="plus.circle.fill" size={30} tintColor={Colors.flame} />
+            <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel="Log a workout" style={styles.log}>
+              <SymbolView name="plus" size={14} weight="bold" tintColor="#000" />
+              <AppText variant="heading" color="#000" style={{ fontSize: 15 }}>
+                Log
+              </AppText>
             </Pressable>
           </Link>
         </View>
-        <LevelBar xp={xp ?? 0} />
-        <NudgeBanner />
-        <CheerCard />
-        {incentives.map((i) => (
-          <IncentiveCard key={i.id} incentive={i} />
-        ))}
 
         {(error || syncError) && (
           <Card style={{ borderColor: Colors.danger }}>
@@ -89,24 +87,31 @@ export default function HomeScreen() {
           </Card>
         )}
 
+        {/* Your streak and this week come first; everything else supports them. */}
         {isPending ? (
-          <ActivityIndicator color={Colors.flame} style={{ marginTop: Spacing.xl }} />
+          <ActivityIndicator color={Colors.flame} style={{ marginVertical: Spacing.xl }} />
         ) : (
-          <>
-            <Link href="/streak" asChild>
-              <Pressable accessibilityRole="button" accessibilityHint="Opens your streak and freezes">
-                <StreakHero
-                  streak={data?.streak ?? null}
-                  state={state}
-                  resting={!!profile.resting_since}
-                  showChevron>
-                  <WeekDots days={days} goal={profile.weekly_goal} embedded />
-                </StreakHero>
-              </Pressable>
-            </Link>
-            <ActivityRings today={data?.today ?? null} />
-            <ProgressMini />
+          <Link href="/streak" asChild>
+            <Pressable accessibilityRole="button" accessibilityHint="Opens your streak and freezes">
+              <StreakHero
+                streak={data?.streak ?? null}
+                state={state}
+                resting={!!profile.resting_since}
+                showChevron>
+                <WeekDots days={days} goal={profile.weekly_goal} embedded />
+              </StreakHero>
+            </Pressable>
+          </Link>
+        )}
 
+        <NudgeBanner />
+        <CheerCard />
+        {incentives.map((i) => (
+          <IncentiveCard key={i.id} incentive={i} />
+        ))}
+
+        {!isPending && (
+          <>
             <Card>
               <AppText variant="label">Recent workouts</AppText>
               {data?.recentWorkouts.length ? (
@@ -133,12 +138,18 @@ export default function HomeScreen() {
                   <AppText variant="body">No workouts yet.</AppText>
                   <AppText variant="caption">
                     Workouts from Apple Watch, Fitness, Strava, or any app that writes to Apple
-                    Health will appear here automatically. Pull down to sync, or tap + to log one
+                    Health will appear here automatically. Pull down to sync, or tap Log to add one
                     by hand.
                   </AppText>
                 </View>
               )}
             </Card>
+
+            <AppText variant="label" style={{ marginTop: Spacing.sm }}>
+              Today’s activity
+            </AppText>
+            <ActivityRings today={data?.today ?? null} />
+            <ProgressMini />
           </>
         )}
       </ScrollView>
@@ -156,4 +167,13 @@ const styles = StyleSheet.create({
   content: { padding: Spacing.md, gap: Spacing.md, paddingBottom: Spacing.xl * 2 },
   titleRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   more: { alignItems: 'center', paddingTop: Spacing.xs },
+  log: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    height: 32,
+    paddingHorizontal: 12,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.flame,
+  },
 });

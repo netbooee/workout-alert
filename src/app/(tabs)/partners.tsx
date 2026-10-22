@@ -13,7 +13,7 @@ import { PartnerCard } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
 import { ActionPill, AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { useLeague, useNames, usePartnerFeed, usePartners, useRespondToPartner } from '@/hooks/use-social';
+import { useLeague, useNames, usePartnerFeed, usePartners, useRemovePartner, useRespondToPartner } from '@/hooks/use-social';
 import type { Partner } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
 
@@ -113,7 +113,7 @@ export default function PartnersScreen() {
                 <AppText variant="body" style={{ flex: 1 }}>
                   {p.display_name ?? 'Someone'}
                 </AppText>
-                <AppText variant="caption">Pending</AppText>
+                <CancelRequest partnershipId={p.partnership_id} name={p.display_name} />
               </View>
             ))}
           </Card>
@@ -140,6 +140,33 @@ export default function PartnersScreen() {
         <IncentiveIntro partners={accepted} />
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/** Take back a request you sent that hasn't been answered. */
+function CancelRequest({ partnershipId, name }: { partnershipId: string; name: string | null }) {
+  const remove = useRemovePartner();
+  return (
+    <Pressable
+      hitSlop={8}
+      disabled={remove.isPending}
+      accessibilityRole="button"
+      accessibilityLabel={`Cancel request to ${name ?? 'them'}`}
+      onPress={() =>
+        Alert.alert('Cancel this request?', `${name ?? 'They'} won’t see it anymore. You can send a new one any time.`, [
+          { text: 'Keep it', style: 'cancel' },
+          {
+            text: 'Cancel request',
+            style: 'destructive',
+            onPress: () =>
+              remove.mutate(partnershipId, { onError: (e) => Alert.alert('Could not cancel', friendlyError(e)) }),
+          },
+        ])
+      }>
+      <AppText variant="caption" color={Colors.danger} style={{ fontWeight: '700' }}>
+        {remove.isPending ? 'Cancelling…' : 'Cancel'}
+      </AppText>
+    </Pressable>
   );
 }
 

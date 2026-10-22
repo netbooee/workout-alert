@@ -8,6 +8,7 @@ import { useRequestPartner } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
 import { inviteMessage } from '@/lib/invite-link';
+import { requestOutcome } from '@/lib/partner-request';
 
 export default function AddPartnerScreen() {
   const profile = useProfile();
@@ -19,12 +20,8 @@ export default function AddPartnerScreen() {
   const send = () =>
     request.mutate(code, {
       onSuccess: (p) => {
-        Alert.alert(
-          p.status === 'accepted' ? 'You’re partners! 🤝' : 'Request sent',
-          p.status === 'accepted'
-            ? 'You can now see each other’s workouts and streaks.'
-            : 'They’ll show up in your partners once they accept.',
-        );
+        const { title, body } = requestOutcome(p, profile.id);
+        Alert.alert(title, body);
         router.back();
       },
       onError: (e) => Alert.alert('Could not add partner', friendlyError(e)),

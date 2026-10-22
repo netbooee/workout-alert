@@ -5,13 +5,17 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useRequestPartner } from '@/hooks/use-social';
+import { useAuth } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
+import { requestOutcome } from '@/lib/partner-request';
 
 /** Handles invite links (sigamos://invite/CODE) for onboarded users; earlier ones wait for onboarding. */
 export default function InviteScreen() {
   const { code } = useLocalSearchParams<{ code: string }>();
   const { mutate, data, error, isPending } = useRequestPartner();
   const sent = useRef(false);
+  const me = useAuth().session?.user.id ?? '';
+  const outcome = data ? requestOutcome(data, me) : null;
 
   useEffect(() => {
     if (sent.current || !code) return;
@@ -34,12 +38,10 @@ export default function InviteScreen() {
         <>
           <AppText variant="display">🤝</AppText>
           <AppText variant="title" style={styles.center}>
-            {data?.status === 'accepted' ? 'You’re partners!' : 'Request sent'}
+            {outcome?.title}
           </AppText>
           <AppText variant="body" color={Colors.textSecondary} style={styles.center}>
-            {data?.status === 'accepted'
-              ? 'You can now see each other’s workouts and streaks.'
-              : 'They’ll appear in your partners once they accept.'}
+            {outcome?.body}
           </AppText>
         </>
       )}

@@ -124,7 +124,7 @@ export default function HomeScreen() {
                     </Link>
                   ))}
                   {data.recentWorkouts.length > RECENT_COUNT && (
-                    <Link href="/me" asChild>
+                    <Link href={{ pathname: '/me', params: { section: 'progress' } }} asChild>
                       <Pressable hitSlop={8} style={styles.more}>
                         <AppText variant="caption" color={Colors.flame}>
                           See older workouts by week

@@ -151,7 +151,7 @@ export default function LogWorkoutScreen() {
           <View style={styles.evidenceHeader}>
             <AppText variant="label">Check-in</AppText>
             <AppText variant="caption" color={Colors.xp}>
-              +5 XP with a photo
+              +25 XP with a photo
             </AppText>
           </View>
           <AppText variant="caption">

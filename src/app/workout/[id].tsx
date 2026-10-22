@@ -256,7 +256,7 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
             <>
               <SymbolView name="camera.fill" size={22} tintColor={Colors.flame} />
               <AppText variant="caption" style={{ fontSize: 11 }}>
-                +5 XP
+                +25 XP
               </AppText>
             </>
           )}

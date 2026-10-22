@@ -52,7 +52,7 @@ const PAGES: Page[] = [
     title: 'Earn XP, level up',
     body: 'Everything you do earns XP. It never resets, so your level only goes up: Rookie, Regular, Grinder, Iron, Machine, Legend.',
     points: [
-      'Workouts earn 10–40 XP; check-in photos +5',
+      'Workouts earn 10–40 XP; add a photo for +25',
       'Hit your weekly goal: +50',
       'Partner verifies your workout: +5; you verify theirs: +2',
       'Finish a challenge: +100',

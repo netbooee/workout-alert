@@ -129,17 +129,17 @@ select is(pg_temp.xp('00000000-0000-0000-0000-00000000000a', 'workout'), 0::bigi
   'workouts under 5 minutes earn nothing');
 
 update public.workouts set photo_paths = '{"b/x/1.jpg"}' where id = (select id from b_workout);
-select is(pg_temp.xp('00000000-0000-0000-0000-00000000000b', 'evidence'), 5::bigint,
-  'adding photo evidence earns 5 XP');
+select is(pg_temp.xp('00000000-0000-0000-0000-00000000000b', 'evidence'), 25::bigint,
+  'adding photo evidence earns 25 XP');
 
 select is(pg_temp.xp('00000000-0000-0000-0000-00000000000b', 'week_goal'), 50::bigint,
   'hitting the weekly goal earns 50 XP');
 
--- Blair: workout XP + 50 for the week goal + 5 for Alex's ✅. Alex: +2 for verifying it.
+-- Blair: 25 for the workout + 25 for its photo + 50 for the week goal + 5 for Alex's ✅. Alex: +2 for verifying it.
 select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
 select results_eq(
   $$select display_name, xp from public.weekly_league((select ts from t_now))$$,
-  $$values ('Blair'::text, 85), ('Alex'::text, 2), ('Casey'::text, 0)$$,
+  $$values ('Blair'::text, 105), ('Alex'::text, 2), ('Casey'::text, 0)$$,
   'the weekly league ranks you and your partners by XP');
 
 reset role;

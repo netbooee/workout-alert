@@ -1,6 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 
 import { useAuth } from '@/lib/auth';
+import { useCheerListState } from '@/lib/cheer-list-store';
 import { needsCheer } from '@/lib/cheers';
 import type { Partner, ReactionKind, Workout } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
@@ -87,11 +88,20 @@ export function usePartnerFeed() {
   });
 }
 
-/** Partners' recent workouts you haven't cheered or verified yet, newest first. */
+/** Partners' recent workouts still waiting on you (see needsCheer), newest first. */
 export function useCheerQueue(): FeedItem[] {
   const me = useAuth().session?.user.id;
   const { data } = usePartnerFeed();
-  return me && data ? needsCheer(data, me) : [];
+  const state = useCheerListState();
+  return me && data ? needsCheer(data, me, new Date(), state) : [];
+}
+
+/** How many partner workouts you haven't touched yet (the Partners tab badge). */
+export function useCheerBadgeCount(): number {
+  const me = useAuth().session?.user.id;
+  const { data } = usePartnerFeed();
+  const { dismissed } = useCheerListState();
+  return me && data ? needsCheer(data, me, new Date(), { dismissed }).length : 0;
 }
 
 /** One partner's recent workouts that count, with reactions. */

@@ -41,8 +41,10 @@ they're consistent across devices and can't be edited by the client.
   **Verify** it (you saw them do it; explained the first time; you can't verify your own).
 - **Cheer on your partners**: partner workouts from the last 3 days you haven't cheered or
   verified show on Home (up to 3) and at the top of the Partners tab, with Cheer and Verify
-  on each row; the Partners tab icon shows how many are waiting, plus partner requests
-  (`src/lib/cheers.ts`, `src/components/cheer-card.tsx`).
+  on each row. A row stays after a cheer so you can still verify; it leaves when you verify,
+  when you dismiss it with ✕ (remembered on the phone), or next time you open the app if you
+  only cheered. The Partners tab icon counts workouts you haven't touched, plus partner
+  requests (`src/lib/cheers.ts`, `src/lib/cheer-list-store.ts`, `src/components/cheer-card.tsx`).
 - **"Just worked out" pushes** have **👏 Cheer** and **✅ Verify** buttons (long-press or pull
   down the notification). Tapping one saves the reaction and opens the workout showing it.
   The server sends these pushes with the `partner_workout` category
@@ -88,7 +90,7 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
 
 - **Offer** from a partner's card (🎁 Offer an incentive), a partner's workout, or the intro card
   on the Partners tab. Goals: workout days, active minutes, a number of workouts (optionally one
-  type, e.g. 3 runs), or reaching a streak length; over 1, 2, or 4 weeks counted from this Sunday
+  type, e.g. 3 runs; **Strength** counts traditional, functional and core strength workouts), or reaching a streak length; over 1, 2, or 4 weeks counted from this Sunday
   in the recipient's timezone. Rewards are real-world text (no money in the app).
 - **Rewards**: eight favorite tiles plus **More…**, a searchable sheet of about 50 suggestions
   in groups (food, time together, pampering, chores, fitness, bigger stakes). Any pick is just

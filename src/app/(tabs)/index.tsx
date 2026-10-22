@@ -7,7 +7,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { ActivityRings } from '@/components/activity-rings';
 import { CheerCard } from '@/components/cheer-card';
 import { IncentiveCard } from '@/components/incentive-card';
-import { LevelChip } from '@/components/level-bar';
 import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
 import { ProgressMini } from '@/components/progress-mini';
@@ -68,7 +67,6 @@ export default function HomeScreen() {
               </AppText>
             )}
           </View>
-          <LevelChip xp={xp ?? 0} />
           <Link href="/log" asChild>
             <Pressable hitSlop={8} accessibilityRole="button" accessibilityLabel="Log a workout" style={styles.log}>
               <SymbolView name="plus" size={14} weight="bold" tintColor="#000" />
@@ -97,6 +95,7 @@ export default function HomeScreen() {
                 streak={data?.streak ?? null}
                 state={state}
                 resting={!!profile.resting_since}
+                xp={xp}
                 showChevron>
                 <WeekDots days={days} goal={profile.weekly_goal} embedded />
               </StreakHero>

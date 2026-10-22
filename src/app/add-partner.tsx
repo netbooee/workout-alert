@@ -6,6 +6,7 @@ import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useRequestPartner } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
+import { friendlyError } from '@/lib/errors';
 import { inviteMessage } from '@/lib/invite-link';
 
 export default function AddPartnerScreen() {
@@ -26,7 +27,7 @@ export default function AddPartnerScreen() {
         );
         router.back();
       },
-      onError: (e) => Alert.alert('Could not add partner', e instanceof Error ? e.message : String(e)),
+      onError: (e) => Alert.alert('Could not add partner', friendlyError(e)),
     });
 
   return (

@@ -15,6 +15,7 @@ import { ActionPill, AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useLeague, useNames, usePartnerFeed, usePartners, useRespondToPartner } from '@/hooks/use-social';
 import type { Partner } from '@/lib/database.types';
+import { friendlyError } from '@/lib/errors';
 
 export default function PartnersScreen() {
   const partners = usePartners();
@@ -147,7 +148,7 @@ function IncomingRequest({ partner }: { partner: Partner }) {
   const answer = (accept: boolean) =>
     respond.mutate(
       { id: partner.partnership_id, accept },
-      { onError: (e) => Alert.alert('Something went wrong', e instanceof Error ? e.message : String(e)) },
+      { onError: (e) => Alert.alert('Something went wrong', friendlyError(e)) },
     );
   return (
     <Card style={{ borderColor: Colors.flame }}>

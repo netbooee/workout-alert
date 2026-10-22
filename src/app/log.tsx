@@ -12,6 +12,7 @@ import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { useProfile } from '@/lib/auth';
 import { showCelebrationIfEarned } from '@/lib/celebrate';
+import { friendlyError } from '@/lib/errors';
 import { addEvidencePhotos, MAX_PHOTOS, pickPhoto } from '@/lib/evidence';
 import { clampMinutes, LOG_BACK_DAYS, LOG_MINUTES_STEP, logWindow, minutesLabel } from '@/lib/log-workout';
 import { supabase } from '@/lib/supabase';
@@ -52,7 +53,7 @@ export default function LogWorkoutScreen() {
       const uri = await pickPhoto(from);
       if (uri) setPhotos((p) => [...p, uri].slice(0, MAX_PHOTOS));
     } catch (e) {
-      Alert.alert('Could not add photo', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not add photo', friendlyError(e));
     }
   };
 
@@ -79,7 +80,7 @@ export default function LogWorkoutScreen() {
       router.back();
       await showCelebrationIfEarned(profile.id);
     } catch (e) {
-      Alert.alert('Could not log workout', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not log workout', friendlyError(e));
       setSaving(false);
     }
   };

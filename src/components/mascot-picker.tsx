@@ -5,6 +5,7 @@ import { Mascot } from '@/components/mascots';
 import { AppText, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useProfile, useUpdateProfile } from '@/lib/auth';
+import { friendlyError } from '@/lib/errors';
 import { MASCOT_KINDS, MASCOTS, mascotKind, type MascotKind } from '@/lib/mascots';
 
 /** Pick your streak buddy. Free to switch any time; partners see your pick. */
@@ -20,7 +21,7 @@ export function MascotPicker() {
     try {
       await updateProfile({ mascot: kind });
     } catch (e) {
-      Alert.alert('Could not change your buddy', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not change your buddy', friendlyError(e));
     }
   };
 

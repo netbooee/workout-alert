@@ -9,6 +9,7 @@ import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useMyIncentives } from '@/hooks/use-incentives';
 import { useNudge, usePartners, usePartnerWorkouts } from '@/hooks/use-social';
+import { friendlyError } from '@/lib/errors';
 import { isOpen } from '@/lib/incentives';
 
 /** One partner: their week and streaks, what's going on between you, and their recent workouts to cheer. */
@@ -48,7 +49,7 @@ export default function PartnerScreen() {
                 onPress={() => {
                   Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
                   nudge.mutate(partner.partner_id, {
-                    onError: (e) => Alert.alert('Could not nudge', e instanceof Error ? e.message : String(e)),
+                    onError: (e) => Alert.alert('Could not nudge', friendlyError(e)),
                   });
                 }}
               />

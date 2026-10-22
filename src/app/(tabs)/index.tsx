@@ -22,6 +22,7 @@ import { useHomeData } from '@/hooks/use-home-data';
 import { useLeagueSettings, usePublicLeague } from '@/hooks/use-league';
 import { useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
+import { friendlyError } from '@/lib/errors';
 import { tierInfo } from '@/lib/leagues';
 import { MASCOTS, mascotKind } from '@/lib/mascots';
 import { buildWeek, weekState } from '@/lib/week';
@@ -95,7 +96,7 @@ export default function HomeScreen() {
         {(error || syncError) && (
           <Card style={{ borderColor: Colors.danger }}>
             <AppText variant="caption" color={Colors.danger}>
-              {(error ?? syncError)?.message}
+              {friendlyError(error ?? syncError)}
             </AppText>
           </Card>
         )}

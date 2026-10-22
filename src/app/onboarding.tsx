@@ -20,6 +20,7 @@ import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useRequestPartner } from '@/hooks/use-social';
 import { useAuth, useUpdateProfile } from '@/lib/auth';
+import { friendlyError } from '@/lib/errors';
 import { healthAvailable, requestHealthPermissions } from '@/lib/health/healthkit';
 import { INVITE_CODE_LENGTH, inviteMessage, normalizeInviteCode } from '@/lib/invite-link';
 import type { LotlMood } from '@/lib/lotl';
@@ -67,7 +68,7 @@ export default function OnboardingScreen() {
     try {
       if (healthAvailable()) await requestHealthPermissions();
     } catch (e) {
-      Alert.alert('Could not connect Apple Health', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not connect Apple Health', friendlyError(e));
     }
     next();
   };
@@ -86,7 +87,7 @@ export default function OnboardingScreen() {
       });
       next();
     } catch (e) {
-      Alert.alert('Could not save your setup', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not save your setup', friendlyError(e));
     }
     setSaving(false);
   };
@@ -98,7 +99,7 @@ export default function OnboardingScreen() {
       await updateProfile({ onboarded_at: new Date().toISOString() });
       // The root navigator switches to the tabs once onboarded_at is set.
     } catch (e) {
-      Alert.alert('Could not finish setup', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not finish setup', friendlyError(e));
       setSaving(false);
     }
   };
@@ -270,7 +271,7 @@ function PartnerStep({
     const normalized = normalizeInviteCode(raw);
     if (!normalized) return;
     request.mutate(normalized, {
-      onError: (e) => Alert.alert('Could not add partner', e instanceof Error ? e.message : String(e)),
+      onError: (e) => Alert.alert('Could not add partner', friendlyError(e)),
     });
   };
 

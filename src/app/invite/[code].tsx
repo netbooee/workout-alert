@@ -5,6 +5,7 @@ import { ActivityIndicator, StyleSheet, View } from 'react-native';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useRequestPartner } from '@/hooks/use-social';
+import { friendlyError } from '@/lib/errors';
 
 /** Handles invite links (sigamos://invite/CODE) for onboarded users; earlier ones wait for onboarding. */
 export default function InviteScreen() {
@@ -26,7 +27,7 @@ export default function InviteScreen() {
         <>
           <AppText variant="title">That invite didn’t work</AppText>
           <AppText variant="body" color={Colors.textSecondary} style={styles.center}>
-            {error instanceof Error ? error.message : String(error)}
+            {friendlyError(error)}
           </AppText>
         </>
       ) : (

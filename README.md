@@ -43,6 +43,13 @@ they're consistent across devices and can't be edited by the client.
   verified show on Home (up to 3) and at the top of the Partners tab, with Cheer and Verify
   on each row; the Partners tab icon shows how many are waiting, plus partner requests
   (`src/lib/cheers.ts`, `src/components/cheer-card.tsx`).
+- **"Just worked out" pushes** have **👏 Cheer** and **✅ Verify** buttons (long-press or pull
+  down the notification). Tapping one saves the reaction and opens the workout showing it.
+  The server sends these pushes with the `partner_workout` category
+  (`20261023000000_partner_workout_actions.sql`); the app registers the buttons
+  (`src/lib/notification-actions.ts`). The buttons open the app because that's the reliable
+  way on iOS for the app to save the reaction; reacting without opening it would need a
+  native notification extension.
 - **Partners tab** order: requests, workouts to cheer, partner cards, partner activity, then
   the league (only with 2+ partners) and the incentive intro. Tapping a partner card opens
   their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,

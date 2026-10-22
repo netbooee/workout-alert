@@ -19,8 +19,10 @@ import { useHealthSync } from '@/hooks/use-health-sync';
 import { useMyIncentives } from '@/hooks/use-incentives';
 import { useLotl } from '@/hooks/use-lotl';
 import { useHomeData } from '@/hooks/use-home-data';
+import { useLeagueSettings, usePublicLeague } from '@/hooks/use-league';
 import { useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
+import { tierInfo } from '@/lib/leagues';
 import { MASCOTS, mascotKind } from '@/lib/mascots';
 import { buildWeek, weekState } from '@/lib/week';
 
@@ -45,6 +47,20 @@ export default function HomeScreen() {
   const activeDays = days.filter((d) => d.active).length;
   const state = weekState(activeDays, profile.weekly_goal);
   const firstName = profile.display_name?.split(' ')[0];
+  const leagueSettings = useLeagueSettings();
+  const inLeague = !!leagueSettings.data?.opted_in;
+  const { data: leagueRows } = usePublicLeague(inLeague);
+  const myLeagueRow = leagueRows?.find((r) => r.is_me);
+  const leagueTier = tierInfo(myLeagueRow?.tier ?? leagueSettings.data?.tier ?? 1);
+  const league = leagueSettings.isSuccess
+    ? {
+        joined: inLeague,
+        emoji: leagueTier.emoji,
+        name: leagueTier.name,
+        rank: myLeagueRow?.rank,
+        size: myLeagueRow?.group_size,
+      }
+    : undefined;
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
@@ -94,6 +110,7 @@ export default function HomeScreen() {
                 streak={data?.streak ?? null}
                 state={state}
                 resting={!!profile.resting_since}
+                league={league}
                 xp={xp}
                 showChevron>
                 <WeekDots days={days} goal={profile.weekly_goal} embedded />

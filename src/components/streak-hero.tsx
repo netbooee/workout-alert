@@ -14,6 +14,7 @@ export function StreakHero({
   state,
   resting = false,
   xp,
+  league,
   showChevron = false,
   children,
 }: {
@@ -22,6 +23,8 @@ export function StreakHero({
   resting?: boolean;
   /** Your total XP, shown as a square on the right that opens How XP works. */
   xp?: number;
+  /** Your public league this week (opens Leagues), or `joined: false` for an invitation. */
+  league?: { joined: boolean; emoji: string; name: string; rank?: number; size?: number };
   /** Hints that the card opens the streak screen. */
   showChevron?: boolean;
   /** Rendered between the streak and the status line (Home puts the week dots here). */
@@ -44,6 +47,7 @@ export function StreakHero({
         <View style={{ flex: 1 }}>
           <AppText variant="display">{weeks}</AppText>
           <AppText variant="caption">week streak</AppText>
+          {league && <LeagueChip {...league} />}
         </View>
         {xp != null && <XpSquare xp={xp} />}
         {showChevron && <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />}
@@ -55,6 +59,24 @@ export function StreakHero({
           : message(state, weeks, streak?.freezes_banked ?? 0)}
       </AppText>
     </Card>
+  );
+}
+
+function LeagueChip({ joined, emoji, name, rank, size }: NonNullable<Parameters<typeof StreakHero>[0]['league']>) {
+  const label = !joined
+    ? '🏆 Join a league'
+    : `${emoji} ${name}${rank ? ` · #${rank}${size && size > 1 ? ` of ${size}` : ''}` : ''}`;
+  return (
+    <Pressable
+      onPress={() => router.push('/league')}
+      hitSlop={8}
+      accessibilityRole="button"
+      accessibilityLabel={joined ? `${name} League${rank ? `, place ${rank}` : ''}` : 'Join a public league'}
+      style={({ pressed }) => [styles.league, pressed && { opacity: 0.7 }]}>
+      <AppText variant="caption" color={Colors.text} numberOfLines={1} style={styles.leagueText}>
+        {label}
+      </AppText>
+    </Pressable>
   );
 }
 
@@ -137,6 +159,15 @@ const styles = StyleSheet.create({
     borderColor: Colors.xp,
     backgroundColor: Colors.xpSoft,
   },
+  league: {
+    alignSelf: 'flex-start',
+    marginTop: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.flameSoft,
+  },
+  leagueText: { fontSize: 13, lineHeight: 17, fontWeight: '700' },
   xpTop: { flexDirection: 'row', alignItems: 'center', gap: 2 },
   xpUnit: { fontSize: 12, lineHeight: 15, fontWeight: '800' },
   xpNumber: {

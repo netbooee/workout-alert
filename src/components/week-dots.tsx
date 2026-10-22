@@ -46,19 +46,22 @@ export function WeekDots({
       </View>
       <View style={styles.row}>
         {days.map((d) => (
-          <AppText key={d.key} variant="caption" style={styles.weekday}>
+          <AppText key={d.key} variant="caption" color={d.isToday ? Colors.flame : undefined} style={styles.weekday}>
             {d.label}
           </AppText>
         ))}
       </View>
       <View style={[styles.row, styles.days]}>
         {active >= goal && <View style={[styles.band, span(0, 6)]} />}
+        {/* Back-to-back days join into a pill; a single day is a circle. */}
         {runs(days).map(([a, b]) => (
-          <View key={a} style={[styles.run, span(a, b)]} />
+          <View key={a} style={[styles.runSlot, span(a, b)]}>
+            <View style={[styles.run, a === b ? styles.runSingle : styles.runJoined]} />
+          </View>
         ))}
         {days.map((d) => (
           <View key={d.key} style={styles.cell}>
-            <View style={[styles.dot, d.isToday && (d.active ? styles.todayWorked : styles.today)]}>
+            <View style={[styles.dot, d.isToday && !d.active && styles.today]}>
               <AppText
                 style={[
                   styles.dayText,
@@ -75,6 +78,7 @@ export function WeekDots({
 }
 
 const ROW = 42;
+const RUN = 36;
 
 const styles = StyleSheet.create({
   container: { gap: Spacing.xs },
@@ -83,11 +87,13 @@ const styles = StyleSheet.create({
   weekday: { flex: 1, textAlign: 'center', fontWeight: '700' },
   days: { height: ROW },
   band: { position: 'absolute', top: 1, bottom: 1, borderRadius: ROW / 2, backgroundColor: Colors.flameSoft },
-  run: { position: 'absolute', top: 4, bottom: 4, borderRadius: ROW / 2, backgroundColor: Colors.flame },
+  runSlot: { position: 'absolute', top: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' },
+  run: { height: RUN, borderRadius: RUN / 2, backgroundColor: Colors.flame },
+  runSingle: { width: RUN },
+  runJoined: { alignSelf: 'stretch' },
   cell: { flex: 1, height: ROW, alignItems: 'center', justifyContent: 'center' },
   dot: { width: 32, height: 32, borderRadius: 16, alignItems: 'center', justifyContent: 'center' },
-  // Today: an orange ring, or a white one on top of an orange workout pill.
+  // Today without a workout gets an orange ring; with one, the orange circle is enough.
   today: { borderWidth: 2, borderColor: Colors.flame },
-  todayWorked: { borderWidth: 2, borderColor: 'rgba(255, 255, 255, 0.85)' },
   dayText: { fontFamily: Font.rounded, fontSize: 16, lineHeight: 20, fontWeight: '700', fontVariant: ['tabular-nums'] },
 });

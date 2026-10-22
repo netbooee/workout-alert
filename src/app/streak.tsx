@@ -191,7 +191,7 @@ const styles = StyleSheet.create({
     color: Colors.flame,
     fontVariant: ['tabular-nums'],
   },
-  heroLabel: { fontFamily: Font.rounded, fontSize: 24, fontWeight: '800', color: Colors.flame, marginTop: -6 },
+  heroLabel: { fontFamily: Font.rounded, fontSize: 24, lineHeight: 30, fontWeight: '800', color: Colors.flame, marginTop: -6 },
   flame: { width: 120, height: 120, borderRadius: 60, alignItems: 'center', justifyContent: 'center' },
   chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.sm },
   chip: { paddingHorizontal: 10, paddingVertical: 4, borderRadius: Radius.pill, backgroundColor: Colors.cardRaised },

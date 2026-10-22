@@ -29,7 +29,7 @@ export function LeagueEntry() {
     <Pressable onPress={() => router.push('/league')} accessibilityRole="button">
       <Card style={[styles.card, !!result && styles.news]}>
         <View style={styles.badge}>
-          <AppText style={{ fontSize: 26 }}>{joined ? tier.emoji : '🏆'}</AppText>
+          <AppText style={{ fontSize: 26, lineHeight: 32 }}>{joined ? tier.emoji : '🏆'}</AppText>
         </View>
         <View style={{ flex: 1, gap: 2 }}>
           <AppText variant="heading">{joined ? `${tier.name} League` : 'Public leagues'}</AppText>

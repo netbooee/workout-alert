@@ -250,7 +250,7 @@ const ROW = 44;
 
 const styles = StyleSheet.create({
   monthRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md, marginTop: Spacing.sm },
-  monthTitle: { flex: 1, fontFamily: Font.rounded, fontSize: 24, fontWeight: '800', color: Colors.text },
+  monthTitle: { flex: 1, fontFamily: Font.rounded, fontSize: 24, lineHeight: 30, fontWeight: '800', color: Colors.text },
   arrow: { padding: 4 },
   tiles: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.sm },
   tile: {
@@ -275,7 +275,7 @@ const styles = StyleSheet.create({
   },
   badgeText: { color: '#fff', fontSize: 11, fontWeight: '800', letterSpacing: 1 },
   tileValue: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  tileNumber: { fontFamily: Font.rounded, fontSize: 22, fontWeight: '800', color: Colors.text, fontVariant: ['tabular-nums'] },
+  tileNumber: { fontFamily: Font.rounded, fontSize: 22, lineHeight: 28, fontWeight: '800', color: Colors.text, fontVariant: ['tabular-nums'] },
   calendar: { gap: 4, paddingHorizontal: Spacing.sm },
   week: { flexDirection: 'row', height: ROW, alignItems: 'center' },
   weekday: { flex: 1, textAlign: 'center', fontWeight: '700' },

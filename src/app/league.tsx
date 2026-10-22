@@ -80,7 +80,7 @@ function PublicLeague() {
   return (
     <>
       {result.data && <ResultCard result={result.data} />}
-      <TierHeader tier={tier} />
+      <TierHeader tier={tier} groupSize={rows.length || 20} />
       {table.isPending ? (
         <ActivityIndicator color={Colors.flame} />
       ) : rows.length ? (
@@ -186,7 +186,7 @@ function ResultCard({ result }: { result: LeagueResult }) {
   );
 }
 
-function TierHeader({ tier }: { tier: number }) {
+function TierHeader({ tier, groupSize }: { tier: number; groupSize: number }) {
   const info = tierInfo(tier);
   const left = 7 - new Date().getDay();
   return (
@@ -194,13 +194,14 @@ function TierHeader({ tier }: { tier: number }) {
       <View style={styles.tiers}>
         {TIERS.map((t) => (
           <View key={t.tier} style={[styles.tierBadge, t.tier === tier && styles.tierCurrent, t.tier > tier && { opacity: 0.35 }]}>
-            <AppText style={{ fontSize: t.tier === tier ? 28 : 20 }}>{t.emoji}</AppText>
+            <AppText style={{ fontSize: t.tier === tier ? 28 : 20, lineHeight: t.tier === tier ? 34 : 26 }}>{t.emoji}</AppText>
           </View>
         ))}
       </View>
       <AppText style={styles.tierTitle}>{info.name} League</AppText>
       <AppText variant="caption" style={{ textAlign: 'center' }}>
-        Top {promoteCount(20)} move up · {left} day{left === 1 ? '' : 's'} left
+        {tier < TIERS.length ? `Top ${promoteCount(groupSize)} move up · ` : ''}
+        {left} day{left === 1 ? '' : 's'} left
       </AppText>
     </View>
   );
@@ -365,7 +366,7 @@ const styles = StyleSheet.create({
     backgroundColor: Colors.cardRaised,
   },
   tierCurrent: { width: 60, height: 60, borderRadius: 30, backgroundColor: Colors.flameSoft, borderWidth: 2, borderColor: Colors.flame },
-  tierTitle: { fontFamily: Font.rounded, fontSize: 26, fontWeight: '800', color: Colors.text, textAlign: 'center' },
+  tierTitle: { fontFamily: Font.rounded, fontSize: 26, lineHeight: 32, fontWeight: '800', color: Colors.text, textAlign: 'center' },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, paddingVertical: 6, paddingHorizontal: Spacing.xs, borderRadius: Radius.sm },
   me: { backgroundColor: Colors.flameSoft },
   rank: { width: 26, textAlign: 'center', fontSize: 16, fontWeight: '800', fontVariant: ['tabular-nums'] },

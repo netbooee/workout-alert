@@ -127,9 +127,16 @@ export default function OnboardingScreen() {
           <StepLayout
             says={MASCOTS[buddy].intro}
             saysKey={buddy}
-            footer={<Button title={`Team up with ${MASCOTS[buddy].name}`} onPress={next} />}>
+            footer={
+              <>
+                <Button title={`Team up with ${MASCOTS[buddy].name}`} onPress={next} />
+                <AppText variant="caption" style={styles.center}>
+                  You can change your buddy any time in Me → Your streak buddy.
+                </AppText>
+              </>
+            }>
             <AppText variant="caption" style={styles.center}>
-              Pick your streak buddy. Their mood follows your week, and you can switch any time.
+              Pick your streak buddy. Their mood follows your week.
             </AppText>
             <BuddyChooser value={buddy} onChange={setBuddy} />
           </StepLayout>

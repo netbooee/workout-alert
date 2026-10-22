@@ -322,16 +322,18 @@ function confirmSignOut() {
 function confirmDeleteAccount(userId: string) {
   Alert.alert(
     'Delete your account?',
-    'This permanently deletes your streak, workouts, photos, messages, partners and rewards. It can’t be undone. Workouts in Apple Health are not touched.',
+    'This permanently deletes your streak, workouts, photos, messages, partners and rewards. It can’t be undone. Workouts in Apple Health are not touched. If you signed in with Apple, you’ll confirm with Apple once more.',
     [
       { text: 'Cancel', style: 'cancel' },
       {
         text: 'Delete account',
         style: 'destructive',
         onPress: () =>
-          deleteAccount(userId).catch((e) =>
-            Alert.alert('Could not delete your account', friendlyError(e)),
-          ),
+          deleteAccount(userId).catch((e) => {
+            // Backing out of Apple's confirmation just cancels.
+            if (e && typeof e === 'object' && 'code' in e && e.code === 'ERR_REQUEST_CANCELED') return;
+            Alert.alert('Could not delete your account', friendlyError(e));
+          }),
       },
     ],
   );

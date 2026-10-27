@@ -7,6 +7,7 @@ import { Avatar } from '@/components/avatar';
 import { AppText, Card } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { usePartners, useRemovePartner, type PartnerState } from '@/hooks/use-social';
+import { friendlyError } from '@/lib/errors';
 
 /** Keep a few open "Invite a friend" rows so there's always a next person to add. */
 const MIN_ROWS = 4;
@@ -36,7 +37,7 @@ export function FriendStreaks() {
           style: 'destructive',
           onPress: () =>
             remove.mutate(p.partnership_id, {
-              onError: (e) => Alert.alert('Could not remove', e instanceof Error ? e.message : String(e)),
+              onError: (e) => Alert.alert('Could not remove', friendlyError(e)),
             }),
         },
       ],

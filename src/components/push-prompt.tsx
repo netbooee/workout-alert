@@ -4,6 +4,7 @@ import { Alert, Linking, StyleSheet, View } from 'react-native';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useEnablePush, usePushStatus } from '@/hooks/use-push';
+import { friendlyError } from '@/lib/errors';
 
 /** Asks to turn on notifications, or points to Settings if they were declined. */
 export function PushPrompt() {
@@ -17,7 +18,7 @@ export function PushPrompt() {
       return;
     }
     enable.mutate(undefined, {
-      onError: (e) => Alert.alert('Could not turn on notifications', e instanceof Error ? e.message : String(e)),
+      onError: (e) => Alert.alert('Could not turn on notifications', friendlyError(e)),
     });
   };
 

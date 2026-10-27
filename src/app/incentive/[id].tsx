@@ -6,6 +6,7 @@ import { AppText } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useCancelIncentive, useIncentive } from '@/hooks/use-incentives';
 import { useAuth } from '@/lib/auth';
+import { friendlyError } from '@/lib/errors';
 import { isOpen } from '@/lib/incentives';
 
 /** One incentive (also where incentive pushes land). */
@@ -24,7 +25,7 @@ export default function IncentiveScreen() {
         onPress: () =>
           cancel.mutate(id, {
             onSuccess: () => router.back(),
-            onError: (e) => Alert.alert('Could not cancel', e instanceof Error ? e.message : String(e)),
+            onError: (e) => Alert.alert('Could not cancel', friendlyError(e)),
           }),
       },
     ]);

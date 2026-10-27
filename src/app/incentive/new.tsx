@@ -12,6 +12,7 @@ import { useOfferIncentive } from '@/hooks/use-incentives';
 import { useKeyboardHeight } from '@/hooks/use-keyboard-height';
 import { usePartners } from '@/hooks/use-social';
 import type { IncentiveGoalKind } from '@/lib/database.types';
+import { friendlyError } from '@/lib/errors';
 import {
   GOAL_ACTIVITIES,
   GOAL_OPTIONS,
@@ -113,7 +114,7 @@ export default function NewIncentiveScreen() {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           router.back();
         },
-        onError: (e) => Alert.alert('Could not send', e instanceof Error ? e.message : String(e)),
+        onError: (e) => Alert.alert('Could not send', friendlyError(e)),
       },
     );
   };

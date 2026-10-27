@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useLinkingURL } from 'expo-linking';
-import { DarkTheme, DefaultTheme, Stack, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, router, Stack, ThemeProvider } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
@@ -10,7 +10,7 @@ import { Colors, Palettes } from '@/constants/theme';
 import { restoreAppearance } from '@/lib/appearance';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { inviteCodeFromUrl } from '@/lib/invite-link';
-import { savePendingInvite } from '@/lib/pending-invite';
+import { clearPendingInvite, getPendingInvite, savePendingInvite } from '@/lib/pending-invite';
 
 SplashScreen.preventAutoHideAsync();
 restoreAppearance();
@@ -66,6 +66,19 @@ function RootNavigator() {
     const code = url && inviteCodeFromUrl(url);
     if (ready && code && !(signedIn && onboarded)) savePendingInvite(code);
   }, [url, ready, signedIn, onboarded]);
+
+  // Someone already onboarded who opened an invite while signed out (say, after
+  // reinstalling) skips onboarding's partner step, so open the invite here.
+  useEffect(() => {
+    if (!ready || !signedIn || !onboarded) return;
+    getPendingInvite()
+      .then(async (code) => {
+        if (!code) return;
+        await clearPendingInvite();
+        router.push({ pathname: '/invite/[code]', params: { code } });
+      })
+      .catch(() => {});
+  }, [ready, signedIn, onboarded]);
 
   if (!ready) return null;
 

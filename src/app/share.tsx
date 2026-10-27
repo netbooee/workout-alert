@@ -12,6 +12,7 @@ import { Colors, Font, Spacing } from '@/constants/theme';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useWorkout } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
+import { friendlyError } from '@/lib/errors';
 import { useEvidenceUrls } from '@/lib/evidence';
 import { tierInfo } from '@/lib/leagues';
 import type { LotlMood } from '@/lib/lotl';
@@ -76,7 +77,7 @@ export default function ShareScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await Share.share({ url: uri, message: shareCaption(card, profile.invite_code) });
     } catch (e) {
-      Alert.alert('Could not share', e instanceof Error ? e.message : String(e));
+      Alert.alert('Could not share', friendlyError(e));
     }
     setSharing(false);
   };

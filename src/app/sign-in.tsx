@@ -7,6 +7,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { GoogleButton } from '@/components/google-button';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { friendlyError } from '@/lib/errors';
 import { googleEnabled, signInWithGoogle } from '@/lib/google-auth';
 import { supabase } from '@/lib/supabase';
 
@@ -61,7 +62,7 @@ function AppleSignIn() {
       }
     } catch (e) {
       if (e instanceof Error && 'code' in e && e.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Sign in failed', e instanceof Error ? e.message : String(e));
+      Alert.alert('Sign in failed', friendlyError(e));
     }
   };
 
@@ -87,7 +88,7 @@ function GoogleSignIn() {
     try {
       await signInWithGoogle();
     } catch (e) {
-      Alert.alert('Sign in failed', e instanceof Error ? e.message : String(e));
+      Alert.alert('Sign in failed', friendlyError(e));
     } finally {
       setLoading(false);
     }

@@ -12,6 +12,7 @@ import { useMyIncentives } from '@/hooks/use-incentives';
 import { useNudge, useRemovePartner, type PartnerState } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import type { Incentive } from '@/lib/database.types';
+import { friendlyError } from '@/lib/errors';
 import { goalOption, isOpen, progressFraction, timeLeft } from '@/lib/incentives';
 import { partnerMood } from '@/lib/lotl';
 import { MASCOTS, mascotKind } from '@/lib/mascots';
@@ -95,7 +96,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
             onPress={() => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               nudge.mutate(partner.partner_id, {
-                onError: (e) => Alert.alert('Could not nudge', e instanceof Error ? e.message : String(e)),
+                onError: (e) => Alert.alert('Could not nudge', friendlyError(e)),
               });
             }}
             accessibilityRole="button"

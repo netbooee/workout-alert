@@ -27,6 +27,7 @@ import { useNames, useWorkout } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import { showCelebrationIfEarned } from '@/lib/celebrate';
 import type { Workout } from '@/lib/database.types';
+import { friendlyError } from '@/lib/errors';
 import {
   addEvidencePhotos,
   deleteWorkout,
@@ -175,7 +176,7 @@ function DeleteWorkout({ workout }: { workout: Workout }) {
               router.back();
             } catch (e) {
               setDeleting(false);
-              Alert.alert('Could not delete workout', e instanceof Error ? e.message : String(e));
+              Alert.alert('Could not delete workout', friendlyError(e));
             }
           },
         },
@@ -218,7 +219,7 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
             await showCelebrationIfEarned(workout.user_id);
           }
         } catch (e) {
-          Alert.alert('Could not add photo', e instanceof Error ? e.message : String(e));
+          Alert.alert('Could not add photo', friendlyError(e));
         } finally {
           setBusy(false);
         }

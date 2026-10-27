@@ -44,6 +44,15 @@ export default function AddPartnerScreen() {
           {profile.invite_code}
         </AppText>
         <Button title="Share invite" onPress={share} />
+        <View style={styles.bonus}>
+          <AppText style={{ fontSize: 20, lineHeight: 24 }}>🎁</AppText>
+          <AppText variant="caption" color={Colors.text} style={{ flex: 1 }}>
+            <AppText variant="caption" color={Colors.text} style={{ fontWeight: '800' }}>
+              +100 XP for you both
+            </AppText>{' '}
+            when a friend joins with your invite and logs their first workout.
+          </AppText>
+        </View>
       </Card>
 
       <Card>
@@ -76,6 +85,15 @@ export default function AddPartnerScreen() {
 }
 
 const styles = StyleSheet.create({
+  bonus: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    alignSelf: 'stretch',
+    padding: Spacing.sm + 2,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.xpSoft,
+  },
   container: { flex: 1, backgroundColor: Colors.background, padding: Spacing.lg, gap: Spacing.md },
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
   codeCard: { alignItems: 'stretch', gap: Spacing.md },

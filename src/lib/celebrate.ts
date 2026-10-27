@@ -11,6 +11,8 @@ export interface Celebration {
   weekGoal: boolean;
   evidence: boolean;
   incentive: boolean;
+  /** inviter: someone you invited just worked out; welcome: you joined with an invite. */
+  invite: 'inviter' | 'welcome' | null;
   /** The highest step tier just reached (e.g. 8000), or 0. */
   steps: number;
 }
@@ -50,6 +52,11 @@ export async function takeCelebration(userId: string): Promise<Celebration | nul
     weekGoal: data.some((e) => e.kind === 'week_goal'),
     evidence: data.some((e) => e.kind === 'evidence'),
     incentive: data.some((e) => e.kind === 'incentive'),
+    invite: data.some((e) => e.kind === 'invite' && e.ref === 'welcome')
+      ? 'welcome'
+      : data.some((e) => e.kind === 'invite')
+        ? 'inviter'
+        : null,
     steps: Math.max(0, ...data.filter((e) => e.kind === 'steps').map((e) => tierFromRef(e.ref))),
   };
 }
@@ -80,6 +87,7 @@ export async function showCelebrationIfEarned(userId: string): Promise<void> {
       weekGoal: earned.weekGoal ? '1' : '0',
       evidence: earned.evidence ? '1' : '0',
       incentive: earned.incentive ? '1' : '0',
+      invite: earned.invite ?? '',
       steps: String(earned.steps),
     },
   });

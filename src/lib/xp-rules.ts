@@ -9,4 +9,5 @@ export const XP_RULES: { emoji: string; what: string; xp: string }[] = [
   { emoji: '✅', what: 'A partner verifies your workout', xp: '+5' },
   { emoji: '🤝', what: 'Verify a partner’s workout (3 a day)', xp: '+2' },
   { emoji: '🎯', what: 'Finish a challenge', xp: '+100' },
+  { emoji: '🎁', what: 'A friend joins with your invite and works out (they get +100 too)', xp: '+100' },
 ];

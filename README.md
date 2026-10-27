@@ -246,6 +246,7 @@ buddy** in the mood that matches your week.
 | Check-in photo on a workout (once per workout) | +25 |
 | Daily steps: 5,000 / 8,000 / 12,000 (up to 25 a day; XP only, never streaks or challenges) | +5 / +10 / +10 |
 | Hitting your weekly goal | +50 |
+| A friend joins with your invite (new account) and logs their first workout; they get it too | +100 |
 | Earning a partner's incentive | +100 |
 | A partner verifies your workout (✅), once per workout | +5 |
 | Verifying a partner's workout (up to 3 a day) | +2 |

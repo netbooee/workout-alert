@@ -36,3 +36,11 @@ describe('celebration copy', () => {
     expect(celebrationTitle({ ...none, incentive: true })).toBe('Challenge complete! 🎯');
   });
 });
+
+describe('invite bonus', () => {
+  it('thanks the inviter and welcomes the new person', () => {
+    expect(celebrationTitle({ ...none, workouts: 1, invite: 'welcome' })).toBe('Welcome bonus! 🎁');
+    expect(buddyLine({ ...none, invite: 'inviter' })).toBe('Your invite paid off! Your friend just worked out 🎁');
+    expect(celebrationMood({ ...none, invite: 'inviter' })).toBe('blazing');
+  });
+});

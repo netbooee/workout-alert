@@ -35,6 +35,7 @@ export default function CelebrateScreen() {
     evidence: string;
     incentive: string;
     steps: string;
+    invite: string;
   }>();
   const profile = useProfile();
   const earned = Number(params.xp) || 0;
@@ -62,6 +63,7 @@ export default function CelebrateScreen() {
     evidence: params.evidence === '1',
     incentive,
     steps,
+    invite: params.invite === 'inviter' ? ('inviter' as const) : params.invite === 'welcome' ? ('welcome' as const) : null,
     newLevel: leveledUp ? levelFor(total!).level : null,
   };
 

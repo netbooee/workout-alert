@@ -32,3 +32,12 @@ describe('friendlyError', () => {
     expect(friendlyError('Photo is too large')).toBe('Photo is too large');
   });
 });
+
+describe('real messages from the app', () => {
+  it('recognises iOS being offline through Expo', () => {
+    const msg =
+      'Error: fetch failed: UnexpectedException: The Internet connection appears to be offline. (at ExpoModulesCore/Promise.swift:56)';
+    expect(friendlyError(new Error(msg))).toMatch(/offline/);
+    expect(friendlyError({ message: msg })).toMatch(/offline/);
+  });
+});

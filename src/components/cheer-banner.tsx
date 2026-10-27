@@ -10,6 +10,7 @@ import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useDismissNewCheers, useNewCheers, usePartners } from '@/hooks/use-social';
 import { cheerBanner } from '@/lib/cheer-banner';
 import { mascotKind } from '@/lib/mascots';
+import { playSound } from '@/lib/sounds';
 
 const SHOW_MS = 8000;
 
@@ -26,6 +27,7 @@ export function CheerBanner() {
 
   useEffect(() => {
     if (!newest) return;
+    playSound('banner');
     const id = setTimeout(() => dismiss(newest), SHOW_MS);
     return () => clearTimeout(id);
   }, [newest, dismiss]);

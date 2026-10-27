@@ -11,6 +11,7 @@ import { useAuth } from '@/lib/auth';
 import { CHEER_KINDS } from '@/lib/cheers';
 import type { ReactionKind } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
+import { playSound } from '@/lib/sounds';
 
 export const REACTIONS: { kind: ReactionKind; emoji: string; label: string }[] = [
   { kind: 'clap', emoji: '👏', label: 'Clap' },
@@ -54,6 +55,7 @@ export function ReactionBar({
 
   const cheer = async (kind: ReactionKind = 'clap') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (!myCheer || myCheer.kind !== kind) playSound('pop');
     try {
       if (myCheer) await toggle.mutateAsync({ workoutId, kind: myCheer.kind, on: false });
       // Tapping your own cheer again takes it back; picking another emoji swaps it.
@@ -68,6 +70,7 @@ export function ReactionBar({
     const on = !iVerified;
     const save = () => {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      if (on) playSound('xp');
       toggle.mutate({ workoutId, kind: 'verified', on }, { onError: fail });
     };
     if (!on) return save();

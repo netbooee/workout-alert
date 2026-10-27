@@ -6,6 +6,7 @@ import Animated, { FadeIn, Keyframe, ZoomIn } from 'react-native-reanimated';
 import { AppText } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import type { ReactionKind } from '@/lib/database.types';
+import { playSound } from '@/lib/sounds';
 
 export interface PickerChoice<K extends string> {
   kind: K;
@@ -56,6 +57,7 @@ export function CheerPicker<K extends string = Exclude<ReactionKind, 'verified'>
 
   const pick = (kind: K, emoji: string) => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    playSound('burst');
     onPick(kind);
     setBurst(emoji);
     setTimeout(() => {

@@ -7,6 +7,7 @@ import { useCheerListState } from '@/lib/cheer-list-store';
 import type { IncomingCheer } from '@/lib/cheer-banner';
 import { CHEER_KINDS, needsCheer } from '@/lib/cheers';
 import type { Partner, ReactionKind, Workout } from '@/lib/database.types';
+import { playSound } from '@/lib/sounds';
 import { supabase } from '@/lib/supabase';
 import { startOfWeek } from '@/lib/week';
 import { workoutLabel } from '@/lib/workout-types';
@@ -233,9 +234,11 @@ export function useRemovePartner() {
 }
 
 export function useNudge() {
-  return useSocialMutation(async (partnerId: string) =>
-    unwrap(await supabase.rpc('nudge_partner', { p_partner: partnerId })),
-  );
+  return useSocialMutation(async (partnerId: string) => {
+    const result = unwrap(await supabase.rpc('nudge_partner', { p_partner: partnerId }));
+    playSound('nudge');
+    return result;
+  });
 }
 
 export function useMarkNudgesSeen() {

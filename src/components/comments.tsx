@@ -21,6 +21,7 @@ import { useAuth } from '@/lib/auth';
 import type { Workout, WorkoutComment } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
 import { useEvidenceUrls } from '@/lib/evidence';
+import { noteVoiceAudioMode } from '@/lib/sounds';
 import { timeAgo } from '@/lib/time-ago';
 import { formatClip, MAX_VOICE_SECONDS, MIN_VOICE_MS } from '@/lib/voice';
 
@@ -134,6 +135,7 @@ function Composer({ workoutId, isOwner }: { workoutId: string; isOwner: boolean 
       Alert.alert('Microphone is off', 'Turn on microphone access for Sigamos in Settings to send voice messages.');
       return;
     }
+    noteVoiceAudioMode();
     await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
     await recorder.prepareToRecordAsync();
     lastDuration.current = 0;

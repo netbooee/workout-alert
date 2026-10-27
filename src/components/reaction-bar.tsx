@@ -1,7 +1,9 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
-import { ActionSheetIOS, Alert, Pressable, StyleSheet, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, StyleSheet, View } from 'react-native';
 
+import { CheerPicker } from '@/components/cheer-picker';
 import { AppText } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useToggleReaction } from '@/hooks/use-social';
@@ -41,6 +43,7 @@ export function ReactionBar({
   const toggle = useToggleReaction();
   const isOwner = ownerId === me;
   const myCheer = reactions.find((r) => r.user_id === me && CHEER_KINDS.includes(r.kind));
+  const [picking, setPicking] = useState(false);
   const iVerified = reactions.some((r) => r.user_id === me && r.kind === 'verified');
   const verified = reactions.some((r) => r.kind === 'verified');
   const cheers = CHEER_KINDS.map((kind) => ({ kind, count: reactions.filter((r) => r.kind === kind).length })).filter(
@@ -60,13 +63,6 @@ export function ReactionBar({
     }
   };
 
-  const pickCheer = () =>
-    ActionSheetIOS.showActionSheetWithOptions(
-      { title: 'Cheer with', options: ['👏 Clap', '🔥 Fire', '💪 Strong', 'Cancel'], cancelButtonIndex: 3 },
-      (i) => {
-        if (i < 3) cheer((['clap', 'fire', 'strong'] as const)[i]);
-      },
-    );
 
   const verify = async () => {
     const on = !iVerified;
@@ -109,10 +105,16 @@ export function ReactionBar({
 
   return (
     <View style={{ gap: Spacing.xs }}>
+      <CheerPicker
+        visible={picking}
+        title="Cheer with"
+        onPick={(kind) => cheer(kind)}
+        onClose={() => setPicking(false)}
+      />
       <View style={styles.row}>
         <Pressable
           onPress={() => cheer(myCheer?.kind)}
-          onLongPress={pickCheer}
+          onLongPress={() => setPicking(true)}
           disabled={toggle.isPending}
           accessibilityRole="button"
           accessibilityHint="Hold to pick a different emoji"

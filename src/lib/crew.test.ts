@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { crewLine, crewOrder, crewStatus } from './crew';
+import { crewLine, crewOrder, crewStatus, crewTotals, crewTotalsLine } from './crew';
 import { buildWeek } from './week';
 
 // Thursday, so three days are left including today.
@@ -40,5 +40,20 @@ describe('crewOrder', () => {
     ]);
     expect(order.map((o) => o.status)).toEqual(['behind', 'on-track', 'on-track', 'done']);
     expect(order[1]!.member.friend_streak).toBe(5);
+  });
+});
+
+describe('crew totals', () => {
+  it('adds up the workouts that count', () => {
+    const totals = crewTotals([
+      { duration_s: 1800 },
+      { duration_s: 3600, counted: true },
+      { duration_s: 600, counted: false },
+      { duration_s: 4200 },
+    ]);
+    expect(totals).toEqual({ workouts: 3, minutes: 160 });
+    expect(crewTotalsLine(totals)).toBe('Together this week: 3 workouts · 2 h 40 min');
+    expect(crewTotalsLine({ workouts: 1, minutes: 45 })).toBe('Together this week: 1 workout · 45 min');
+    expect(crewTotalsLine({ workouts: 0, minutes: 0 })).toMatch(/Be the first/);
   });
 });

@@ -5,6 +5,7 @@ import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, V
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityRings } from '@/components/activity-rings';
+import { CheerBanner } from '@/components/cheer-banner';
 import { CheerCard } from '@/components/cheer-card';
 import { CrewCard } from '@/components/crew-card';
 import { IncentiveCard } from '@/components/incentive-card';
@@ -102,6 +103,8 @@ export default function HomeScreen() {
           </Card>
         )}
 
+        <CheerBanner />
+
         {/* Your streak and this week come first; everything else supports them. */}
         {isPending ? (
           <ActivityIndicator color={Colors.flame} style={{ marginVertical: Spacing.xl }} />
@@ -121,7 +124,7 @@ export default function HomeScreen() {
           </Link>
         )}
 
-        <CrewCard myDays={days} />
+        <CrewCard myDays={days} myWorkouts={data?.weekWorkouts ?? []} />
         <NudgeBanner />
         <CheerCard />
         {incentives.length > 0 && <AppText variant="label">Challenges</AppText>}

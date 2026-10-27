@@ -5,14 +5,16 @@ import { useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
+import { CheerPicker } from '@/components/cheer-picker';
 import { Mascot } from '@/components/mascots';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { useCrewWeek, useNudge, usePartners, type PartnerState } from '@/hooks/use-social';
-import { CREW_BADGE, crewLine, crewOrder, crewStatus, type CrewStatus } from '@/lib/crew';
+import { useCrewWeek, useNudge, usePartners, useSetCheer, type PartnerState } from '@/hooks/use-social';
+import { CREW_BADGE, crewLine, crewOrder, crewStatus, crewTotals, crewTotalsLine, type CrewStatus } from '@/lib/crew';
 import { friendlyError } from '@/lib/errors';
 import { mascotKind } from '@/lib/mascots';
 import { buildWeek, DAY_LABELS, type WeekDay } from '@/lib/week';
+import { workoutLabel } from '@/lib/workout-types';
 
 const RING = 64;
 const STROKE = 4;
@@ -23,12 +25,22 @@ const STROKE = 4;
  * with a status badge. Tap one to compare this week side by side, with a nudge.
  * With no partners yet, empty slots invite you to add one.
  */
-export function CrewCard({ myDays }: { myDays: WeekDay[] }) {
+export function CrewCard({
+  myDays,
+  myWorkouts,
+}: {
+  myDays: WeekDay[];
+  /** Your workouts this week, for the crew's total. */
+  myWorkouts: readonly { duration_s: number; counted?: boolean }[];
+}) {
   const { data: partners, isSuccess } = usePartners();
   const accepted = (partners ?? []).filter((p) => p.status === 'accepted');
   const incoming = (partners ?? []).filter((p) => p.status === 'pending' && p.incoming).length;
   const { data: workouts } = useCrewWeek(accepted.map((p) => p.partner_id));
   const [picked, setPicked] = useState<string | null>(null);
+  const [cheering, setCheering] = useState<{ workoutId: string; title: string } | null>(null);
+  const setCheer = useSetCheer();
+  const nudge = useNudge();
 
   if (!isSuccess) return null;
   if (!accepted.length) return <EmptyCrew incoming={incoming} />;
@@ -51,6 +63,10 @@ export function CrewCard({ myDays }: { myDays: WeekDay[] }) {
           </AppText>
         </Pressable>
       </View>
+      {/* After Any Distance's club summary: a small group feels bigger added up. */}
+      <AppText variant="heading" style={{ fontSize: 15, marginTop: -Spacing.xs }}>
+        🤝 {crewTotalsLine(crewTotals([...myWorkouts, ...(workouts ?? [])]))}
+      </AppText>
 
       <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.strip}>
         {crew.map(({ member, status }) => (
@@ -62,6 +78,22 @@ export function CrewCard({ myDays }: { myDays: WeekDay[] }) {
             onPress={() => {
               Haptics.selectionAsync();
               setPicked(member.partner_id);
+            }}
+            onLongPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              const name = member.display_name?.split(' ')[0] ?? 'your partner';
+              // Their most recent workout this week.
+              const latest = (workouts ?? [])
+                .filter((w) => w.user_id === member.partner_id)
+                .sort((a, b) => b.started_at.localeCompare(a.started_at))[0];
+              if (latest) {
+                setCheering({ workoutId: latest.id, title: `Cheer ${name}’s ${workoutLabel(latest.activity_type).toLowerCase()}` });
+              } else if (!member.recently_nudged && member.this_week_days < member.this_week_goal) {
+                Alert.alert(`${name} hasn’t worked out yet this week`, 'Send a nudge instead?', [
+                  { text: 'Not now', style: 'cancel' },
+                  { text: '👋 Nudge', onPress: () => nudge.mutate(member.partner_id) },
+                ]);
+              }
             }}
           />
         ))}
@@ -79,6 +111,22 @@ export function CrewCard({ myDays }: { myDays: WeekDay[] }) {
         </Pressable>
       </ScrollView>
 
+      <CheerPicker
+        visible={!!cheering}
+        title={cheering?.title ?? ''}
+        onPick={(kind) =>
+          cheering &&
+          setCheer.mutate(
+            { workoutId: cheering.workoutId, kind },
+            { onError: (e) => Alert.alert('Could not cheer', friendlyError(e)) },
+          )
+        }
+        onClose={() => setCheering(null)}
+      />
+      <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
+        Hold a buddy to cheer their latest workout
+      </AppText>
+
       <Compare partner={selected.member} status={selected.status} theirDays={selected.days} myDays={myDays} />
     </Card>
   );
@@ -89,11 +137,13 @@ function CrewBuddy({
   status,
   selected,
   onPress,
+  onLongPress,
 }: {
   partner: PartnerState;
   status: CrewStatus;
   selected: boolean;
   onPress: () => void;
+  onLongPress: () => void;
 }) {
   const firstName = partner.display_name?.split(' ')[0] ?? 'Partner';
   const progress = Math.min(partner.this_week_days / Math.max(partner.this_week_goal, 1), 1);
@@ -103,7 +153,9 @@ function CrewBuddy({
   return (
     <Pressable
       onPress={onPress}
+      onLongPress={onLongPress}
       accessibilityRole="button"
+      accessibilityHint="Hold to cheer their latest workout"
       accessibilityState={{ selected }}
       accessibilityLabel={`${firstName}, ${partner.this_week_days} of ${partner.this_week_goal} days this week`}
       style={styles.member}>

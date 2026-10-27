@@ -55,3 +55,24 @@ export function crewOrder<E extends { member: CrewMember; status: CrewStatus }>(
     (a, b) => ORDER[a.status] - ORDER[b.status] || b.member.friend_streak - a.member.friend_streak,
   );
 }
+
+/** Workouts that count this week across you and your partners, for "Together this week". */
+export function crewTotals(workouts: readonly { duration_s: number; counted?: boolean }[]): {
+  workouts: number;
+  minutes: number;
+} {
+  const counted = workouts.filter((w) => w.counted !== false);
+  return {
+    workouts: counted.length,
+    minutes: Math.round(counted.reduce((sum, w) => sum + w.duration_s, 0) / 60),
+  };
+}
+
+/** "9 workouts · 4 h 20 min", or a nudge to be first. */
+export function crewTotalsLine({ workouts, minutes }: { workouts: number; minutes: number }): string {
+  if (!workouts) return 'Together this week: no workouts yet. Be the first!';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  const time = h ? `${h} h${m ? ` ${m} min` : ''}` : `${m} min`;
+  return `Together this week: ${workouts} workout${workouts === 1 ? '' : 's'} · ${time}`;
+}

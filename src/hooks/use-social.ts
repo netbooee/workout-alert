@@ -5,6 +5,7 @@ import { useCheerListState } from '@/lib/cheer-list-store';
 import { needsCheer } from '@/lib/cheers';
 import type { Partner, ReactionKind, Workout } from '@/lib/database.types';
 import { supabase } from '@/lib/supabase';
+import { startOfWeek } from '@/lib/week';
 
 // Everything social lives under ['social'] so one invalidation refreshes it.
 
@@ -102,6 +103,25 @@ export function useCheerBadgeCount(): number {
   const { data } = usePartnerFeed();
   const { dismissed } = useCheerListState();
   return me && data ? needsCheer(data, me, new Date(), { dismissed }).length : 0;
+}
+
+/** Your accepted partners' workouts that count this week, for the crew card on Home. */
+export function useCrewWeek(partnerIds: string[]) {
+  const userId = useAuth().session?.user.id;
+  return useQuery({
+    queryKey: ['social', 'crew-week', userId, ...partnerIds],
+    enabled: !!userId && partnerIds.length > 0,
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from('workouts')
+          .select('user_id, started_at, duration_s, counted')
+          .in('user_id', partnerIds)
+          .is('duplicate_of', null)
+          .eq('counted', true)
+          .gte('started_at', startOfWeek(new Date()).toISOString()),
+      ),
+  });
 }
 
 /** One partner's recent workouts that count, with reactions. */

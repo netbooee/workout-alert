@@ -6,6 +6,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { ActivityRings } from '@/components/activity-rings';
 import { CheerCard } from '@/components/cheer-card';
+import { CrewCard } from '@/components/crew-card';
 import { IncentiveCard } from '@/components/incentive-card';
 import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
@@ -120,6 +121,7 @@ export default function HomeScreen() {
           </Link>
         )}
 
+        <CrewCard myDays={days} />
         <NudgeBanner />
         <CheerCard />
         {incentives.length > 0 && <AppText variant="label">Challenges</AppText>}

@@ -182,24 +182,27 @@ function Compare({
 
       <View style={styles.actions}>
         {canNudge && (
-          <Button
-            title={partner.recently_nudged ? 'Nudged 👋' : `👋 Nudge ${firstName}`}
-            variant="secondary"
-            style={{ flex: 1 }}
-            disabled={partner.recently_nudged}
-            loading={nudge.isPending}
+          <Pressable
+            disabled={partner.recently_nudged || nudge.isPending}
             onPress={() => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               nudge.mutate(partner.partner_id, { onError: (e) => Alert.alert('Could not nudge', friendlyError(e)) });
             }}
-          />
+            accessibilityRole="button"
+            accessibilityLabel={partner.recently_nudged ? `Nudged ${firstName}` : `Nudge ${firstName}`}
+            style={({ pressed }) => [styles.action, styles.nudge, (pressed || partner.recently_nudged) && { opacity: 0.6 }]}>
+            <AppText style={[styles.actionText, { color: Colors.flame }]}>
+              {partner.recently_nudged ? 'Nudged 👋' : '👋 Nudge'}
+            </AppText>
+          </Pressable>
         )}
-        <Button
-          title={`See ${firstName} ›`}
-          variant="secondary"
-          style={{ flex: 1 }}
+        <Pressable
           onPress={() => router.push({ pathname: '/partner/[id]', params: { id: partner.partner_id } })}
-        />
+          accessibilityRole="button"
+          accessibilityLabel={`Open ${firstName}’s profile`}
+          style={({ pressed }) => [styles.action, pressed && { opacity: 0.6 }]}>
+          <AppText style={styles.actionText}>Profile ›</AppText>
+        </Pressable>
       </View>
     </View>
   );
@@ -298,5 +301,16 @@ const styles = StyleSheet.create({
   dot: { width: DOT, height: DOT, borderRadius: DOT / 2, backgroundColor: Colors.card },
   dotActive: { backgroundColor: Colors.flame },
   dotToday: { borderWidth: 2, borderColor: Colors.flame },
-  actions: { flexDirection: 'row', gap: Spacing.sm },
+  actions: { flexDirection: 'row', gap: Spacing.sm, marginTop: Spacing.xs },
+  action: {
+    flex: 1,
+    minHeight: 44,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: Radius.md,
+    borderCurve: 'continuous',
+    backgroundColor: Colors.card,
+  },
+  nudge: { backgroundColor: Colors.flameSoft },
+  actionText: { fontSize: 16, lineHeight: 20, fontWeight: '700', color: Colors.text },
 });

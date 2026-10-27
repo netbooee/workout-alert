@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { crewLine, crewOrder, crewStatus, crewTotals, crewTotalsLine } from './crew';
+import { crewLine, crewOrder, crewStatus, crewTotals, crewTotalsLine, holdTarget } from './crew';
 import { buildWeek } from './week';
 
 // Thursday, so three days are left including today.
@@ -55,5 +55,34 @@ describe('crew totals', () => {
     expect(crewTotalsLine(totals)).toBe('Together this week: 3 workouts · 2 h 40 min');
     expect(crewTotalsLine({ workouts: 1, minutes: 45 })).toBe('Together this week: 1 workout · 45 min');
     expect(crewTotalsLine({ workouts: 0, minutes: 0 })).toMatch(/Be the first/);
+  });
+});
+
+describe('holdTarget', () => {
+  // Tuesday Oct 27; the week started Sunday Oct 25.
+  const now = new Date(2026, 9, 27, 12);
+  const weekStart = new Date(2026, 9, 25);
+  const w = (id: string, user_id: string, d: Date) => ({ id, user_id, activity_type: 'running', started_at: d.toISOString() });
+
+  it('cheers this week’s latest workout', () => {
+    const t = holdTarget('a', [w('1', 'a', new Date(2026, 9, 25, 9)), w('2', 'a', new Date(2026, 9, 26, 9))], weekStart, now);
+    expect(t).toMatchObject({ kind: 'cheer', when: null, workout: { id: '2' } });
+  });
+
+  it('falls back to a recent one and says when', () => {
+    expect(holdTarget('a', [w('1', 'a', new Date(2026, 9, 22, 9))], weekStart, now)).toMatchObject({
+      kind: 'cheer',
+      when: 'Thursday',
+    });
+    expect(holdTarget('a', [w('1', 'a', new Date(2026, 9, 16, 9))], weekStart, now)).toMatchObject({
+      kind: 'cheer',
+      when: 'Oct 16',
+    });
+  });
+
+  it('offers a nudge when there’s nothing in two weeks', () => {
+    expect(holdTarget('a', [w('1', 'a', new Date(2026, 9, 1, 9)), w('2', 'b', new Date(2026, 9, 26))], weekStart, now)).toEqual({
+      kind: 'nudge',
+    });
   });
 });

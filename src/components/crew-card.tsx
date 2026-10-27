@@ -9,11 +9,27 @@ import { CheerPicker } from '@/components/cheer-picker';
 import { Mascot } from '@/components/mascots';
 import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { useCrewWeek, useNudge, usePartners, useSetCheer, type PartnerState } from '@/hooks/use-social';
-import { CREW_BADGE, crewLine, crewOrder, crewStatus, crewTotals, crewTotalsLine, type CrewStatus } from '@/lib/crew';
+import {
+  useCrewWeek,
+  useNudge,
+  usePartners,
+  useRecentPartnerWorkouts,
+  useSetCheer,
+  type PartnerState,
+} from '@/hooks/use-social';
+import {
+  CREW_BADGE,
+  crewLine,
+  crewOrder,
+  crewStatus,
+  crewTotals,
+  crewTotalsLine,
+  holdTarget,
+  type CrewStatus,
+} from '@/lib/crew';
 import { friendlyError } from '@/lib/errors';
 import { mascotKind } from '@/lib/mascots';
-import { buildWeek, DAY_LABELS, type WeekDay } from '@/lib/week';
+import { buildWeek, DAY_LABELS, startOfWeek, type WeekDay } from '@/lib/week';
 import { workoutLabel } from '@/lib/workout-types';
 
 const RING = 64;
@@ -39,6 +55,8 @@ export function CrewCard({
   const { data: workouts } = useCrewWeek(accepted.map((p) => p.partner_id));
   const [picked, setPicked] = useState<string | null>(null);
   const [cheering, setCheering] = useState<{ workoutId: string; title: string } | null>(null);
+  const [nudging, setNudging] = useState<PartnerState | null>(null);
+  const { data: recent } = useRecentPartnerWorkouts(accepted.map((p) => p.partner_id));
   const setCheer = useSetCheer();
   const nudge = useNudge();
 
@@ -82,17 +100,15 @@ export function CrewCard({
             onLongPress={() => {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
               const name = member.display_name?.split(' ')[0] ?? 'your partner';
-              // Their most recent workout this week.
-              const latest = (workouts ?? [])
-                .filter((w) => w.user_id === member.partner_id)
-                .sort((a, b) => b.started_at.localeCompare(a.started_at))[0];
-              if (latest) {
-                setCheering({ workoutId: latest.id, title: `Cheer ${name}’s ${workoutLabel(latest.activity_type).toLowerCase()}` });
-              } else if (!member.recently_nudged && member.this_week_days < member.this_week_goal) {
-                Alert.alert(`${name} hasn’t worked out yet this week`, 'Send a nudge instead?', [
-                  { text: 'Not now', style: 'cancel' },
-                  { text: '👋 Nudge', onPress: () => nudge.mutate(member.partner_id) },
-                ]);
+              const target = holdTarget(member.partner_id, recent ?? [], startOfWeek(new Date()));
+              if (target.kind === 'cheer') {
+                const what = workoutLabel(target.workout.activity_type).toLowerCase();
+                setCheering({
+                  workoutId: target.workout.id,
+                  title: `Cheer ${name}’s ${what}${target.when ? ` from ${target.when}` : ''}`,
+                });
+              } else {
+                setNudging(member);
               }
             }}
           />
@@ -123,8 +139,23 @@ export function CrewCard({
         }
         onClose={() => setCheering(null)}
       />
+      <CheerPicker
+        visible={!!nudging}
+        title={`${nudging?.display_name?.split(' ')[0] ?? 'They'} hasn’t worked out lately`}
+        subtitle={
+          nudging?.recently_nudged
+            ? 'You nudged them recently. Give it a little time.'
+            : 'Send a nudge to get them moving?'
+        }
+        choices={nudging?.recently_nudged ? [] : [{ kind: 'nudge', emoji: '👋', label: 'Nudge' }]}
+        onPick={() =>
+          nudging &&
+          nudge.mutate(nudging.partner_id, { onError: (e) => Alert.alert('Could not nudge', friendlyError(e)) })
+        }
+        onClose={() => setNudging(null)}
+      />
       <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
-        Hold a buddy to cheer their latest workout
+        Hold a buddy to cheer their latest workout, or nudge them
       </AppText>
 
       <Compare partner={selected.member} status={selected.status} theirDays={selected.days} myDays={myDays} />

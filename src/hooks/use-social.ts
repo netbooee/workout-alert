@@ -274,6 +274,27 @@ export function useSetCheer() {
   });
 }
 
+/** Partners' workouts that count from the last two weeks, newest first: what holding a crew buddy cheers. */
+export function useRecentPartnerWorkouts(partnerIds: string[]) {
+  const userId = useAuth().session?.user.id;
+  return useQuery({
+    queryKey: ['social', 'recent-partner-workouts', userId, ...partnerIds],
+    enabled: !!userId && partnerIds.length > 0,
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from('workouts')
+          .select('id, user_id, activity_type, started_at')
+          .in('user_id', partnerIds)
+          .is('duplicate_of', null)
+          .eq('counted', true)
+          .gte('started_at', new Date(Date.now() - 14 * 86_400_000).toISOString())
+          .order('started_at', { ascending: false })
+          .limit(100),
+      ),
+  });
+}
+
 const cheersSeenKey = (userId: string) => `cheers-seen:${userId}`;
 
 /**

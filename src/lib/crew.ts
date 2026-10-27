@@ -76,3 +76,39 @@ export function crewTotalsLine({ workouts, minutes }: { workouts: number; minute
   const time = h ? `${h} h${m ? ` ${m} min` : ''}` : `${m} min`;
   return `Together this week: ${workouts} workout${workouts === 1 ? '' : 's'} · ${time}`;
 }
+
+export interface RecentWorkout {
+  id: string;
+  user_id: string;
+  activity_type: string;
+  started_at: string;
+}
+
+/** How far back holding a buddy looks for a workout to cheer. */
+export const CHEER_LOOKBACK_DAYS = 14;
+
+/**
+ * What holding a buddy does: cheer their latest workout (saying when, if it
+ * wasn't this week), or offer a nudge when there's nothing recent.
+ */
+export function holdTarget(
+  partnerId: string,
+  recent: readonly RecentWorkout[],
+  weekStart: Date,
+  now: Date = new Date(),
+): { kind: 'cheer'; workout: RecentWorkout; when: string | null } | { kind: 'nudge' } {
+  const since = now.getTime() - CHEER_LOOKBACK_DAYS * 86_400_000;
+  const latest = recent
+    .filter((w) => w.user_id === partnerId && new Date(w.started_at).getTime() >= since)
+    .sort((a, b) => b.started_at.localeCompare(a.started_at))[0];
+  if (!latest) return { kind: 'nudge' };
+
+  const started = new Date(latest.started_at);
+  if (started >= weekStart) return { kind: 'cheer', workout: latest, when: null };
+  const daysAgo = (now.getTime() - started.getTime()) / 86_400_000;
+  const when =
+    daysAgo < 7
+      ? started.toLocaleDateString('en-US', { weekday: 'long' })
+      : started.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  return { kind: 'cheer', workout: latest, when };
+}

@@ -7,6 +7,7 @@ import { AppText, Card } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import type { Streak } from '@/lib/database.types';
 import { levelFor } from '@/lib/levels';
+import { todayLine, todayTone, type TodayTone } from '@/lib/today-line';
 import type { WeekState } from '@/lib/week';
 
 export function StreakHero({
@@ -16,6 +17,8 @@ export function StreakHero({
   xp,
   league,
   showChevron = false,
+  workedOutToday = false,
+  action,
   children,
 }: {
   streak: Streak | null;
@@ -27,11 +30,17 @@ export function StreakHero({
   league?: { joined: boolean; emoji: string; name: string; rank?: number; size?: number };
   /** Hints that the card opens the streak screen. */
   showChevron?: boolean;
+  /** A workout that counts already happened today (changes what the sentence says). */
+  workedOutToday?: boolean;
+  /** Rendered under the sentence, e.g. Home's Log button. */
+  action?: ReactNode;
   /** Rendered between the streak and the status line (Home puts the week dots here). */
   children?: ReactNode;
 }) {
   const weeks = streak?.current_weeks ?? 0;
   const lit = weeks > 0 || state.kind === 'done';
+  const facts = { state, weeks, freezes: streak?.freezes_banked ?? 0, workedOutToday, resting };
+  const tone = todayTone(facts);
 
   // Same look as the streak screen (Duolingo-style), at Home size.
   return (
@@ -60,18 +69,18 @@ export function StreakHero({
         </View>
       )}
       {children}
-      <View style={styles.tip}>
+      {/* One plain sentence about today, after Alma's "Track one item to keep your streak". */}
+      <View style={[styles.tip, tone === 'urgent' && styles.urgentTip]}>
         <SymbolView
-          name={resting ? 'moon.zzz.fill' : 'flame.fill'}
-          size={20}
-          tintColor={resting ? Colors.rest : state.kind === 'done' ? Colors.success : Colors.flame}
+          name={tone === 'rest' ? 'moon.zzz.fill' : tone === 'done' ? 'checkmark.circle.fill' : 'flame.fill'}
+          size={22}
+          tintColor={tone === 'calm' ? Colors.flame : TONE_COLOR[tone]}
         />
-        <AppText variant="body" color={resting ? Colors.rest : messageColor(state)} style={{ flex: 1 }}>
-          {resting
-            ? 'Rest mode is on. Your streak is protected 😴'
-            : message(state, weeks, streak?.freezes_banked ?? 0)}
+        <AppText variant="heading" color={TONE_COLOR[tone]} style={{ flex: 1 }}>
+          {todayLine(facts)}
         </AppText>
       </View>
+      {action}
     </Card>
   );
 }
@@ -111,35 +120,12 @@ function XpChip({ xp }: { xp: number }) {
   );
 }
 
-function message(state: WeekState, weeks: number, freezes: number): string {
-  const days = (n: number) => `${n} more day${n === 1 ? '' : 's'}`;
-  switch (state.kind) {
-    case 'done':
-      return 'Goal hit this week. Streak secured 🔥';
-    case 'on-track':
-      return `${days(state.needed)} to go · ${state.daysLeft} days left this week`;
-    case 'at-risk':
-      return weeks > 0
-        ? `Streak at risk: ${days(state.needed)} needed with ${state.daysLeft} left`
-        : `${days(state.needed)} needed with ${state.daysLeft} left`;
-    case 'out-of-reach':
-      if (weeks === 0) return 'Fresh start on Sunday. Any workout still counts toward your history.';
-      return freezes > 0
-        ? 'This week is out of reach, but a freeze will cover it ❄️'
-        : 'This week is out of reach. Hit next week’s goal to start a new streak.';
-  }
-}
-
-function messageColor(state: WeekState): ColorValue {
-  switch (state.kind) {
-    case 'done':
-      return Colors.success;
-    case 'at-risk':
-      return Colors.flame;
-    default:
-      return Colors.textSecondary;
-  }
-}
+const TONE_COLOR: Record<TodayTone, ColorValue> = {
+  done: Colors.success,
+  urgent: Colors.flame,
+  calm: Colors.text,
+  rest: Colors.rest,
+};
 
 const styles = StyleSheet.create({
   card: { padding: Spacing.md + 4, gap: Spacing.md },
@@ -168,4 +154,5 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: Colors.border,
   },
+  urgentTip: { borderColor: Colors.flame, backgroundColor: Colors.flameSoft },
 });

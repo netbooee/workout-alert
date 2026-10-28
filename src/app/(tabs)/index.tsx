@@ -8,6 +8,7 @@ import { ActivityRings } from '@/components/activity-rings';
 import { CheerBanner } from '@/components/cheer-banner';
 import { CheerCard } from '@/components/cheer-card';
 import { CrewCard } from '@/components/crew-card';
+import { EmptyState } from '@/components/empty-state';
 import { IncentiveCard } from '@/components/incentive-card';
 import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
@@ -27,6 +28,7 @@ import { useProfile } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
 import { tierInfo } from '@/lib/leagues';
 import { MASCOTS, mascotKind } from '@/lib/mascots';
+import { shouldOfferLog } from '@/lib/today-line';
 import { buildWeek, weekState } from '@/lib/week';
 
 export default function HomeScreen() {
@@ -49,6 +51,8 @@ export default function HomeScreen() {
   const days = buildWeek(data?.weekWorkouts ?? [], profile.min_workout_minutes);
   const activeDays = days.filter((d) => d.active).length;
   const state = weekState(activeDays, profile.weekly_goal);
+  const workedOutToday = days.some((d) => d.isToday && d.active);
+  const resting = !!profile.resting_since;
   const firstName = profile.display_name?.split(' ')[0];
   const leagueSettings = useLeagueSettings();
   const inLeague = !!leagueSettings.data?.opted_in;
@@ -114,7 +118,15 @@ export default function HomeScreen() {
               <StreakHero
                 streak={data?.streak ?? null}
                 state={state}
-                resting={!!profile.resting_since}
+                resting={resting}
+                workedOutToday={workedOutToday}
+                action={
+                  shouldOfferLog({ state, weeks: 0, freezes: 0, workedOutToday, resting }) && (
+                    <Link href="/log" asChild>
+                      <Button title="+ Log a workout" />
+                    </Link>
+                  )
+                }
                 league={league}
                 xp={xp}
                 showChevron>
@@ -156,16 +168,15 @@ export default function HomeScreen() {
                   )}
                 </>
               ) : (
-                <View style={{ paddingVertical: Spacing.md, gap: Spacing.xs }}>
-                  <AppText variant="body">No workouts yet.</AppText>
-                  <AppText variant="caption">
-                    Workouts from Apple Watch, Fitness, Strava, or any app that writes to Apple
-                    Health will appear here automatically. Pull down to sync, or add one by hand.
-                  </AppText>
-                  <Link href="/log" asChild>
-                    <Button title="+ Log a workout" style={{ marginTop: Spacing.xs }} />
-                  </Link>
-                </View>
+                <EmptyState
+                  title="Your first workout starts the streak!"
+                  body="Workouts from Apple Watch, Fitness, Strava and other apps show up here on their own. Pull down to refresh, or log one yourself."
+                  action={
+                    <Link href="/log" asChild>
+                      <Button title="+ Log a workout" />
+                    </Link>
+                  }
+                />
               )}
             </Card>
 

@@ -38,7 +38,7 @@ const GOAL_HINTS: Record<number, string> = {
   7: 'Every single day',
 };
 
-type Step = 'buddy' | 'name' | 'goal' | 'health' | 'notify' | 'partner';
+type Step = 'buddy' | 'name' | 'goal' | 'health' | 'notify' | 'widget' | 'partner';
 /** Someone new only meets the buddy's friendly side; fired up, worried and sleepy are for later. */
 type WelcomeMood = Extract<LotlMood, 'happy' | 'ready' | 'blazing'>;
 
@@ -52,8 +52,8 @@ export default function OnboardingScreen() {
   // Apple sign-in fills the name; Google and email sign-ins ask for it.
   const [steps] = useState<Step[]>(() =>
     profile?.display_name?.trim()
-      ? ['buddy', 'goal', 'health', 'notify', 'partner']
-      : ['buddy', 'name', 'goal', 'health', 'notify', 'partner'],
+      ? ['buddy', 'goal', 'health', 'notify', 'widget', 'partner']
+      : ['buddy', 'name', 'goal', 'health', 'notify', 'widget', 'partner'],
   );
   const [index, setIndex] = useState(0);
   const [name, setName] = useState(profile?.display_name ?? '');
@@ -239,6 +239,41 @@ export default function OnboardingScreen() {
               </AppText>
             </Card>
           </StepLayout>
+        ) : step === 'widget' ? (
+          <StepLayout
+            buddy={buddy}
+            mood="happy"
+            says="Put me on your Home Screen and you’ll see your streak every time you unlock your phone."
+            footer={
+              <>
+                <Button title="Got it" onPress={next} />
+                <Button title="Maybe later" variant="secondary" onPress={next} />
+              </>
+            }>
+            <WidgetPreview buddy={buddy} />
+            <Card style={{ gap: Spacing.sm }}>
+              <AppText variant="label">Add the widget</AppText>
+              {[
+                'Touch and hold an empty spot on your Home Screen until the apps jiggle.',
+                'Tap Edit in the top corner, then Add Widget.',
+                'Search for Sigamos, pick a size, and tap Add Widget.',
+              ].map((line, i) => (
+                <View key={i} style={styles.widgetStep}>
+                  <View style={styles.widgetStepNumber}>
+                    <AppText variant="caption" color="#fff" style={{ fontWeight: '800' }}>
+                      {i + 1}
+                    </AppText>
+                  </View>
+                  <AppText variant="body" style={styles.flex}>
+                    {line}
+                  </AppText>
+                </View>
+              ))}
+            </Card>
+            <AppText variant="caption" style={styles.center}>
+              You can add it any time. It updates on its own after each workout.
+            </AppText>
+          </StepLayout>
         ) : (
           <PartnerStep buddy={buddy} saving={saving} onFinish={finish} />
         )}
@@ -356,6 +391,40 @@ function PartnerStep({
   );
 }
 
+/** A small drawing of the Home Screen widget, so people know what they're adding. */
+function WidgetPreview({ buddy }: { buddy: MascotKind }) {
+  const dots = ['done', 'done', 'missed', 'today', 'future', 'future', 'future'] as const;
+  return (
+    <View style={styles.widget} accessible accessibilityLabel="Preview of the Sigamos widget: a 6-week streak">
+      <View style={styles.widgetTop}>
+        <Mascot kind={buddy} mood="happy" size={52} />
+        <View style={{ flex: 1 }}>
+          <AppText style={styles.widgetStreak}>🔥 6</AppText>
+          <AppText variant="caption" color="#fff" style={{ opacity: 0.85 }}>
+            week streak
+          </AppText>
+        </View>
+      </View>
+      <AppText variant="heading" color="#fff">
+        1 more day
+      </AppText>
+      <View style={styles.widgetDots}>
+        {dots.map((d, i) => (
+          <View
+            key={i}
+            style={[
+              styles.widgetDot,
+              d === 'done' && { backgroundColor: '#fff' },
+              d === 'today' && { borderWidth: 2, borderColor: '#fff' },
+              d === 'future' && { opacity: 0.35 },
+            ]}
+          />
+        ))}
+      </View>
+    </View>
+  );
+}
+
 function StepLayout({
   buddy,
   mood = 'happy',
@@ -432,6 +501,31 @@ const styles = StyleSheet.create({
   },
   goalSelected: { backgroundColor: Colors.flame },
   infoCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
+  widget: {
+    alignSelf: 'center',
+    width: 170,
+    height: 170,
+    padding: Spacing.md,
+    gap: 6,
+    borderRadius: 26,
+    borderCurve: 'continuous',
+    backgroundColor: Colors.flame,
+    boxShadow: '0 8px 20px rgba(0,0,0,0.18)',
+  },
+  widgetTop: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  widgetStreak: { color: '#fff', fontSize: 26, lineHeight: 30, fontWeight: '900' },
+  widgetDots: { flexDirection: 'row', gap: 4, marginTop: 'auto' },
+  widgetDot: { flex: 1, aspectRatio: 1, borderRadius: 99, backgroundColor: 'rgba(255,255,255,0.35)' },
+  widgetStep: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm },
+  widgetStepNumber: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.flame,
+    marginTop: 1,
+  },
   codeCard: { alignItems: 'stretch', gap: Spacing.md },
   code: { textAlign: 'center', letterSpacing: 8, fontSize: 40, color: Colors.flame },
   codeRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },

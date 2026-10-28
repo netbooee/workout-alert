@@ -247,6 +247,16 @@ export default function MeScreen() {
                 <Button title="Show the welcome tour" variant="secondary" />
               </Link>
               <Button
+                title="Add the Home Screen widget"
+                variant="secondary"
+                onPress={() =>
+                  Alert.alert(
+                    'Add the Sigamos widget',
+                    '1. Touch and hold an empty spot on your Home Screen until the apps jiggle.\n2. Tap Edit, then Add Widget.\n3. Search for Sigamos, pick a size, and tap Add Widget.',
+                  )
+                }
+              />
+              <Button
                 title="Help and support"
                 variant="secondary"
                 onPress={() => Linking.openURL('https://sigamos.cloud/support/')}

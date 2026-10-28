@@ -95,26 +95,28 @@ export default function MeScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Card style={styles.nameCard}>
-          <Avatar id={profile.id} name={profile.display_name} size={52} />
-          <View style={{ flex: 1, gap: 2 }}>
-            <AppText variant="title" numberOfLines={1}>
-              {profile.display_name ?? 'Add your name'}
-            </AppText>
-            <AppText variant="caption">This is how partners see you</AppText>
+        <Card style={{ gap: Spacing.md }}>
+          <View style={styles.nameCard}>
+            <Avatar id={profile.id} name={profile.display_name} size={52} />
+            <View style={{ flex: 1, gap: 2 }}>
+              <AppText variant="title" numberOfLines={1}>
+                {profile.display_name ?? 'Add your name'}
+              </AppText>
+              <AppText variant="caption">This is how partners see you</AppText>
+            </View>
+            <Pressable
+              onPress={editName}
+              accessibilityRole="button"
+              accessibilityLabel={profile.display_name ? 'Edit name' : 'Add your name'}
+              style={styles.editName}>
+              <SymbolView name="pencil" size={14} weight="semibold" tintColor={Colors.flame} />
+              <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+                {profile.display_name ? 'Edit' : 'Add'}
+              </AppText>
+            </Pressable>
           </View>
-          <Pressable
-            onPress={editName}
-            accessibilityRole="button"
-            accessibilityLabel={profile.display_name ? 'Edit name' : 'Add your name'}
-            style={styles.editName}>
-            <SymbolView name="pencil" size={14} weight="semibold" tintColor={Colors.flame} />
-            <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
-              {profile.display_name ? 'Edit' : 'Add'}
-            </AppText>
-          </Pressable>
+          <StatTiles weeks={home?.streak?.current_weeks ?? 0} xp={xp} />
         </Card>
-        <StatTiles weeks={home?.streak?.current_weeks ?? 0} xp={xp} />
         <Segmented
           options={[
             { key: 'you', label: 'You' },
@@ -474,11 +476,16 @@ function StatTiles({ weeks, xp }: { weeks: number; xp: number | undefined }) {
         />
       </View>
       {weeks > 0 && (
-        <Button
-          title="📤 Share my progress"
-          variant="secondary"
+        <Pressable
           onPress={() => router.push({ pathname: '/share', params: { kind: 'streak', weeks: String(weeks) } })}
-        />
+          accessibilityRole="button"
+          hitSlop={8}
+          style={({ pressed }) => [styles.share, pressed && { opacity: 0.6 }]}>
+          <SymbolView name="square.and.arrow.up" size={14} weight="semibold" tintColor={Colors.flame} />
+          <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+            Share my progress
+          </AppText>
+        </Pressable>
       )}
     </View>
   );
@@ -498,20 +505,20 @@ function StatTile({
   href: Href;
 }) {
   return (
-    <Link href={href} asChild>
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={`${value} ${label}`}
-        style={({ pressed }) => [styles.tile, pressed && { opacity: 0.7 }]}>
-        <AppText style={styles.tileEmoji}>{emoji}</AppText>
-        <AppText style={[styles.tileValue, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
-          {value}
-        </AppText>
-        <AppText variant="label" style={styles.tileLabel} numberOfLines={1}>
-          {label}
-        </AppText>
-      </Pressable>
-    </Link>
+    // A plain Pressable: Link asChild dropped the style function, leaving the tiles unstyled.
+    <Pressable
+      onPress={() => router.push(href)}
+      accessibilityRole="button"
+      accessibilityLabel={`${value} ${label}`}
+      style={({ pressed }) => [styles.tile, pressed && { opacity: 0.7 }]}>
+      <AppText style={styles.tileEmoji}>{emoji}</AppText>
+      <AppText style={[styles.tileValue, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+        {value}
+      </AppText>
+      <AppText variant="label" style={styles.tileLabel} numberOfLines={1}>
+        {label}
+      </AppText>
+    </Pressable>
   );
 }
 
@@ -523,12 +530,11 @@ const styles = StyleSheet.create({
     gap: 2,
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.xs,
-    borderRadius: Radius.lg,
+    borderRadius: Radius.md,
     borderCurve: 'continuous',
-    borderWidth: StyleSheet.hairlineWidth,
-    borderColor: Colors.border,
-    backgroundColor: Colors.card,
+    backgroundColor: Colors.cardRaised,
   },
+  share: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
   tileEmoji: { fontSize: 26, lineHeight: 32 },
   tileValue: { fontFamily: Font.rounded, fontSize: 22, lineHeight: 28, fontWeight: '800' },
   tileLabel: { fontSize: 10, letterSpacing: 0.4 },

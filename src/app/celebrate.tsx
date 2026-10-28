@@ -6,6 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import Animated, { FadeInDown, ZoomIn } from 'react-native-reanimated';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { Confetti } from '@/components/confetti';
 import { LevelBar } from '@/components/level-bar';
 import { Mascot } from '@/components/mascots';
 import { AppText, Button } from '@/components/ui';
@@ -37,6 +38,10 @@ export default function CelebrateScreen() {
     incentive: string;
     steps: string;
     invite: string;
+    /** The workout you just logged, for Share. */
+    workoutId?: string;
+    /** '1' when that workout is under your "What counts" bar. */
+    uncounted?: string;
   }>();
   const profile = useProfile();
   const earned = Number(params.xp) || 0;
@@ -44,6 +49,8 @@ export default function CelebrateScreen() {
   const weekGoal = params.weekGoal === '1';
   const incentive = params.incentive === '1';
   const steps = Number(params.steps) || 0;
+  const loggedId = params.workoutId || null;
+  const uncounted = params.uncounted === '1';
   const { data: total } = useXpTotal();
   const { data: home } = useHomeData();
   const shown = useCountUp(earned);
@@ -79,6 +86,7 @@ export default function CelebrateScreen() {
 
   return (
     <SafeAreaView style={styles.container}>
+      {!uncounted && <Confetti />}
       <View style={styles.body}>
         <Animated.View entering={FadeInDown.delay(250)} style={styles.bubble}>
           <AppText variant="heading" style={{ textAlign: 'center' }}>
@@ -99,6 +107,11 @@ export default function CelebrateScreen() {
           <AppText variant="display" color={Colors.xp}>
             +{shown} XP
           </AppText>
+          {uncounted && (
+            <AppText variant="caption" style={{ textAlign: 'center', maxWidth: 300 }}>
+              This one is under your What counts bar, so it won’t fill a day this week. The XP is still yours.
+            </AppText>
+          )}
         </Animated.View>
 
         {steps > 0 && (workouts > 0 || weekGoal || facts.evidence || incentive) && (
@@ -124,6 +137,13 @@ export default function CelebrateScreen() {
 
       <Animated.View entering={FadeInDown.delay(700)} style={{ gap: Spacing.sm }}>
         <Button title="Continue" onPress={() => (hasStreakStep ? setStep('streak') : router.back())} />
+        {loggedId && !inviteToLeague && (
+          <Button
+            title="📤 Share this workout"
+            variant="secondary"
+            onPress={() => router.replace({ pathname: '/share', params: { kind: 'workout', id: loggedId } })}
+          />
+        )}
         {inviteToLeague && (
           <Button
             title="🏆 Compete in public leagues"
@@ -158,6 +178,7 @@ function StreakStep({
 
   return (
     <SafeAreaView style={styles.container}>
+      {weekGoal && <Confetti />}
       <View style={styles.body}>
         <Animated.View entering={ZoomIn.springify().damping(9)} style={[styles.burst, styles.flameBurst]}>
           <SymbolView

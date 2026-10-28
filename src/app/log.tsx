@@ -78,7 +78,7 @@ export default function LogWorkoutScreen() {
 
       await queryClient.invalidateQueries();
       router.back();
-      await showCelebrationIfEarned(profile.id);
+      await showCelebrationIfEarned(profile.id, { workoutId: workout.id, counted: workout.counted });
     } catch (e) {
       Alert.alert('Couldn’t log workout', friendlyError(e));
       setSaving(false);

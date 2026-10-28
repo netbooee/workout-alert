@@ -3,6 +3,7 @@ import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
+import { EmptyState } from '@/components/empty-state';
 import { FeedCard } from '@/components/feed-card';
 import { IncentiveCard } from '@/components/incentive-card';
 import { AppText, Button, Card } from '@/components/ui';
@@ -83,7 +84,12 @@ export default function PartnerScreen() {
       ) : workouts?.length ? (
         workouts.map((item) => <FeedCard key={item.workout.id} item={item} name={firstName} />)
       ) : (
-        <AppText variant="caption">No workouts yet.</AppText>
+        <EmptyState
+          mascot={partner?.mascot}
+          mood="sleepy"
+          title={`${firstName} hasn’t worked out yet`}
+          body="Their workouts will show up here. A friendly nudge might get them moving."
+        />
       )}
     </ScrollView>
   );

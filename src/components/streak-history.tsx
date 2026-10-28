@@ -1,6 +1,8 @@
+import { Link } from 'expo-router';
 import { StyleSheet, View, type ColorValue } from 'react-native';
 
-import { AppText, Card } from '@/components/ui';
+import { EmptyState } from '@/components/empty-state';
+import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import type { StreakWeek } from '@/lib/database.types';
 
@@ -17,7 +19,15 @@ export function StreakHistory({ weeks }: { weeks: StreakWeek[] }) {
     <Card>
       <AppText variant="label">Last {weeks.length || 12} weeks</AppText>
       {weeks.length === 0 ? (
-        <AppText variant="caption">Your weekly history will show up after your first workout.</AppText>
+        <EmptyState
+          title="Your history starts here"
+          body="Each week you work out adds a bar. Hit your goal and it turns orange."
+          action={
+            <Link href="/log" asChild>
+              <Button title="+ Log a workout" variant="secondary" />
+            </Link>
+          }
+        />
       ) : (
         <>
           <View style={styles.bars}>

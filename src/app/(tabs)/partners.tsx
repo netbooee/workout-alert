@@ -5,6 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
 import { CheerCard } from '@/components/cheer-card';
+import { EmptyState } from '@/components/empty-state';
 import { FeedCard } from '@/components/feed-card';
 import { IncentiveIntro } from '@/components/incentive-intro';
 import { LeagueCard } from '@/components/league-card';
@@ -129,7 +130,10 @@ export default function PartnersScreen() {
                 <FeedCard key={item.workout.id} item={item} name={nameOf(item.workout.user_id)} />
               ))
             ) : (
-              <AppText variant="caption">No partner workouts yet.</AppText>
+              <EmptyState
+                title="No partner workouts yet"
+                body="When your partners work out, it shows up here so you can cheer them on."
+              />
             )}
           </>
         )}

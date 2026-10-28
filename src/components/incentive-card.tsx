@@ -152,7 +152,7 @@ export function IncentiveCard({
           {!reached && (
             <View style={styles.row}>
               {(received || i.shared) && (
-                <Button title="Log a workout" style={{ flex: 1 }} onPress={() => router.push('/log')} />
+                <Button title="Log a workout" variant="secondary" style={{ flex: 1 }} onPress={() => router.push('/log')} />
               )}
               {(!received || i.shared) && (
                 <Button
@@ -163,7 +163,7 @@ export function IncentiveCard({
                   loading={nudge.isPending}
                   onPress={() => {
                     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                    nudge.mutate(otherId, { onError: fail('Could not nudge') });
+                    nudge.mutate(otherId, { onError: fail('Couldn’t nudge') });
                   }}
                 />
               )}
@@ -179,7 +179,7 @@ export function IncentiveCard({
             variant="secondary"
             style={{ flex: 1 }}
             disabled={respond.isPending}
-            onPress={() => respond.mutate({ id: i.id, accept: false }, { onError: fail('Could not decline') })}
+            onPress={() => respond.mutate({ id: i.id, accept: false }, { onError: fail('Couldn’t decline') })}
           />
           <Button
             title="Accept 🎁"
@@ -187,7 +187,7 @@ export function IncentiveCard({
             loading={respond.isPending}
             onPress={() => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              respond.mutate({ id: i.id, accept: true }, { onError: fail('Could not accept') });
+              respond.mutate({ id: i.id, accept: true }, { onError: fail('Couldn’t accept') });
             }}
           />
         </View>
@@ -208,7 +208,7 @@ export function IncentiveCard({
               loading={deliver.isPending}
               onPress={() => {
                 Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-                deliver.mutate(i.id, { onError: fail('Could not update') });
+                deliver.mutate(i.id, { onError: fail('Couldn’t update') });
               }}
             />
           )}

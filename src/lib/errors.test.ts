@@ -15,7 +15,7 @@ describe('friendlyError', () => {
   it('never shows database jargon or [object Object]', () => {
     expect(friendlyError({ code: '42703', message: 'column "foo" does not exist' })).toMatch(/Something went wrong/);
     expect(friendlyError({})).toMatch(/Something went wrong/);
-    expect(friendlyError({ code: 'PGRST301', message: 'JWT expired' })).toMatch(/session has expired/);
+    expect(friendlyError({ code: 'PGRST301', message: 'JWT expired' })).toMatch(/sign-in has expired/);
   });
 
   it('maps common codes', () => {

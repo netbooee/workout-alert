@@ -80,3 +80,36 @@ export function trackRank(
 }
 
 export const MEDALS = ['🥇', '🥈', '🥉'] as const;
+
+/** Made-up end-of-week results, for previewing the result screen during development. */
+export function sampleLeagueResult(outcome: Zone, tier: number, myName: string, myMascot: string) {
+  const names = ['Alex', 'Sam', myName, 'Jordan', 'Riley', 'Casey', 'Morgan', 'Jamie'];
+  const mascots = ['capybara', 'sloth', myMascot, 'red_panda', 'lotl', 'capybara', 'sloth', 'red_panda'];
+  const myRank = outcome === 'up' ? 3 : outcome === 'down' ? 8 : 5;
+  const order = names.map((name, i) => ({ name, mascot: mascots[i]!, me: i === 2 }));
+  // Put "you" at the rank the outcome needs.
+  const me = order.splice(2, 1)[0]!;
+  order.splice(myRank - 1, 0, me);
+  const table = order.map((p, i) => ({
+    member_key: `sample-${i}`,
+    name: p.name,
+    mascot: p.mascot as 'lotl' | 'capybara' | 'sloth' | 'red_panda',
+    xp: 620 - i * 70,
+    rank: i + 1,
+    is_me: p.me,
+    result: (i < 2 ? 'up' : i >= 7 ? 'down' : 'stay') as Zone,
+  }));
+  const mine = table[myRank - 1]!;
+  mine.result = outcome;
+  return {
+    result: {
+      week_start: '2026-10-25',
+      final_rank: myRank,
+      final_xp: mine.xp,
+      result: outcome,
+      tier: Math.min(Math.max(tier + (outcome === 'up' ? 1 : outcome === 'down' ? -1 : 0), 1), TOP_TIER),
+      group_size: table.length,
+    },
+    table,
+  };
+}

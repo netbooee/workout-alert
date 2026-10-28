@@ -78,7 +78,7 @@ async function respond(response: Notifications.NotificationResponse, queryClient
       await reactFromNotification(workoutId, reaction);
       await queryClient.invalidateQueries({ queryKey: ['social'] });
     } catch (e) {
-      Alert.alert('Could not save', friendlyError(e));
+      Alert.alert('Couldn’t save', friendlyError(e));
     }
   }
   if (typeof url === 'string' && url.startsWith('/')) router.push(url as Href);

@@ -63,7 +63,7 @@ export function ReactionBar({
     (c) => c.count > 0,
   );
 
-  const fail = (e: unknown) => Alert.alert('Could not save', friendlyError(e));
+  const fail = (e: unknown) => Alert.alert('Couldn’t save', friendlyError(e));
 
   const cheer = (kind: ReactionKind = 'clap') => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);

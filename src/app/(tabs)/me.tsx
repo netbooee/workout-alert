@@ -1,9 +1,20 @@
 import * as Haptics from 'expo-haptics';
 import { useQueryClient } from '@tanstack/react-query';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams, type Href } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
+import {
+  ActionSheetIOS,
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  View,
+  type ColorValue,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
@@ -15,15 +26,17 @@ import { PushPrompt } from '@/components/push-prompt';
 import { RewardShelf } from '@/components/reward-shelf';
 import { StreakHistory } from '@/components/streak-history';
 import { AppText, Button, Card, Segmented } from '@/components/ui';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
 import { useLeagueSettings } from '@/hooks/use-league';
 import { useXpTotal } from '@/hooks/use-social';
 import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { deleteAccount, signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
+import { tierInfo } from '@/lib/leagues';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 import { mascotKind } from '@/lib/mascots';
+import { pickProfilePhoto, removeProfilePhotoFile, uploadProfilePhoto } from '@/lib/profile-photo';
 import { useSoundsPref } from '@/lib/sounds';
 import {
   MIN_WORKOUT_OPTIONS,
@@ -50,6 +63,46 @@ export default function MeScreen() {
   const { data: history } = useStreakHistory();
   const { data: xp } = useXpTotal();
   const [resyncing, setResyncing] = useState(false);
+  const [savingPhoto, setSavingPhoto] = useState(false);
+
+  const setPhoto = async (from: 'camera' | 'library' | 'remove') => {
+    const old = profile.avatar_url;
+    try {
+      if (from === 'remove') {
+        await updateProfile({ avatar_url: null });
+      } else {
+        const uri = await pickProfilePhoto(from);
+        if (!uri) return;
+        setSavingPhoto(true);
+        const path = await uploadProfilePhoto(profile.id, uri);
+        await updateProfile({ avatar_url: path });
+      }
+      await removeProfilePhotoFile(old);
+    } catch (e) {
+      Alert.alert('Couldn’t change your photo', friendlyError(e));
+    } finally {
+      setSavingPhoto(false);
+    }
+  };
+
+  const changePhoto = () => {
+    const hasPhoto = !!profile.avatar_url;
+    const options = ['Take photo', 'Choose from library', ...(hasPhoto ? ['Remove photo'] : []), 'Cancel'];
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        title: 'Profile photo',
+        message: 'Your partners see it instead of your initials.',
+        options,
+        cancelButtonIndex: options.length - 1,
+        destructiveButtonIndex: hasPhoto ? 2 : undefined,
+      },
+      (i) => {
+        if (i === 0) setPhoto('camera');
+        else if (i === 1) setPhoto('library');
+        else if (hasPhoto && i === 2) setPhoto('remove');
+      },
+    );
+  };
 
   const setGoal = async (goal: number) => {
     if (goal < 1 || goal > 7 || goal === profile.weekly_goal) return;
@@ -57,7 +110,7 @@ export default function MeScreen() {
     try {
       await updateProfile({ weekly_goal: goal });
     } catch (e) {
-      Alert.alert('Could not update goal', friendlyError(e));
+      Alert.alert('Couldn’t update goal', friendlyError(e));
     }
   };
 
@@ -71,7 +124,7 @@ export default function MeScreen() {
         try {
           await updateProfile({ display_name: name });
         } catch (e) {
-          Alert.alert('Could not save your name', friendlyError(e));
+          Alert.alert('Couldn’t save your name', friendlyError(e));
         }
       },
       'plain-text',
@@ -85,7 +138,7 @@ export default function MeScreen() {
       await syncHealthData(profile.id);
       await refetch();
     } catch (e) {
-      Alert.alert('Sync failed', friendlyError(e));
+      Alert.alert('Couldn’t refresh from Apple Health', friendlyError(e));
     } finally {
       setResyncing(false);
     }
@@ -94,24 +147,40 @@ export default function MeScreen() {
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView contentContainerStyle={styles.content}>
-        <Card style={styles.nameCard}>
-          <Avatar id={profile.id} name={profile.display_name} size={52} />
-          <View style={{ flex: 1, gap: 2 }}>
-            <AppText variant="title" numberOfLines={1}>
-              {profile.display_name ?? 'Add your name'}
-            </AppText>
-            <AppText variant="caption">This is how partners see you</AppText>
+        <Card style={{ gap: Spacing.md }}>
+          <View style={styles.nameCard}>
+            <Pressable
+              onPress={changePhoto}
+              disabled={savingPhoto}
+              accessibilityRole="button"
+              accessibilityLabel={profile.avatar_url ? 'Change profile photo' : 'Add a profile photo'}>
+              <Avatar id={profile.id} name={profile.display_name} size={56} />
+              <View style={styles.cameraBadge}>
+                {savingPhoto ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <SymbolView name="camera.fill" size={12} tintColor="#000" />
+                )}
+              </View>
+            </Pressable>
+            <View style={{ flex: 1, gap: 2 }}>
+              <AppText variant="title" numberOfLines={1}>
+                {profile.display_name ?? 'Add your name'}
+              </AppText>
+              <AppText variant="caption">This is how partners see you</AppText>
+            </View>
+            <Pressable
+              onPress={editName}
+              accessibilityRole="button"
+              accessibilityLabel={profile.display_name ? 'Edit name' : 'Add your name'}
+              style={styles.editName}>
+              <SymbolView name="pencil" size={14} weight="semibold" tintColor={Colors.flame} />
+              <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+                {profile.display_name ? 'Edit' : 'Add'}
+              </AppText>
+            </Pressable>
           </View>
-          <Pressable
-            onPress={editName}
-            accessibilityRole="button"
-            accessibilityLabel={profile.display_name ? 'Edit name' : 'Add your name'}
-            style={styles.editName}>
-            <SymbolView name="pencil" size={14} weight="semibold" tintColor={Colors.flame} />
-            <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
-              {profile.display_name ? 'Edit' : 'Add'}
-            </AppText>
-          </Pressable>
+          <StatTiles weeks={home?.streak?.current_weeks ?? 0} xp={xp} />
         </Card>
         <Segmented
           options={[
@@ -237,7 +306,7 @@ export default function MeScreen() {
                 Workouts sync automatically when you open the app. If something looks missing, re-sync
                 the last 12 weeks.
               </AppText>
-              <Button title="Re-sync health data" variant="secondary" loading={resyncing} onPress={resync} />
+              <Button title="Refresh from Apple Health" variant="secondary" loading={resyncing} onPress={resync} />
             </Card>
 
             <Card>
@@ -246,6 +315,16 @@ export default function MeScreen() {
               <Link href="/welcome" asChild>
                 <Button title="Show the welcome tour" variant="secondary" />
               </Link>
+              <Button
+                title="Add the Home Screen widget"
+                variant="secondary"
+                onPress={() =>
+                  Alert.alert(
+                    'Add the Sigamos widget',
+                    '1. Touch and hold an empty spot on your Home Screen until the apps jiggle.\n2. Tap Edit, then Add Widget.\n3. Search for Sigamos, pick a size, and tap Add Widget.',
+                  )
+                }
+              />
               <Button
                 title="Help and support"
                 variant="secondary"
@@ -278,7 +357,7 @@ function WhatCountsCard() {
     try {
       await updateProfile(patch);
     } catch (e) {
-      Alert.alert('Could not save', friendlyError(e));
+      Alert.alert('Couldn’t save', friendlyError(e));
     }
     setSaving(false);
   };
@@ -333,7 +412,7 @@ function confirmDeleteAccount(userId: string) {
           deleteAccount(userId).catch((e) => {
             // Backing out of Apple's confirmation just cancels.
             if (e && typeof e === 'object' && 'code' in e && e.code === 'ERR_REQUEST_CANCELED') return;
-            Alert.alert('Could not delete your account', friendlyError(e));
+            Alert.alert('Couldn’t delete your account', friendlyError(e));
           }),
       },
     ],
@@ -361,7 +440,7 @@ function RestModeCard({ resting }: { resting: boolean }) {
     setSaving(true);
     const { error } = await supabase.rpc('set_rest_mode', { p_on: on });
     setSaving(false);
-    if (error) Alert.alert('Could not change rest mode', error.message);
+    if (error) Alert.alert('Couldn’t change rest mode', error.message);
     await queryClient.invalidateQueries();
   };
 
@@ -419,7 +498,7 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
         value={value}
         trackColor={{ true: Colors.flame }}
         onValueChange={(v) => {
-          onChange(v).catch((e) => Alert.alert('Could not save', friendlyError(e)));
+          onChange(v).catch((e) => Alert.alert('Couldn’t save', friendlyError(e)));
         }}
       />
     </View>
@@ -434,7 +513,109 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
   );
 }
 
+/**
+ * Your streak, XP and league at a glance, each opening its own screen, after
+ * Mimo's and Opal's profile tiles. Share sends your streak card.
+ */
+function StatTiles({ weeks, xp }: { weeks: number; xp: number | undefined }) {
+  const { data: league, isSuccess } = useLeagueSettings();
+  const tier = tierInfo(league?.tier ?? 1);
+  const joined = !!league?.opted_in;
+  return (
+    <View style={{ gap: Spacing.sm }}>
+      <View style={styles.tiles}>
+        <StatTile
+          emoji="🔥"
+          value={String(weeks)}
+          label="week streak"
+          color={weeks > 0 ? Colors.flame : Colors.textMuted}
+          href="/streak"
+        />
+        <StatTile emoji="⚡" value={xp != null ? xp.toLocaleString() : '–'} label="total XP" color={Colors.xp} href="/xp" />
+        <StatTile
+          emoji={joined ? tier.emoji : '🏆'}
+          value={isSuccess ? (joined ? tier.name : 'Join') : '–'}
+          label={joined ? 'league' : 'a league'}
+          color={Colors.text}
+          href="/league"
+        />
+      </View>
+      {weeks > 0 && (
+        <Pressable
+          onPress={() => router.push({ pathname: '/share', params: { kind: 'streak', weeks: String(weeks) } })}
+          accessibilityRole="button"
+          hitSlop={8}
+          style={({ pressed }) => [styles.share, pressed && { opacity: 0.6 }]}>
+          <SymbolView name="square.and.arrow.up" size={14} weight="semibold" tintColor={Colors.flame} />
+          <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+            Share my progress
+          </AppText>
+        </Pressable>
+      )}
+    </View>
+  );
+}
+
+function StatTile({
+  emoji,
+  value,
+  label,
+  color,
+  href,
+}: {
+  emoji: string;
+  value: string;
+  label: string;
+  color: ColorValue;
+  href: Href;
+}) {
+  return (
+    // A plain Pressable: Link asChild dropped the style function, leaving the tiles unstyled.
+    <Pressable
+      onPress={() => router.push(href)}
+      accessibilityRole="button"
+      accessibilityLabel={`${value} ${label}`}
+      style={({ pressed }) => [styles.tile, pressed && { opacity: 0.7 }]}>
+      <AppText style={styles.tileEmoji}>{emoji}</AppText>
+      <AppText style={[styles.tileValue, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+        {value}
+      </AppText>
+      <AppText variant="label" style={styles.tileLabel} numberOfLines={1}>
+        {label}
+      </AppText>
+    </Pressable>
+  );
+}
+
 const styles = StyleSheet.create({
+  tiles: { flexDirection: 'row', gap: Spacing.sm },
+  cameraBadge: {
+    position: 'absolute',
+    right: -4,
+    bottom: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.flame,
+    borderWidth: 2,
+    borderColor: Colors.card,
+  },
+  tile: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xs,
+    borderRadius: Radius.md,
+    borderCurve: 'continuous',
+    backgroundColor: Colors.cardRaised,
+  },
+  share: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 6 },
+  tileEmoji: { fontSize: 26, lineHeight: 32 },
+  tileValue: { fontFamily: Font.rounded, fontSize: 22, lineHeight: 28, fontWeight: '800' },
+  tileLabel: { fontSize: 10, letterSpacing: 0.4 },
   leagueRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, minHeight: 44 },
   soundsRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.sm },
   deleteAccount: { alignSelf: 'center', padding: Spacing.sm },

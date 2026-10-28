@@ -3,7 +3,7 @@
     "name": "Sigamos",
     "slug": "sigamos",
     "owner": "netbooees-team",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "sigamos",

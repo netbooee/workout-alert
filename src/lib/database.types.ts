@@ -20,6 +20,7 @@ export type Database = {
         Row: {
           id: string;
           display_name: string | null;
+          /** Path of your profile photo in the private avatars bucket (despite the name, not a URL). */
           avatar_url: string | null;
           timezone: string;
           weekly_goal: number;

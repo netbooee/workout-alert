@@ -73,8 +73,15 @@ async function newAccountBaseline(userId: string): Promise<string | null> {
   return onboardedAt;
 }
 
-/** Opens the celebration screen if anything new was earned. */
-export async function showCelebrationIfEarned(userId: string): Promise<void> {
+/**
+ * Opens the celebration screen if anything new was earned. After logging a
+ * workout, `logged` lets it offer Share and say when the workout is under
+ * your "What counts" bar.
+ */
+export async function showCelebrationIfEarned(
+  userId: string,
+  logged?: { workoutId: string; counted: boolean },
+): Promise<void> {
   const earned = await takeCelebration(userId);
   if (!earned) return;
   // Imported lazily so this module stays usable outside the router (e.g. tests).
@@ -89,6 +96,8 @@ export async function showCelebrationIfEarned(userId: string): Promise<void> {
       incentive: earned.incentive ? '1' : '0',
       invite: earned.invite ?? '',
       steps: String(earned.steps),
+      workoutId: logged?.workoutId ?? '',
+      uncounted: logged && !logged.counted ? '1' : '0',
     },
   });
 }

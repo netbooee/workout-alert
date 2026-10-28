@@ -37,7 +37,7 @@ export function FriendStreaks() {
           style: 'destructive',
           onPress: () =>
             remove.mutate(p.partnership_id, {
-              onError: (e) => Alert.alert('Could not remove', friendlyError(e)),
+              onError: (e) => Alert.alert('Couldn’t remove', friendlyError(e)),
             }),
         },
       ],

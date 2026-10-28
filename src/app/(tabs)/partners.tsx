@@ -5,13 +5,14 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
 import { CheerCard } from '@/components/cheer-card';
+import { EmptyState } from '@/components/empty-state';
 import { FeedCard } from '@/components/feed-card';
 import { IncentiveIntro } from '@/components/incentive-intro';
 import { LeagueCard } from '@/components/league-card';
 import { LeagueEntry } from '@/components/league-entry';
 import { PartnerCard } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
-import { ActionPill, AppText, Button, Card } from '@/components/ui';
+import { ActionPill, AppText, Button, Card, SectionLabel } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useLeague, useNames, usePartnerFeed, usePartners, useRemovePartner, useRespondToPartner } from '@/hooks/use-social';
 import type { Partner } from '@/lib/database.types';
@@ -66,7 +67,7 @@ export default function PartnersScreen() {
               Better together 🤝
             </AppText>
             <AppText variant="body" color={Colors.textSecondary} style={{ textAlign: 'center' }}>
-              Add an accountability partner. You’ll see each other’s workouts and streaks, cheer on
+              Add an workout partner. You’ll see each other’s workouts and streaks, cheer on
               each other’s check-ins, and compete in a weekly league.
             </AppText>
             <Link href="/add-partner" asChild>
@@ -121,15 +122,16 @@ export default function PartnersScreen() {
 
         {accepted.length > 0 && (
           <>
-            <AppText variant="label" style={{ marginTop: Spacing.sm }}>
-              Partner activity
-            </AppText>
+            <SectionLabel>Partner activity</SectionLabel>
             {feed.data?.length ? (
               feed.data.map((item) => (
                 <FeedCard key={item.workout.id} item={item} name={nameOf(item.workout.user_id)} />
               ))
             ) : (
-              <AppText variant="caption">No partner workouts yet.</AppText>
+              <EmptyState
+                title="No partner workouts yet"
+                body="When your partners work out, it shows up here so you can cheer them on."
+              />
             )}
           </>
         )}
@@ -159,7 +161,7 @@ function CancelRequest({ partnershipId, name }: { partnershipId: string; name: s
             text: 'Cancel request',
             style: 'destructive',
             onPress: () =>
-              remove.mutate(partnershipId, { onError: (e) => Alert.alert('Could not cancel', friendlyError(e)) }),
+              remove.mutate(partnershipId, { onError: (e) => Alert.alert('Couldn’t cancel', friendlyError(e)) }),
           },
         ])
       }>
@@ -183,7 +185,7 @@ function IncomingRequest({ partner }: { partner: Partner }) {
         <Avatar id={partner.partner_id} name={partner.display_name} size={40} />
         <View style={{ flex: 1 }}>
           <AppText variant="heading">{partner.display_name ?? 'Someone'}</AppText>
-          <AppText variant="caption">wants to be your accountability partner</AppText>
+          <AppText variant="caption">wants to be your workout partner</AppText>
         </View>
       </View>
       <View style={styles.actions}>

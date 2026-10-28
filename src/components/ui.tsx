@@ -27,6 +27,18 @@ export function AppText({
   return <Text {...props} style={[textStyles[variant], color ? { color } : null, style]} />;
 }
 
+/**
+ * A section heading outside a card: small grey capitals with a little room
+ * above, so every screen's sections read the same way.
+ */
+export function SectionLabel({ children, style }: PropsWithChildren<{ style?: TextProps['style'] }>) {
+  return (
+    <AppText variant="label" accessibilityRole="header" style={[{ marginTop: Spacing.sm, marginLeft: Spacing.xs }, style]}>
+      {children}
+    </AppText>
+  );
+}
+
 export function Card({ children, style }: PropsWithChildren<{ style?: StyleProp<ViewStyle> }>) {
   return <View style={[styles.card, style]}>{children}</View>;
 }

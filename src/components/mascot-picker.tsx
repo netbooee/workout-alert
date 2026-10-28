@@ -21,7 +21,7 @@ export function MascotPicker() {
     try {
       await updateProfile({ mascot: kind });
     } catch (e) {
-      Alert.alert('Could not change your buddy', friendlyError(e));
+      Alert.alert('Couldn’t change your buddy', friendlyError(e));
     }
   };
 

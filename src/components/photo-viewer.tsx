@@ -71,7 +71,7 @@ function Viewer({ urls, start, onClose }: { urls: string[]; start: number; onClo
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       setSaved(page);
     } catch (e) {
-      Alert.alert('Could not save the photo', friendlyError(e));
+      Alert.alert('Couldn’t save the photo', friendlyError(e));
     } finally {
       setSaving(false);
     }

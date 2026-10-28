@@ -62,7 +62,7 @@ function AppleSignIn() {
       }
     } catch (e) {
       if (e instanceof Error && 'code' in e && e.code === 'ERR_REQUEST_CANCELED') return;
-      Alert.alert('Sign in failed', friendlyError(e));
+      Alert.alert('Couldn’t sign you in', friendlyError(e));
     }
   };
 
@@ -88,7 +88,7 @@ function GoogleSignIn() {
     try {
       await signInWithGoogle();
     } catch (e) {
-      Alert.alert('Sign in failed', friendlyError(e));
+      Alert.alert('Couldn’t sign you in', friendlyError(e));
     } finally {
       setLoading(false);
     }

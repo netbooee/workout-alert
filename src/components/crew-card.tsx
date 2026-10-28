@@ -134,7 +134,7 @@ export function CrewCard({
           cheering &&
           setCheer.mutate(
             { workoutId: cheering.workoutId, kind },
-            { onError: (e) => Alert.alert('Could not cheer', friendlyError(e)) },
+            { onError: (e) => Alert.alert('Couldn’t cheer', friendlyError(e)) },
           )
         }
         onClose={() => setCheering(null)}
@@ -150,7 +150,7 @@ export function CrewCard({
         choices={nudging?.recently_nudged ? [] : [{ kind: 'nudge', emoji: '👋', label: 'Nudge' }]}
         onPick={() =>
           nudging &&
-          nudge.mutate(nudging.partner_id, { onError: (e) => Alert.alert('Could not nudge', friendlyError(e)) })
+          nudge.mutate(nudging.partner_id, { onError: (e) => Alert.alert('Couldn’t nudge', friendlyError(e)) })
         }
         onClose={() => setNudging(null)}
       />
@@ -269,7 +269,7 @@ function Compare({
             disabled={partner.recently_nudged || nudge.isPending}
             onPress={() => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              nudge.mutate(partner.partner_id, { onError: (e) => Alert.alert('Could not nudge', friendlyError(e)) });
+              nudge.mutate(partner.partner_id, { onError: (e) => Alert.alert('Couldn’t nudge', friendlyError(e)) });
             }}
             accessibilityRole="button"
             accessibilityLabel={partner.recently_nudged ? `Nudged ${firstName}` : `Nudge ${firstName}`}
@@ -342,7 +342,7 @@ function EmptyCrew({ incoming }: { incoming: number }) {
           onPress={() => router.push('/partners')}
         />
       ) : (
-        <Button title="Add a partner" onPress={() => router.push('/add-partner')} />
+        <Button title="Add a partner" variant="secondary" onPress={() => router.push('/add-partner')} />
       )}
     </Card>
   );

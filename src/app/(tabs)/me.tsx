@@ -3,7 +3,18 @@ import { useQueryClient } from '@tanstack/react-query';
 import { Link, router, useLocalSearchParams, type Href } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
-import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
+import {
+  ActionSheetIOS,
+  ActivityIndicator,
+  Alert,
+  Linking,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  View,
+  type ColorValue,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Avatar } from '@/components/avatar';
@@ -25,6 +36,7 @@ import { friendlyError } from '@/lib/errors';
 import { tierInfo } from '@/lib/leagues';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 import { mascotKind } from '@/lib/mascots';
+import { pickProfilePhoto, removeProfilePhotoFile, uploadProfilePhoto } from '@/lib/profile-photo';
 import { useSoundsPref } from '@/lib/sounds';
 import {
   MIN_WORKOUT_OPTIONS,
@@ -51,6 +63,46 @@ export default function MeScreen() {
   const { data: history } = useStreakHistory();
   const { data: xp } = useXpTotal();
   const [resyncing, setResyncing] = useState(false);
+  const [savingPhoto, setSavingPhoto] = useState(false);
+
+  const setPhoto = async (from: 'camera' | 'library' | 'remove') => {
+    const old = profile.avatar_url;
+    try {
+      if (from === 'remove') {
+        await updateProfile({ avatar_url: null });
+      } else {
+        const uri = await pickProfilePhoto(from);
+        if (!uri) return;
+        setSavingPhoto(true);
+        const path = await uploadProfilePhoto(profile.id, uri);
+        await updateProfile({ avatar_url: path });
+      }
+      await removeProfilePhotoFile(old);
+    } catch (e) {
+      Alert.alert('Couldn’t change your photo', friendlyError(e));
+    } finally {
+      setSavingPhoto(false);
+    }
+  };
+
+  const changePhoto = () => {
+    const hasPhoto = !!profile.avatar_url;
+    const options = ['Take photo', 'Choose from library', ...(hasPhoto ? ['Remove photo'] : []), 'Cancel'];
+    ActionSheetIOS.showActionSheetWithOptions(
+      {
+        title: 'Profile photo',
+        message: 'Your partners see it instead of your initials.',
+        options,
+        cancelButtonIndex: options.length - 1,
+        destructiveButtonIndex: hasPhoto ? 2 : undefined,
+      },
+      (i) => {
+        if (i === 0) setPhoto('camera');
+        else if (i === 1) setPhoto('library');
+        else if (hasPhoto && i === 2) setPhoto('remove');
+      },
+    );
+  };
 
   const setGoal = async (goal: number) => {
     if (goal < 1 || goal > 7 || goal === profile.weekly_goal) return;
@@ -97,7 +149,20 @@ export default function MeScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <Card style={{ gap: Spacing.md }}>
           <View style={styles.nameCard}>
-            <Avatar id={profile.id} name={profile.display_name} size={52} />
+            <Pressable
+              onPress={changePhoto}
+              disabled={savingPhoto}
+              accessibilityRole="button"
+              accessibilityLabel={profile.avatar_url ? 'Change profile photo' : 'Add a profile photo'}>
+              <Avatar id={profile.id} name={profile.display_name} size={56} />
+              <View style={styles.cameraBadge}>
+                {savingPhoto ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <SymbolView name="camera.fill" size={12} tintColor="#000" />
+                )}
+              </View>
+            </Pressable>
             <View style={{ flex: 1, gap: 2 }}>
               <AppText variant="title" numberOfLines={1}>
                 {profile.display_name ?? 'Add your name'}
@@ -524,6 +589,19 @@ function StatTile({
 
 const styles = StyleSheet.create({
   tiles: { flexDirection: 'row', gap: Spacing.sm },
+  cameraBadge: {
+    position: 'absolute',
+    right: -4,
+    bottom: -4,
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.flame,
+    borderWidth: 2,
+    borderColor: Colors.card,
+  },
   tile: {
     flex: 1,
     alignItems: 'center',

@@ -5,6 +5,7 @@ import { createContext, useContext, useEffect, useState, type PropsWithChildren 
 
 import type { Profile } from '@/lib/database.types';
 import { signOutOfGoogle } from '@/lib/google-auth';
+import { AVATAR_BUCKET } from '@/lib/profile-photo';
 import { unregisterDevice } from '@/lib/push';
 import { supabase } from '@/lib/supabase';
 import { resetWidget } from '@/widgets/sync';
@@ -88,6 +89,7 @@ export function useUpdateProfile() {
         | 'min_workout_minutes'
         | 'min_walk_minutes'
         | 'count_walks'
+        | 'avatar_url'
       >
     >,
   ) => {
@@ -119,7 +121,7 @@ export async function signOut() {
 }
 
 /**
- * Permanently deletes the account: the user's photos and voice messages
+ * Permanently deletes the account: the user's photos (check-ins and profile)
  * first (storage objects can't be removed from SQL), then the auth user,
  * which cascades through every table. Ends signed out.
  *
@@ -129,10 +131,12 @@ export async function signOut() {
 export async function deleteAccount(userId: string) {
   await revokeAppleSignIn();
   await unregisterDevice().catch(() => {});
-  const paths = await listFiles(EVIDENCE_BUCKET, userId);
-  for (let i = 0; i < paths.length; i += 100) {
-    const { error } = await supabase.storage.from(EVIDENCE_BUCKET).remove(paths.slice(i, i + 100));
-    if (error) throw error;
+  for (const bucket of [EVIDENCE_BUCKET, AVATAR_BUCKET]) {
+    const paths = await listFiles(bucket, userId);
+    for (let i = 0; i < paths.length; i += 100) {
+      const { error } = await supabase.storage.from(bucket).remove(paths.slice(i, i + 100));
+      if (error) throw error;
+    }
   }
   const { error } = await supabase.rpc('delete_my_account');
   if (error) throw error;

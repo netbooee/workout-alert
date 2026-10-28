@@ -18,7 +18,7 @@ export function PushPrompt() {
       return;
     }
     enable.mutate(undefined, {
-      onError: (e) => Alert.alert('Could not turn on notifications', friendlyError(e)),
+      onError: (e) => Alert.alert('Couldn’t turn on notifications', friendlyError(e)),
     });
   };
 

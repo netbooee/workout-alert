@@ -96,7 +96,7 @@ export function PartnerCard({ partner }: { partner: PartnerState }) {
             onPress={() => {
               Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
               nudge.mutate(partner.partner_id, {
-                onError: (e) => Alert.alert('Could not nudge', friendlyError(e)),
+                onError: (e) => Alert.alert('Couldn’t nudge', friendlyError(e)),
               });
             }}
             accessibilityRole="button"

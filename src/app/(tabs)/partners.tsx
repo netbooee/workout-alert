@@ -66,7 +66,7 @@ export default function PartnersScreen() {
               Better together 🤝
             </AppText>
             <AppText variant="body" color={Colors.textSecondary} style={{ textAlign: 'center' }}>
-              Add an accountability partner. You’ll see each other’s workouts and streaks, cheer on
+              Add an workout partner. You’ll see each other’s workouts and streaks, cheer on
               each other’s check-ins, and compete in a weekly league.
             </AppText>
             <Link href="/add-partner" asChild>
@@ -159,7 +159,7 @@ function CancelRequest({ partnershipId, name }: { partnershipId: string; name: s
             text: 'Cancel request',
             style: 'destructive',
             onPress: () =>
-              remove.mutate(partnershipId, { onError: (e) => Alert.alert('Could not cancel', friendlyError(e)) }),
+              remove.mutate(partnershipId, { onError: (e) => Alert.alert('Couldn’t cancel', friendlyError(e)) }),
           },
         ])
       }>
@@ -183,7 +183,7 @@ function IncomingRequest({ partner }: { partner: Partner }) {
         <Avatar id={partner.partner_id} name={partner.display_name} size={40} />
         <View style={{ flex: 1 }}>
           <AppText variant="heading">{partner.display_name ?? 'Someone'}</AppText>
-          <AppText variant="caption">wants to be your accountability partner</AppText>
+          <AppText variant="caption">wants to be your workout partner</AppText>
         </View>
       </View>
       <View style={styles.actions}>

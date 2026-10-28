@@ -24,7 +24,7 @@ export default function AddPartnerScreen() {
         Alert.alert(title, body);
         router.back();
       },
-      onError: (e) => Alert.alert('Could not add partner', friendlyError(e)),
+      onError: (e) => Alert.alert('Couldn’t add partner', friendlyError(e)),
     });
 
   return (

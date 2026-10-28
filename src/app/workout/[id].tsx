@@ -87,7 +87,7 @@ export default function WorkoutScreen() {
 
         <View style={styles.stats}>
           <Stat label="Duration" value={formatDuration(w.duration_s)} />
-          <Stat label="Active kcal" value={w.active_kcal != null ? String(Math.round(w.active_kcal)) : '—'} />
+          <Stat label="Calories" value={w.active_kcal != null ? String(Math.round(w.active_kcal)) : '—'} />
           <Stat label="Avg HR" value={w.avg_hr != null ? `${Math.round(w.avg_hr)}` : '—'} />
           <Stat label="Max HR" value={w.max_hr != null ? `${Math.round(w.max_hr)}` : '—'} />
         </View>
@@ -176,7 +176,7 @@ function DeleteWorkout({ workout }: { workout: Workout }) {
               router.back();
             } catch (e) {
               setDeleting(false);
-              Alert.alert('Could not delete workout', friendlyError(e));
+              Alert.alert('Couldn’t delete workout', friendlyError(e));
             }
           },
         },
@@ -219,7 +219,7 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
             await showCelebrationIfEarned(workout.user_id);
           }
         } catch (e) {
-          Alert.alert('Could not add photo', friendlyError(e));
+          Alert.alert('Couldn’t add photo', friendlyError(e));
         } finally {
           setBusy(false);
         }
@@ -292,7 +292,7 @@ function Note({ workout, editable }: { workout: Workout; editable: boolean }) {
     setSaving(true);
     const { error } = await supabase.from('workouts').update({ note: text.trim() || null }).eq('id', workout.id);
     setSaving(false);
-    if (error) Alert.alert('Could not save note', error.message);
+    if (error) Alert.alert('Couldn’t save note', error.message);
     else queryClient.invalidateQueries({ queryKey: ['social'] });
   };
 

@@ -2,7 +2,7 @@
 // string) into a sentence people can act on. No native imports.
 
 const OFFLINE = 'You seem to be offline. Check your connection and try again.';
-const SIGNED_OUT = 'Your session has expired. Sign out and back in, then try again.';
+const SIGNED_OUT = 'Your sign-in has expired. Sign out and sign back in, then try again.';
 const GENERIC = 'Something went wrong on our side. Please try again in a moment.';
 
 /** Codes our own database functions raise with messages written for people. */

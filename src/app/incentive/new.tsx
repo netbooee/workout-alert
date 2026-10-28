@@ -114,7 +114,7 @@ export default function NewIncentiveScreen() {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
           router.back();
         },
-        onError: (e) => Alert.alert('Could not send', friendlyError(e)),
+        onError: (e) => Alert.alert('Couldn’t send', friendlyError(e)),
       },
     );
   };

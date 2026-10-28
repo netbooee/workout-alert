@@ -140,7 +140,7 @@ function JoinCard({ nickname: saved }: { nickname: string }) {
         loading={join.isPending}
         onPress={() => {
           Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-          join.mutate({ on: true, nickname }, { onError: fail('Could not join') });
+          join.mutate({ on: true, nickname }, { onError: fail('Couldn’t join') });
         }}
       />
       <AppText variant="caption" style={{ textAlign: 'center' }}>
@@ -313,7 +313,7 @@ function Table({ rows }: { rows: PublicLeagueRow[] }) {
             { key: r.member_key, reason: 'Reported from the league table' },
             {
               onSuccess: () => Alert.alert('Thanks', 'We’ll take a look.'),
-              onError: fail('Could not report'),
+              onError: fail('Couldn’t report'),
             },
           ),
       },
@@ -323,7 +323,7 @@ function Table({ rows }: { rows: PublicLeagueRow[] }) {
     <Card style={{ gap: 2, paddingHorizontal: Spacing.sm }}>
       {rows.map((r, i) => (
         <Fragment key={r.member_key}>
-          {i === firstDown && <Divider label="Demotion zone" color={Colors.danger} arrow="▼" />}
+          {i === firstDown && <Divider label="Moving down" color={Colors.danger} arrow="▼" />}
           <Pressable
             disabled={r.is_me}
             onPress={() => ask(r)}
@@ -341,7 +341,7 @@ function Table({ rows }: { rows: PublicLeagueRow[] }) {
               {r.xp} XP
             </AppText>
           </Pressable>
-          {ups > 0 && i === ups - 1 && i < n - 1 && <Divider label="Promotion zone" color={Colors.success} arrow="▲" />}
+          {ups > 0 && i === ups - 1 && i < n - 1 && <Divider label="Moving up" color={Colors.success} arrow="▲" />}
         </Fragment>
       ))}
       {n > 1 && (
@@ -440,7 +440,7 @@ function LeagueSettings({ nickname: saved }: { nickname: string }) {
             disabled={!!problem}
             loading={set.isPending}
             onPress={() =>
-              set.mutate({ on: true, nickname }, { onSuccess: () => setEditing(false), onError: fail('Could not save') })
+              set.mutate({ on: true, nickname }, { onSuccess: () => setEditing(false), onError: fail('Couldn’t save') })
             }
           />
         </>
@@ -461,7 +461,7 @@ function LeagueSettings({ nickname: saved }: { nickname: string }) {
             {
               text: 'Leave',
               style: 'destructive',
-              onPress: () => set.mutate({ on: false, nickname: saved }, { onError: fail('Could not leave') }),
+              onPress: () => set.mutate({ on: false, nickname: saved }, { onError: fail('Couldn’t leave') }),
             },
           ])
         }

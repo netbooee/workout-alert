@@ -22,7 +22,7 @@ export function inviteUrl(code: string): string {
 
 export function inviteMessage(code: string): string {
   return (
-    `Be my workout accountability partner on Sigamos 🔥 We both get +100 XP after your first workout.\n\n` +
+    `Be my workout workout partner on Sigamos 🔥 We both get +100 XP after your first workout.\n\n` +
     `${inviteUrl(code)}\n` +
     `or enter my code in the app: ${code}`
   );

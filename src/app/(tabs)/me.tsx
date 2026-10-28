@@ -57,7 +57,7 @@ export default function MeScreen() {
     try {
       await updateProfile({ weekly_goal: goal });
     } catch (e) {
-      Alert.alert('Could not update goal', friendlyError(e));
+      Alert.alert('Couldn’t update goal', friendlyError(e));
     }
   };
 
@@ -71,7 +71,7 @@ export default function MeScreen() {
         try {
           await updateProfile({ display_name: name });
         } catch (e) {
-          Alert.alert('Could not save your name', friendlyError(e));
+          Alert.alert('Couldn’t save your name', friendlyError(e));
         }
       },
       'plain-text',
@@ -85,7 +85,7 @@ export default function MeScreen() {
       await syncHealthData(profile.id);
       await refetch();
     } catch (e) {
-      Alert.alert('Sync failed', friendlyError(e));
+      Alert.alert('Couldn’t refresh from Apple Health', friendlyError(e));
     } finally {
       setResyncing(false);
     }
@@ -237,7 +237,7 @@ export default function MeScreen() {
                 Workouts sync automatically when you open the app. If something looks missing, re-sync
                 the last 12 weeks.
               </AppText>
-              <Button title="Re-sync health data" variant="secondary" loading={resyncing} onPress={resync} />
+              <Button title="Refresh from Apple Health" variant="secondary" loading={resyncing} onPress={resync} />
             </Card>
 
             <Card>
@@ -288,7 +288,7 @@ function WhatCountsCard() {
     try {
       await updateProfile(patch);
     } catch (e) {
-      Alert.alert('Could not save', friendlyError(e));
+      Alert.alert('Couldn’t save', friendlyError(e));
     }
     setSaving(false);
   };
@@ -343,7 +343,7 @@ function confirmDeleteAccount(userId: string) {
           deleteAccount(userId).catch((e) => {
             // Backing out of Apple's confirmation just cancels.
             if (e && typeof e === 'object' && 'code' in e && e.code === 'ERR_REQUEST_CANCELED') return;
-            Alert.alert('Could not delete your account', friendlyError(e));
+            Alert.alert('Couldn’t delete your account', friendlyError(e));
           }),
       },
     ],
@@ -371,7 +371,7 @@ function RestModeCard({ resting }: { resting: boolean }) {
     setSaving(true);
     const { error } = await supabase.rpc('set_rest_mode', { p_on: on });
     setSaving(false);
-    if (error) Alert.alert('Could not change rest mode', error.message);
+    if (error) Alert.alert('Couldn’t change rest mode', error.message);
     await queryClient.invalidateQueries();
   };
 
@@ -429,7 +429,7 @@ function Toggle({ label, value, onChange }: { label: string; value: boolean; onC
         value={value}
         trackColor={{ true: Colors.flame }}
         onValueChange={(v) => {
-          onChange(v).catch((e) => Alert.alert('Could not save', friendlyError(e)));
+          onChange(v).catch((e) => Alert.alert('Couldn’t save', friendlyError(e)));
         }}
       />
     </View>

@@ -53,7 +53,7 @@ export default function LogWorkoutScreen() {
       const uri = await pickPhoto(from);
       if (uri) setPhotos((p) => [...p, uri].slice(0, MAX_PHOTOS));
     } catch (e) {
-      Alert.alert('Could not add photo', friendlyError(e));
+      Alert.alert('Couldn’t add photo', friendlyError(e));
     }
   };
 
@@ -80,7 +80,7 @@ export default function LogWorkoutScreen() {
       router.back();
       await showCelebrationIfEarned(profile.id);
     } catch (e) {
-      Alert.alert('Could not log workout', friendlyError(e));
+      Alert.alert('Couldn’t log workout', friendlyError(e));
       setSaving(false);
     }
   };

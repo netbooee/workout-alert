@@ -68,7 +68,7 @@ export default function OnboardingScreen() {
     try {
       if (healthAvailable()) await requestHealthPermissions();
     } catch (e) {
-      Alert.alert('Could not connect Apple Health', friendlyError(e));
+      Alert.alert('Couldn’t connect Apple Health', friendlyError(e));
     }
     next();
   };
@@ -87,7 +87,7 @@ export default function OnboardingScreen() {
       });
       next();
     } catch (e) {
-      Alert.alert('Could not save your setup', friendlyError(e));
+      Alert.alert('Couldn’t save your setup', friendlyError(e));
     }
     setSaving(false);
   };
@@ -99,7 +99,7 @@ export default function OnboardingScreen() {
       await updateProfile({ onboarded_at: new Date().toISOString() });
       // The root navigator switches to the tabs once onboarded_at is set.
     } catch (e) {
-      Alert.alert('Could not finish setup', friendlyError(e));
+      Alert.alert('Couldn’t finish setup', friendlyError(e));
       setSaving(false);
     }
   };
@@ -306,7 +306,7 @@ function PartnerStep({
     const normalized = normalizeInviteCode(raw);
     if (!normalized) return;
     request.mutate(normalized, {
-      onError: (e) => Alert.alert('Could not add partner', friendlyError(e)),
+      onError: (e) => Alert.alert('Couldn’t add partner', friendlyError(e)),
     });
   };
 

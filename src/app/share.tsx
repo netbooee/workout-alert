@@ -77,7 +77,7 @@ export default function ShareScreen() {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       await Share.share({ url: uri, message: shareCaption(card, profile.invite_code) });
     } catch (e) {
-      Alert.alert('Could not share', friendlyError(e));
+      Alert.alert('Couldn’t share', friendlyError(e));
     }
     setSharing(false);
   };

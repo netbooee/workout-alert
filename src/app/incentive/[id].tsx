@@ -25,7 +25,7 @@ export default function IncentiveScreen() {
         onPress: () =>
           cancel.mutate(id, {
             onSuccess: () => router.back(),
-            onError: (e) => Alert.alert('Could not cancel', friendlyError(e)),
+            onError: (e) => Alert.alert('Couldn’t cancel', friendlyError(e)),
           }),
       },
     ]);

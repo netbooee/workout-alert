@@ -36,7 +36,7 @@ export default function WeekScreen() {
     return (
       <View style={styles.centered}>
         {title}
-        <AppText variant="body">{error?.message ?? 'Could not load this week.'}</AppText>
+        <AppText variant="body">{error?.message ?? 'Couldn’t load this week.'}</AppText>
       </View>
     );
   }

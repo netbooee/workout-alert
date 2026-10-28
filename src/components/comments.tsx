@@ -50,7 +50,7 @@ export function Comments({ workout }: { workout: Workout }) {
         style: 'destructive',
         onPress: () =>
           remove.mutate(comment, {
-            onError: (e) => Alert.alert('Could not delete', friendlyError(e)),
+            onError: (e) => Alert.alert('Couldn’t delete', friendlyError(e)),
           }),
       },
     ]);
@@ -156,7 +156,7 @@ function Composer({ workoutId, isOwner }: { workoutId: string; isOwner: boolean 
           setClip(null);
           setPhase('idle');
         },
-        onError: (e) => Alert.alert('Could not send', friendlyError(e)),
+        onError: (e) => Alert.alert('Couldn’t send', friendlyError(e)),
       },
     );
   };

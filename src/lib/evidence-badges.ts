@@ -1,4 +1,4 @@
-// How strong a workout's evidence is, for display to accountability partners.
+// How strong a workout's evidence is, for display to workout partners.
 // Pure so it can be unit tested.
 
 import type { SFSymbol } from 'expo-symbols';

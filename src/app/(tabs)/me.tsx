@@ -1,6 +1,6 @@
 import * as Haptics from 'expo-haptics';
 import { useQueryClient } from '@tanstack/react-query';
-import { Link, useLocalSearchParams } from 'expo-router';
+import { Link, router, useLocalSearchParams, type Href } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Alert, Linking, Pressable, ScrollView, StyleSheet, Switch, View, type ColorValue } from 'react-native';
@@ -15,13 +15,14 @@ import { PushPrompt } from '@/components/push-prompt';
 import { RewardShelf } from '@/components/reward-shelf';
 import { StreakHistory } from '@/components/streak-history';
 import { AppText, Button, Card, Segmented } from '@/components/ui';
-import { Colors, Radius, Spacing } from '@/constants/theme';
+import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
 import { useLeagueSettings } from '@/hooks/use-league';
 import { useXpTotal } from '@/hooks/use-social';
 import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { deleteAccount, signOut, useProfile, useUpdateProfile } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
+import { tierInfo } from '@/lib/leagues';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 import { mascotKind } from '@/lib/mascots';
 import { useSoundsPref } from '@/lib/sounds';
@@ -113,6 +114,7 @@ export default function MeScreen() {
             </AppText>
           </Pressable>
         </Card>
+        <StatTiles weeks={home?.streak?.current_weeks ?? 0} xp={xp} />
         <Segmented
           options={[
             { key: 'you', label: 'You' },
@@ -444,7 +446,92 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
   );
 }
 
+/**
+ * Your streak, XP and league at a glance, each opening its own screen, after
+ * Mimo's and Opal's profile tiles. Share sends your streak card.
+ */
+function StatTiles({ weeks, xp }: { weeks: number; xp: number | undefined }) {
+  const { data: league, isSuccess } = useLeagueSettings();
+  const tier = tierInfo(league?.tier ?? 1);
+  const joined = !!league?.opted_in;
+  return (
+    <View style={{ gap: Spacing.sm }}>
+      <View style={styles.tiles}>
+        <StatTile
+          emoji="🔥"
+          value={String(weeks)}
+          label="week streak"
+          color={weeks > 0 ? Colors.flame : Colors.textMuted}
+          href="/streak"
+        />
+        <StatTile emoji="⚡" value={xp != null ? xp.toLocaleString() : '–'} label="total XP" color={Colors.xp} href="/xp" />
+        <StatTile
+          emoji={joined ? tier.emoji : '🏆'}
+          value={isSuccess ? (joined ? tier.name : 'Join') : '–'}
+          label={joined ? 'league' : 'a league'}
+          color={Colors.text}
+          href="/league"
+        />
+      </View>
+      {weeks > 0 && (
+        <Button
+          title="📤 Share my progress"
+          variant="secondary"
+          onPress={() => router.push({ pathname: '/share', params: { kind: 'streak', weeks: String(weeks) } })}
+        />
+      )}
+    </View>
+  );
+}
+
+function StatTile({
+  emoji,
+  value,
+  label,
+  color,
+  href,
+}: {
+  emoji: string;
+  value: string;
+  label: string;
+  color: ColorValue;
+  href: Href;
+}) {
+  return (
+    <Link href={href} asChild>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={`${value} ${label}`}
+        style={({ pressed }) => [styles.tile, pressed && { opacity: 0.7 }]}>
+        <AppText style={styles.tileEmoji}>{emoji}</AppText>
+        <AppText style={[styles.tileValue, { color }]} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.7}>
+          {value}
+        </AppText>
+        <AppText variant="label" style={styles.tileLabel} numberOfLines={1}>
+          {label}
+        </AppText>
+      </Pressable>
+    </Link>
+  );
+}
+
 const styles = StyleSheet.create({
+  tiles: { flexDirection: 'row', gap: Spacing.sm },
+  tile: {
+    flex: 1,
+    alignItems: 'center',
+    gap: 2,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xs,
+    borderRadius: Radius.lg,
+    borderCurve: 'continuous',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.border,
+    backgroundColor: Colors.card,
+  },
+  tileEmoji: { fontSize: 26, lineHeight: 32 },
+  tileValue: { fontFamily: Font.rounded, fontSize: 22, lineHeight: 28, fontWeight: '800' },
+  tileLabel: { fontSize: 10, letterSpacing: 0.4 },
   leagueRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, minHeight: 44 },
   soundsRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.sm },
   deleteAccount: { alignSelf: 'center', padding: Spacing.sm },

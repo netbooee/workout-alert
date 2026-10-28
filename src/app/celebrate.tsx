@@ -19,6 +19,7 @@ import { buddyLine, celebrationMood, celebrationTitle } from '@/lib/celebration-
 import type { Streak } from '@/lib/database.types';
 import { levelFor } from '@/lib/levels';
 import { mascotKind } from '@/lib/mascots';
+import { playSound } from '@/lib/sounds';
 import { earnedFreezeAt, isMilestone, milestoneLabel } from '@/lib/streak';
 import { buildWeek, weekState, type WeekState, type WorkoutLike } from '@/lib/week';
 
@@ -35,6 +36,7 @@ export default function CelebrateScreen() {
     evidence: string;
     incentive: string;
     steps: string;
+    invite: string;
   }>();
   const profile = useProfile();
   const earned = Number(params.xp) || 0;
@@ -53,15 +55,21 @@ export default function CelebrateScreen() {
 
   useEffect(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, []);
+    playSound(incentive || params.invite ? 'levelup' : 'success');
+  }, [incentive, params.invite]);
 
   const leveledUp = total != null && levelFor(total - earned).level < levelFor(total).level;
+  // A new level gets the fanfare once the total XP has loaded.
+  useEffect(() => {
+    if (leveledUp) playSound('levelup');
+  }, [leveledUp]);
   const facts = {
     workouts,
     weekGoal,
     evidence: params.evidence === '1',
     incentive,
     steps,
+    invite: params.invite === 'inviter' ? ('inviter' as const) : params.invite === 'welcome' ? ('welcome' as const) : null,
     newLevel: leveledUp ? levelFor(total!).level : null,
   };
 
@@ -144,6 +152,7 @@ function StreakStep({
   const lit = weeks > 0 || state.kind === 'done';
 
   useEffect(() => {
+    playSound('streak');
     if (weekGoal) Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, [weekGoal]);
 

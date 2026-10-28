@@ -1,9 +1,10 @@
-import { useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
+import { setAudioModeAsync, useAudioPlayer, useAudioPlayerStatus } from 'expo-audio';
 import { SymbolView } from 'expo-symbols';
 import { ActivityIndicator, Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { noteVoiceAudioMode } from '@/lib/sounds';
 import { formatClip } from '@/lib/voice';
 
 /** A play/pause pill with progress for a voice message (remote signed URL or local file). */
@@ -20,6 +21,9 @@ export function VoiceMessage({ url, durationMs }: { url: string | undefined; dur
       return;
     }
     if (atEnd) await player.seekTo(0);
+    // Sound effects follow the silent switch; a voice message you tapped should still play.
+    noteVoiceAudioMode();
+    await setAudioModeAsync({ playsInSilentMode: true });
     player.play();
   };
 

@@ -1,10 +1,16 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useCallback } from 'react';
 
 import { useAuth } from '@/lib/auth';
 import { useCheerListState } from '@/lib/cheer-list-store';
-import { needsCheer } from '@/lib/cheers';
+import type { IncomingCheer } from '@/lib/cheer-banner';
+import { CHEER_KINDS, needsCheer } from '@/lib/cheers';
 import type { Partner, ReactionKind, Workout } from '@/lib/database.types';
+import { playSound } from '@/lib/sounds';
 import { supabase } from '@/lib/supabase';
+import { startOfWeek } from '@/lib/week';
+import { workoutLabel } from '@/lib/workout-types';
 
 // Everything social lives under ['social'] so one invalidation refreshes it.
 
@@ -102,6 +108,25 @@ export function useCheerBadgeCount(): number {
   const { data } = usePartnerFeed();
   const { dismissed } = useCheerListState();
   return me && data ? needsCheer(data, me, new Date(), { dismissed }).length : 0;
+}
+
+/** Your accepted partners' workouts that count this week, for the crew card on Home. */
+export function useCrewWeek(partnerIds: string[]) {
+  const userId = useAuth().session?.user.id;
+  return useQuery({
+    queryKey: ['social', 'crew-week', userId, ...partnerIds],
+    enabled: !!userId && partnerIds.length > 0,
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from('workouts')
+          .select('id, user_id, activity_type, started_at, duration_s, counted')
+          .in('user_id', partnerIds)
+          .is('duplicate_of', null)
+          .eq('counted', true)
+          .gte('started_at', startOfWeek(new Date()).toISOString()),
+      ),
+  });
 }
 
 /** One partner's recent workouts that count, with reactions. */
@@ -209,9 +234,11 @@ export function useRemovePartner() {
 }
 
 export function useNudge() {
-  return useSocialMutation(async (partnerId: string) =>
-    unwrap(await supabase.rpc('nudge_partner', { p_partner: partnerId })),
-  );
+  return useSocialMutation(async (partnerId: string) => {
+    const result = unwrap(await supabase.rpc('nudge_partner', { p_partner: partnerId }));
+    playSound('nudge');
+    return result;
+  });
 }
 
 export function useMarkNudgesSeen() {
@@ -232,6 +259,100 @@ export function useToggleReaction() {
               .delete()
               .match({ workout_id: workoutId, kind, user_id: userId! }),
           ),
+  );
+}
+
+/** Cheer a workout with one emoji, replacing any cheer you already gave it (verifying is separate). */
+export function useSetCheer() {
+  const userId = useAuth().session?.user.id;
+  return useSocialMutation(async ({ workoutId, kind }: { workoutId: string; kind: ReactionKind }) => {
+    unwrap(
+      await supabase
+        .from('reactions')
+        .delete()
+        .match({ workout_id: workoutId, user_id: userId! })
+        .in('kind', CHEER_KINDS),
+    );
+    return unwrap(await supabase.from('reactions').insert({ workout_id: workoutId, kind }));
+  });
+}
+
+/** Partners' workouts that count from the last two weeks, newest first: what holding a crew buddy cheers. */
+export function useRecentPartnerWorkouts(partnerIds: string[]) {
+  const userId = useAuth().session?.user.id;
+  return useQuery({
+    queryKey: ['social', 'recent-partner-workouts', userId, ...partnerIds],
+    enabled: !!userId && partnerIds.length > 0,
+    queryFn: async () =>
+      unwrap(
+        await supabase
+          .from('workouts')
+          .select('id, user_id, activity_type, started_at')
+          .in('user_id', partnerIds)
+          .is('duplicate_of', null)
+          .eq('counted', true)
+          .gte('started_at', new Date(Date.now() - 14 * 86_400_000).toISOString())
+          .order('started_at', { ascending: false })
+          .limit(100),
+      ),
+  });
+}
+
+const cheersSeenKey = (userId: string) => `cheers-seen:${userId}`;
+
+/**
+ * Cheers and verifications on your workouts since you last saw the banner on
+ * Home. The first time on a device it only records a starting point. Kept
+ * until dismissed (no refetching) so the banner doesn't vanish mid-read.
+ */
+export function useNewCheers() {
+  const userId = useAuth().session?.user.id;
+  return useQuery({
+    queryKey: ['social', 'new-cheers', userId],
+    enabled: !!userId,
+    staleTime: Infinity,
+    queryFn: async (): Promise<IncomingCheer[]> => {
+      const seen = await AsyncStorage.getItem(cheersSeenKey(userId!));
+      if (!seen) {
+        await AsyncStorage.setItem(cheersSeenKey(userId!), new Date().toISOString());
+        return [];
+      }
+      const mine = unwrap(
+        await supabase
+          .from('workouts')
+          .select('id, activity_type')
+          .eq('user_id', userId!)
+          .gte('started_at', new Date(Date.now() - 14 * 86400_000).toISOString()),
+      );
+      if (!mine.length) return [];
+      const reactions = unwrap(
+        await supabase
+          .from('reactions')
+          .select('workout_id, user_id, kind, created_at')
+          .in('workout_id', mine.map((w) => w.id))
+          .neq('user_id', userId!)
+          .gt('created_at', seen)
+          .order('created_at', { ascending: false }),
+      );
+      return reactions.map((r) => ({
+        ...r,
+        workout: workoutLabel(mine.find((w) => w.id === r.workout_id)?.activity_type ?? ''),
+      }));
+    },
+  });
+}
+
+/** Hide the banner and remember what's been seen, up to the newest shown. */
+export function useDismissNewCheers() {
+  const userId = useAuth().session?.user.id;
+  const queryClient = useQueryClient();
+  return useCallback(
+    (newest: string | undefined) => {
+      if (!userId) return;
+      queryClient.setQueryData(['social', 'new-cheers', userId], []);
+      if (newest) AsyncStorage.setItem(cheersSeenKey(userId), newest).catch(() => {});
+    },
+    [userId, queryClient],
   );
 }
 

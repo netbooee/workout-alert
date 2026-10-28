@@ -12,6 +12,7 @@ import { useLeagueResult, useLeagueResultTable, useMarkLeagueResultSeen } from '
 import { useProfile } from '@/lib/auth';
 import { MEDALS, resultLine, tierInfo } from '@/lib/leagues';
 import { mascotKind } from '@/lib/mascots';
+import { playSound } from '@/lib/sounds';
 
 /** Rows shown around you in last week's table. */
 const AROUND = 3;
@@ -35,7 +36,8 @@ export default function LeagueResultScreen() {
 
   useEffect(() => {
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-  }, [step]);
+    playSound(step === 'table' ? 'success' : result?.result === 'up' ? 'levelup' : 'banner');
+  }, [step, result?.result]);
 
   const done = () => {
     seen.mutate();

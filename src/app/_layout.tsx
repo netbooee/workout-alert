@@ -11,9 +11,11 @@ import { restoreAppearance } from '@/lib/appearance';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { inviteCodeFromUrl } from '@/lib/invite-link';
 import { clearPendingInvite, getPendingInvite, savePendingInvite } from '@/lib/pending-invite';
+import { restoreSounds } from '@/lib/sounds';
 
 SplashScreen.preventAutoHideAsync();
 restoreAppearance();
+restoreSounds();
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { staleTime: 60_000 } },

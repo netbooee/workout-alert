@@ -104,8 +104,10 @@ select pg_temp.workout('00000000-0000-0000-0000-00000000000b', 1);
 select pg_temp.workout('00000000-0000-0000-0000-00000000000b', 2);
 select is((select status from public.incentives), 'earned', 'hitting the goal earns the incentive');
 select is((select amount from public.xp_events where kind = 'incentive'), 100, 'earning it is worth 100 XP');
+-- Only challenge notifications: a "just worked out" alert also goes out when the
+-- test's workouts happen to fall within the last few hours, which depends on the date.
 select bag_eq(
-  $$select user_id, title, body from public.notifications$$,
+  $$select user_id, title, body from public.notifications where kind = 'incentive'$$,
   $$values
     ('00000000-0000-0000-0000-00000000000b'::uuid, 'You completed Sam’s challenge! 🎉'::text, '☕ Coffee on me · +100 XP'::text),
     ('00000000-0000-0000-0000-00000000000a'::uuid, 'Jo completed your challenge 🎉'::text, 'Time to deliver: ☕ Coffee on me'::text)$$,

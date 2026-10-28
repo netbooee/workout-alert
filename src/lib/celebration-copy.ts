@@ -12,6 +12,8 @@ export interface CelebrationFacts {
   steps: number;
   /** The new level, when this XP crossed into one. */
   newLevel: number | null;
+  /** An invite bonus: you invited someone who just worked out, or you joined with an invite. */
+  invite?: 'inviter' | 'welcome' | null;
 }
 
 const thousands = (n: number) => n.toLocaleString('en-US');
@@ -19,6 +21,8 @@ const thousands = (n: number) => n.toLocaleString('en-US');
 export function celebrationTitle(c: CelebrationFacts): string {
   if (c.newLevel) return `Level ${c.newLevel}!`;
   if (c.incentive) return 'Challenge complete! 🎯';
+  if (c.invite === 'inviter') return 'Invite bonus! 🎁';
+  if (c.invite === 'welcome') return 'Welcome bonus! 🎁';
   if (c.weekGoal) return 'Week goal hit!';
   if (c.workouts > 1) return `${c.workouts} workouts logged!`;
   if (c.workouts === 1) return 'Workout logged!';
@@ -29,6 +33,8 @@ export function celebrationTitle(c: CelebrationFacts): string {
 
 /** The buddy's speech bubble: the biggest thing that just happened. */
 export function buddyLine(c: CelebrationFacts): string {
+  if (c.invite === 'inviter') return 'Your invite paid off! Your friend just worked out 🎁';
+  if (c.invite === 'welcome') return 'Welcome to the crew! +100 XP for joining with an invite 🎁';
   if (c.incentive) return 'You finished the challenge! Go claim that reward 🎁';
   if (c.weekGoal) return 'Week goal smashed! Your streak is safe 🔥';
   if (c.newLevel) return `Level ${c.newLevel}! Look at you go ⭐`;
@@ -41,5 +47,5 @@ export function buddyLine(c: CelebrationFacts): string {
 }
 
 export function celebrationMood(c: CelebrationFacts): LotlMood {
-  return c.incentive || c.weekGoal || c.newLevel || c.steps >= 12000 ? 'blazing' : 'happy';
+  return c.incentive || c.invite || c.weekGoal || c.newLevel || c.steps >= 12000 ? 'blazing' : 'happy';
 }

@@ -91,8 +91,8 @@ export default function PartnersScreen() {
                 </AppText>
                 <AppText variant="caption">
                   {accepted.length === 1
-                    ? 'Two or more partners unlock your weekly league'
-                    : 'More partners, more cheers and a bigger league'}
+                    ? 'Two or more partners unlock your weekly league · 🎁 +100 XP each for new friends'
+                    : '🎁 +100 XP for you both when a new friend joins and works out'}
                 </AppText>
               </View>
               <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />

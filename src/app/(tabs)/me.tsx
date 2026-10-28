@@ -24,6 +24,7 @@ import { deleteAccount, signOut, useProfile, useUpdateProfile } from '@/lib/auth
 import { friendlyError } from '@/lib/errors';
 import { resetHealthSync, syncHealthData } from '@/lib/health/sync';
 import { mascotKind } from '@/lib/mascots';
+import { useSoundsPref } from '@/lib/sounds';
 import {
   MIN_WORKOUT_OPTIONS,
   rulesSummary,
@@ -435,6 +436,7 @@ function StepButton({ label, onPress }: { label: string; onPress: () => void }) 
 
 const styles = StyleSheet.create({
   leagueRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, minHeight: 44 },
+  soundsRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginTop: Spacing.sm },
   deleteAccount: { alignSelf: 'center', padding: Spacing.sm },
   nameCard: { flexDirection: 'row', alignItems: 'center', gap: Spacing.md },
   editName: {
@@ -476,6 +478,7 @@ const APPEARANCE_OPTIONS: { key: AppearancePref; label: string }[] = [
 
 function AppearanceCard() {
   const [pref, setPref] = useAppearancePref();
+  const [sounds, setSounds] = useSoundsPref();
   return (
     <Card>
       <View style={styles.appearanceRow}>
@@ -483,6 +486,13 @@ function AppearanceCard() {
         <Segmented options={APPEARANCE_OPTIONS} value={pref} onChange={setPref} />
       </View>
       <AppText variant="caption">Automatic follows your iPhone’s light or dark setting.</AppText>
+      <View style={styles.soundsRow}>
+        <View style={{ flex: 1 }}>
+          <AppText variant="body">Sounds</AppText>
+          <AppText variant="caption">For celebrations, cheers and nudges. Quiet when your iPhone is on silent.</AppText>
+        </View>
+        <Switch value={sounds} onValueChange={setSounds} trackColor={{ true: Colors.flame }} />
+      </View>
     </Card>
   );
 }

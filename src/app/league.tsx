@@ -1,6 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Haptics from 'expo-haptics';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { Fragment, useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, TextInput, View, type ColorValue } from 'react-native';
 
@@ -91,13 +92,7 @@ function PublicLeague() {
           <Table rows={rows} />
         </>
       ) : (
-        <Card>
-          <AppText variant="heading">Earn XP to join this week’s group</AppText>
-          <AppText variant="caption">
-            Your first XP this week puts you in a group of up to 20 people in {tierInfo(tier).name}. Any
-            workout, photo or step bonus counts.
-          </AppText>
-        </Card>
+        <SampleTable tier={tier} />
       )}
       <LeagueSettings nickname={settings.data?.nickname ?? ''} />
     </>
@@ -171,11 +166,28 @@ function TierHeader({ tier, groupSize }: { tier: number; groupSize: number }) {
   return (
     <View style={{ gap: Spacing.sm }}>
       <View style={styles.tiers}>
-        {TIERS.map((t) => (
-          <View key={t.tier} style={[styles.tierBadge, t.tier === tier && styles.tierCurrent, t.tier > tier && { opacity: 0.35 }]}>
-            <AppText style={{ fontSize: t.tier === tier ? 28 : 20, lineHeight: t.tier === tier ? 34 : 26 }}>{t.emoji}</AppText>
-          </View>
-        ))}
+        {TIERS.map((t) => {
+          const locked = t.tier > tier;
+          return (
+            <View
+              key={t.tier}
+              accessibilityLabel={`${t.name}${locked ? ', locked' : t.tier === tier ? ', your league' : ''}`}
+              style={[styles.tierBadge, t.tier === tier && styles.tierCurrent]}>
+              <AppText
+                style={[
+                  { fontSize: t.tier === tier ? 28 : 20, lineHeight: t.tier === tier ? 34 : 26 },
+                  locked && { opacity: 0.25 },
+                ]}>
+                {t.emoji}
+              </AppText>
+              {locked && (
+                <View style={styles.lock}>
+                  <SymbolView name="lock.fill" size={10} tintColor={Colors.textSecondary} />
+                </View>
+              )}
+            </View>
+          );
+        })}
       </View>
       <AppText style={styles.tierTitle}>{info.name} League</AppText>
       <AppText variant="caption" style={{ textAlign: 'center' }}>
@@ -363,6 +375,40 @@ function Divider({ label, color, arrow }: { label: string; color: ColorValue; ar
   );
 }
 
+/**
+ * Before your first XP of the week: a faded table with your buddy in it and
+ * what gets you in (after Duolingo's "Finish 9 lessons to start competing").
+ */
+function SampleTable({ tier }: { tier: number }) {
+  const profile = useProfile();
+  return (
+    <Card style={{ gap: Spacing.md }}>
+      <View style={styles.sample} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+        {[1, 2, 3, 4].map((rank) => (
+          <View key={rank} style={[styles.row, rank === 2 && styles.me]}>
+            <AppText style={[styles.rank, { color: Colors.textMuted }]}>{MEDALS[rank - 1] ?? rank}</AppText>
+            {rank === 2 ? (
+              <Mascot kind={mascotKind(profile.mascot)} mood="ready" size={34} />
+            ) : (
+              <View style={styles.sampleAvatar} />
+            )}
+            <View style={[styles.sampleBar, { width: rank === 2 ? 70 : 110 - rank * 12 }]} />
+            <View style={{ flex: 1 }} />
+            <View style={[styles.sampleBar, { width: 44 }]} />
+          </View>
+        ))}
+      </View>
+      <AppText variant="heading" style={{ textAlign: 'center' }}>
+        Earn XP to join this week’s group
+      </AppText>
+      <AppText variant="caption" style={{ textAlign: 'center' }}>
+        Your first workout, photo or step bonus this week puts you in a group of up to 20 people in{' '}
+        {tierInfo(tier).name}.
+      </AppText>
+    </Card>
+  );
+}
+
 function LeagueSettings({ nickname: saved }: { nickname: string }) {
   const set = useSetPublicLeague();
   const [editing, setEditing] = useState(false);
@@ -424,6 +470,22 @@ function LeagueSettings({ nickname: saved }: { nickname: string }) {
           Leave public leagues
         </AppText>
       </Pressable>
+      {__DEV__ && (
+        <Pressable
+          onPress={() =>
+            Alert.alert('Preview the end-of-week screen', 'Made-up results. Nothing is saved.', [
+              { text: 'Cancel', style: 'cancel' },
+              { text: 'Moved up', onPress: () => router.push({ pathname: '/league-result', params: { preview: 'up' } }) },
+              { text: 'Stayed', onPress: () => router.push({ pathname: '/league-result', params: { preview: 'stay' } }) },
+              { text: 'Moved down', onPress: () => router.push({ pathname: '/league-result', params: { preview: 'down' } }) },
+            ])
+          }
+          style={styles.settingRow}>
+          <AppText variant="body" color={Colors.textSecondary}>
+            Preview end-of-week screen (dev)
+          </AppText>
+        </Pressable>
+      )}
     </Card>
   );
 }
@@ -472,4 +534,18 @@ const styles = StyleSheet.create({
   divider: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, marginVertical: 4 },
   dividerLine: { flex: 1, height: 1, opacity: 0.5 },
   settingRow: { flexDirection: 'row', alignItems: 'center', minHeight: 36 },
+  lock: {
+    position: 'absolute',
+    right: -2,
+    bottom: -2,
+    width: 18,
+    height: 18,
+    borderRadius: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.card,
+  },
+  sample: { gap: 2, opacity: 0.55 },
+  sampleAvatar: { width: 34, height: 34, borderRadius: 17, backgroundColor: Colors.cardRaised },
+  sampleBar: { height: 12, borderRadius: 6, backgroundColor: Colors.cardRaised },
 });

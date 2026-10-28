@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { demoteCount, nicknameProblem, promoteCount, resultLine, tierInfo, trackRank, zoneFor } from './leagues';
+import { demoteCount, nicknameProblem, promoteCount, resultLine, sampleLeagueResult, tierInfo, trackRank, zoneFor } from './leagues';
 
 describe('league zones', () => {
   it('scales promotion and demotion to the group size', () => {
@@ -51,5 +51,15 @@ describe('trackRank', () => {
     const tue = trackRank(later.memo, 'w', 'tue', 8);
     expect(tue.moved).toBe(-1);
     expect(tue.memo.startRank).toBe(7);
+  });
+});
+
+describe('sampleLeagueResult', () => {
+  it('places you where the outcome needs and moves your tier', () => {
+    const up = sampleLeagueResult('up', 1, 'Tony', 'lotl');
+    expect(up.result).toMatchObject({ result: 'up', tier: 2, final_rank: 3 });
+    expect(up.table.find((r) => r.is_me)).toMatchObject({ name: 'Tony', rank: 3, result: 'up' });
+    expect(sampleLeagueResult('down', 2, 'Tony', 'lotl').result).toMatchObject({ tier: 1, final_rank: 8 });
+    expect(sampleLeagueResult('stay', 5, 'Tony', 'lotl').result.tier).toBe(5);
   });
 });

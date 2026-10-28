@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 import Animated, { FadeIn, FadeInDown, ZoomIn } from 'react-native-reanimated';
@@ -10,7 +10,7 @@ import { AppText, Button, Card } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useLeagueResult, useLeagueResultTable, useMarkLeagueResultSeen } from '@/hooks/use-league';
 import { useProfile } from '@/lib/auth';
-import { MEDALS, resultLine, tierInfo } from '@/lib/leagues';
+import { MEDALS, resultLine, sampleLeagueResult, tierInfo } from '@/lib/leagues';
 import { mascotKind } from '@/lib/mascots';
 import { playSound } from '@/lib/sounds';
 
@@ -29,8 +29,16 @@ const SPARKS = [
  */
 export default function LeagueResultScreen() {
   const profile = useProfile();
-  const { data: result } = useLeagueResult();
-  const { data: table } = useLeagueResultTable(!!result);
+  // ?preview=up|stay|down shows made-up results (development builds only), without marking anything seen.
+  const { preview } = useLocalSearchParams<{ preview?: string }>();
+  const sample =
+    preview === 'up' || preview === 'stay' || preview === 'down'
+      ? sampleLeagueResult(preview, 1, profile.display_name?.split(' ')[0] ?? 'You', profile.mascot)
+      : null;
+  const live = useLeagueResult();
+  const liveTable = useLeagueResultTable(!sample && !!live.data);
+  const result = sample ? sample.result : live.data;
+  const table = sample ? sample.table : liveTable.data;
   const seen = useMarkLeagueResultSeen();
   const [step, setStep] = useState<'table' | 'tier'>('table');
 
@@ -40,7 +48,7 @@ export default function LeagueResultScreen() {
   }, [step, result?.result]);
 
   const done = () => {
-    seen.mutate();
+    if (!sample) seen.mutate();
     router.back();
   };
 
@@ -146,7 +154,7 @@ export default function LeagueResultScreen() {
             title="📤 Share"
             variant="secondary"
             onPress={() => {
-              seen.mutate();
+              if (!sample) seen.mutate();
               router.replace({
                 pathname: '/share',
                 params: { kind: 'league', tier: String(result.tier), up: '1', rank: String(result.final_rank) },

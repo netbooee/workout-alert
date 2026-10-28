@@ -14,7 +14,7 @@ import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
 import { ProgressMini } from '@/components/progress-mini';
 import { StreakHero } from '@/components/streak-hero';
-import { ActionPill, AppText, Button, Card } from '@/components/ui';
+import { ActionPill, AppText, Button, Card, SectionLabel } from '@/components/ui';
 import { WeekDots } from '@/components/week-dots';
 import { WorkoutRow } from '@/components/workout-row';
 import { Colors, Spacing } from '@/constants/theme';
@@ -53,6 +53,7 @@ export default function HomeScreen() {
   const state = weekState(activeDays, profile.weekly_goal);
   const workedOutToday = days.some((d) => d.isToday && d.active);
   const resting = !!profile.resting_since;
+  const offerLog = shouldOfferLog({ state, weeks: 0, freezes: 0, workedOutToday, resting });
   const firstName = profile.display_name?.split(' ')[0];
   const leagueSettings = useLeagueSettings();
   const inLeague = !!leagueSettings.data?.opted_in;
@@ -95,7 +96,8 @@ export default function HomeScreen() {
             )}
           </View>
           <Link href="/log" asChild>
-            <ActionPill icon="plus" label="Log" accessibilityLabel="Log a workout" />
+            {/* Quiet while the streak card has its own Log button, so one orange button leads. */}
+            <ActionPill icon="plus" label="Log" accessibilityLabel="Log a workout" quiet={offerLog} />
           </Link>
         </View>
 
@@ -121,7 +123,7 @@ export default function HomeScreen() {
                 resting={resting}
                 workedOutToday={workedOutToday}
                 action={
-                  shouldOfferLog({ state, weeks: 0, freezes: 0, workedOutToday, resting }) && (
+                  offerLog && (
                     <Link href="/log" asChild>
                       <Button title="+ Log a workout" />
                     </Link>
@@ -139,7 +141,7 @@ export default function HomeScreen() {
         <CrewCard myDays={days} myWorkouts={data?.weekWorkouts ?? []} />
         <NudgeBanner />
         <CheerCard />
-        {incentives.length > 0 && <AppText variant="label">Challenges</AppText>}
+        {incentives.length > 0 && <SectionLabel>Challenges</SectionLabel>}
         {incentives.map((i) => (
           <IncentiveCard key={i.id} incentive={i} collapsible />
         ))}
@@ -173,16 +175,14 @@ export default function HomeScreen() {
                   body="Workouts from Apple Watch, Fitness, Strava and other apps show up here on their own. Pull down to refresh, or log one yourself."
                   action={
                     <Link href="/log" asChild>
-                      <Button title="+ Log a workout" />
+                      <Button title="+ Log a workout" variant="secondary" />
                     </Link>
                   }
                 />
               )}
             </Card>
 
-            <AppText variant="label" style={{ marginTop: Spacing.sm }}>
-              Today’s activity
-            </AppText>
+            <SectionLabel>Today’s activity</SectionLabel>
             <ActivityRings today={data?.today ?? null} />
             <ProgressMini />
           </>

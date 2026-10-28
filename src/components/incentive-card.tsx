@@ -152,7 +152,7 @@ export function IncentiveCard({
           {!reached && (
             <View style={styles.row}>
               {(received || i.shared) && (
-                <Button title="Log a workout" style={{ flex: 1 }} onPress={() => router.push('/log')} />
+                <Button title="Log a workout" variant="secondary" style={{ flex: 1 }} onPress={() => router.push('/log')} />
               )}
               {(!received || i.shared) && (
                 <Button

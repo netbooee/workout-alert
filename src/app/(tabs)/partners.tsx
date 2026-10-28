@@ -12,7 +12,7 @@ import { LeagueCard } from '@/components/league-card';
 import { LeagueEntry } from '@/components/league-entry';
 import { PartnerCard } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
-import { ActionPill, AppText, Button, Card } from '@/components/ui';
+import { ActionPill, AppText, Button, Card, SectionLabel } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useLeague, useNames, usePartnerFeed, usePartners, useRemovePartner, useRespondToPartner } from '@/hooks/use-social';
 import type { Partner } from '@/lib/database.types';
@@ -122,9 +122,7 @@ export default function PartnersScreen() {
 
         {accepted.length > 0 && (
           <>
-            <AppText variant="label" style={{ marginTop: Spacing.sm }}>
-              Partner activity
-            </AppText>
+            <SectionLabel>Partner activity</SectionLabel>
             {feed.data?.length ? (
               feed.data.map((item) => (
                 <FeedCard key={item.workout.id} item={item} name={nameOf(item.workout.user_id)} />

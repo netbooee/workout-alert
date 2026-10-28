@@ -6,7 +6,7 @@ import { Avatar } from '@/components/avatar';
 import { EmptyState } from '@/components/empty-state';
 import { FeedCard } from '@/components/feed-card';
 import { IncentiveCard } from '@/components/incentive-card';
-import { AppText, Button, Card } from '@/components/ui';
+import { AppText, Button, Card, SectionLabel } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useMyIncentives } from '@/hooks/use-incentives';
 import { useNudge, usePartners, usePartnerWorkouts } from '@/hooks/use-social';
@@ -68,17 +68,13 @@ export default function PartnerScreen() {
       )}
 
       {challenges.length > 0 && (
-        <AppText variant="label" style={{ marginTop: Spacing.sm }}>
-          Challenges with {firstName}
-        </AppText>
+        <SectionLabel>Challenges with {firstName}</SectionLabel>
       )}
       {challenges.map((i) => (
         <IncentiveCard key={i.id} incentive={i} collapsible />
       ))}
 
-      <AppText variant="label" style={{ marginTop: Spacing.sm }}>
-        {firstName}’s workouts
-      </AppText>
+      <SectionLabel>{firstName}’s workouts</SectionLabel>
       {isPending ? (
         <ActivityIndicator color={Colors.flame} />
       ) : workouts?.length ? (

@@ -342,7 +342,7 @@ function EmptyCrew({ incoming }: { incoming: number }) {
           onPress={() => router.push('/partners')}
         />
       ) : (
-        <Button title="Add a partner" onPress={() => router.push('/add-partner')} />
+        <Button title="Add a partner" variant="secondary" onPress={() => router.push('/add-partner')} />
       )}
     </Card>
   );

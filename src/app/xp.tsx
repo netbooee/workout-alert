@@ -2,7 +2,7 @@ import { router } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { LevelBar } from '@/components/level-bar';
-import { AppText } from '@/components/ui';
+import { AppText, SectionLabel } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useXpTotal } from '@/hooks/use-social';
@@ -33,7 +33,7 @@ export default function XpScreen() {
           <AppText variant="caption">{total.toLocaleString()} XP total</AppText>
         </View>
 
-        <AppText variant="label">Earn XP</AppText>
+        <SectionLabel>Earn XP</SectionLabel>
         <View style={styles.card}>
           {XP_RULES.map((r) => (
             <View key={r.what} style={styles.row}>
@@ -50,7 +50,7 @@ export default function XpScreen() {
 
         <StepBonus />
 
-        <AppText variant="label">What resets</AppText>
+        <SectionLabel>What resets</SectionLabel>
         <View style={styles.card}>
           <AppText variant="body">
             <AppText variant="body" style={styles.bold}>
@@ -73,7 +73,7 @@ export default function XpScreen() {
           </AppText>
         </View>
 
-        <AppText variant="label">Levels</AppText>
+        <SectionLabel>Levels</SectionLabel>
         <View style={styles.card}>
           {TITLES.map(([minLevel, title], i) => {
             const next = TITLES[i + 1]?.[0];
@@ -103,7 +103,7 @@ function StepBonus() {
   const next = nextStepTier(steps);
   return (
     <>
-      <AppText variant="label">Step bonus, every day</AppText>
+      <SectionLabel>Step bonus, every day</SectionLabel>
       <View style={styles.card}>
         {STEP_TIERS.map((t) => {
           const done = steps >= t.steps;
@@ -138,11 +138,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.md,
     paddingVertical: Spacing.md,
   },
-  content: { padding: Spacing.lg, paddingTop: 0, gap: Spacing.md },
-  card: { gap: Spacing.md, padding: Spacing.md, borderRadius: Radius.md, backgroundColor: Colors.card },
+  content: { padding: Spacing.md, paddingTop: 0, gap: Spacing.md, paddingBottom: Spacing.xl },
+  // Same look as the shared Card.
+  card: {
+    gap: Spacing.md,
+    padding: Spacing.md,
+    borderRadius: Radius.lg,
+    borderCurve: 'continuous',
+    borderWidth: StyleSheet.hairlineWidth,
+    borderColor: Colors.border,
+    backgroundColor: Colors.card,
+  },
   row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   emoji: { fontSize: 22, lineHeight: 28, width: 30 },
   bold: { fontWeight: '700', color: Colors.text },

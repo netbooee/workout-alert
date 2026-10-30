@@ -141,6 +141,8 @@ function RootNavigator() {
         <Stack.Screen name="invite/[code]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="xp" options={{ presentation: 'modal' }} />
         <Stack.Screen name="share" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="pep-talk/new" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="pep-talk/[id]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
         <Stack.Screen
           name="welcome"
           options={{ presentation: 'fullScreenModal', animation: 'fade', gestureEnabled: false }}

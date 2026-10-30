@@ -251,6 +251,22 @@ export type Database = {
         Update: { seen_at?: string | null };
         Relationships: [];
       };
+      pep_talks: {
+        Row: {
+          id: string;
+          from_id: string;
+          to_id: string;
+          media_kind: 'photo' | 'video';
+          /** <sender id>/pep-<timestamp>.<jpg|mp4|mov> in the private pep-talks bucket. */
+          media_path: string;
+          message: string | null;
+          created_at: string;
+          seen_at: string | null;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       league_players: {
         Row: {
           user_id: string;
@@ -359,6 +375,14 @@ export type Database = {
         Args: { p_partner: string };
         Returns: Database['public']['Tables']['nudges']['Row'];
       };
+      send_pep_talk: {
+        Args: { p_partner: string; p_kind: 'photo' | 'video'; p_path: string; p_message?: string | null };
+        Returns: Database['public']['Tables']['pep_talks']['Row'];
+      };
+      mark_pep_talks_seen: {
+        Args: { p_ids: string[] };
+        Returns: undefined;
+      };
       my_partners: {
         Args: Record<PropertyKey, never>;
         Returns: {
@@ -452,6 +476,7 @@ export type Reaction = PublicTables['reactions']['Row'];
 export type WorkoutComment = PublicTables['workout_comments']['Row'];
 export type Incentive = PublicTables['incentives']['Row'];
 export type Nudge = PublicTables['nudges']['Row'];
+export type PepTalk = PublicTables['pep_talks']['Row'];
 export type XpEvent = PublicTables['xp_events']['Row'];
 export type Partner = Database['public']['Functions']['my_partners']['Returns'][number];
 export type LeagueRow = Database['public']['Functions']['weekly_league']['Returns'][number];

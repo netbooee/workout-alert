@@ -266,7 +266,7 @@ export default function MeScreen() {
                 onChange={(v) => updateProfile({ notify_streak_reminders: v })}
               />
               <Toggle
-                label="Nudges from partners"
+                label="Nudges and pep talks"
                 value={profile.notify_nudges}
                 onChange={(v) => updateProfile({ notify_nudges: v })}
               />

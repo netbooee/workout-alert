@@ -36,6 +36,7 @@ export type Database = {
           notify_verifications: boolean;
           notify_comments: boolean;
           notify_incentives: boolean;
+          notify_groups: boolean;
           notify_streak_reminders: boolean;
           resting_since: string | null;
           mascot: 'lotl' | 'capybara' | 'sloth' | 'red_panda';
@@ -49,6 +50,7 @@ export type Database = {
           notify_verifications?: boolean;
           notify_comments?: boolean;
           notify_incentives?: boolean;
+          notify_groups?: boolean;
           notify_streak_reminders?: boolean;
           display_name?: string | null;
           avatar_url?: string | null;
@@ -251,6 +253,30 @@ export type Database = {
         Update: { seen_at?: string | null };
         Relationships: [];
       };
+      groups: {
+        Row: {
+          id: string;
+          name: string;
+          emoji: string;
+          invite_code: string;
+          created_by: string | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      group_members: {
+        Row: {
+          group_id: string;
+          user_id: string;
+          role: 'owner' | 'member';
+          joined_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       pep_talks: {
         Row: {
           id: string;
@@ -375,6 +401,60 @@ export type Database = {
         Args: { p_partner: string };
         Returns: Database['public']['Tables']['nudges']['Row'];
       };
+      create_group: {
+        Args: { p_name: string; p_emoji?: string };
+        Returns: Database['public']['Tables']['groups']['Row'];
+      };
+      join_group: {
+        Args: { p_code: string };
+        Returns: Database['public']['Tables']['groups']['Row'];
+      };
+      update_group: {
+        Args: { p_group: string; p_name: string; p_emoji: string };
+        Returns: Database['public']['Tables']['groups']['Row'];
+      };
+      leave_group: {
+        Args: { p_group: string };
+        Returns: undefined;
+      };
+      remove_group_member: {
+        Args: { p_group: string; p_user: string };
+        Returns: undefined;
+      };
+      group_preview: {
+        Args: { p_code: string };
+        Returns: { id: string; name: string; emoji: string; member_count: number; is_member: boolean }[];
+      };
+      my_groups: {
+        Args: { p_now?: string };
+        Returns: {
+          id: string;
+          name: string;
+          emoji: string;
+          invite_code: string;
+          role: 'owner' | 'member';
+          member_count: number;
+          squad_streak: number;
+          made: number;
+          need: number;
+        }[];
+      };
+      group_board: {
+        Args: { p_group: string; p_now?: string };
+        Returns: {
+          user_id: string;
+          name: string;
+          mascot: string;
+          avatar_url: string | null;
+          role: 'owner' | 'member';
+          xp: number;
+          last_week_xp: number;
+          this_week_days: number;
+          this_week_goal: number;
+          week_status: 'hit' | 'frozen' | 'missed' | 'in_progress' | 'rest';
+          is_me: boolean;
+        }[];
+      };
       send_pep_talk: {
         Args: { p_partner: string; p_kind: 'photo' | 'video'; p_path: string; p_message?: string | null };
         Returns: Database['public']['Tables']['pep_talks']['Row'];
@@ -477,6 +557,8 @@ export type WorkoutComment = PublicTables['workout_comments']['Row'];
 export type Incentive = PublicTables['incentives']['Row'];
 export type Nudge = PublicTables['nudges']['Row'];
 export type PepTalk = PublicTables['pep_talks']['Row'];
+export type MyGroup = Database['public']['Functions']['my_groups']['Returns'][number];
+export type GroupMemberRow = Database['public']['Functions']['group_board']['Returns'][number];
 export type XpEvent = PublicTables['xp_events']['Row'];
 export type Partner = Database['public']['Functions']['my_partners']['Returns'][number];
 export type LeagueRow = Database['public']['Functions']['weekly_league']['Returns'][number];

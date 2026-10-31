@@ -271,6 +271,11 @@ export default function MeScreen() {
                 onChange={(v) => updateProfile({ notify_nudges: v })}
               />
               <Toggle
+                label="Group updates"
+                value={profile.notify_groups}
+                onChange={(v) => updateProfile({ notify_groups: v })}
+              />
+              <Toggle
                 label="When a partner works out"
                 value={profile.notify_partner_workouts}
                 onChange={(v) => updateProfile({ notify_partner_workouts: v })}

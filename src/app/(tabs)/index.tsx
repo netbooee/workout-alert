@@ -9,6 +9,7 @@ import { CheerBanner } from '@/components/cheer-banner';
 import { CheerCard } from '@/components/cheer-card';
 import { CrewCard } from '@/components/crew-card';
 import { EmptyState } from '@/components/empty-state';
+import { GroupsCard } from '@/components/groups-card';
 import { IncentiveCard } from '@/components/incentive-card';
 import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
@@ -141,6 +142,7 @@ export default function HomeScreen() {
         )}
 
         <CrewCard myDays={days} myWorkouts={data?.weekWorkouts ?? []} />
+        <GroupsCard compact />
         <NudgeBanner />
         <CheerCard />
         {incentives.length > 0 && <SectionLabel>Challenges</SectionLabel>}

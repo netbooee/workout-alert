@@ -85,6 +85,7 @@ export function useUpdateProfile() {
         | 'notify_streak_reminders'
         | 'notify_comments'
         | 'notify_incentives'
+        | 'notify_groups'
         | 'mascot'
         | 'min_workout_minutes'
         | 'min_walk_minutes'

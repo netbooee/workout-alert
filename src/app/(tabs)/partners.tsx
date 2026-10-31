@@ -7,6 +7,7 @@ import { Avatar } from '@/components/avatar';
 import { CheerCard } from '@/components/cheer-card';
 import { EmptyState } from '@/components/empty-state';
 import { FeedCard } from '@/components/feed-card';
+import { GroupsCard } from '@/components/groups-card';
 import { IncentiveIntro } from '@/components/incentive-intro';
 import { LeagueCard } from '@/components/league-card';
 import { LeagueEntry } from '@/components/league-entry';
@@ -102,6 +103,7 @@ export default function PartnersScreen() {
         )}
 
         {partners.isSuccess && <LeagueEntry />}
+        <GroupsCard />
 
         {accepted.length > 0 && <PushPrompt />}
 

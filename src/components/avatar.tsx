@@ -18,9 +18,21 @@ function colorFor(id: string) {
  * Someone's profile photo, or their initials on a color of their own until
  * the photo loads (or if they have none). Photos are found by id: yours from
  * your profile, partners' from the partners list, so callers only pass an id.
+ * Screens that already have the path (group mates) pass it as `photoPath`.
  */
-export function Avatar({ id, name, size = 40 }: { id: string; name: string | null; size?: number }) {
-  const path = useAvatarPath(id);
+export function Avatar({
+  id,
+  name,
+  size = 40,
+  photoPath,
+}: {
+  id: string;
+  name: string | null;
+  size?: number;
+  photoPath?: string | null;
+}) {
+  const known = useAvatarPath(id);
+  const path = photoPath ?? known;
   const url = useProfilePhotoUrl(path);
   const initials = (name ?? '?')
     .split(/\s+/)

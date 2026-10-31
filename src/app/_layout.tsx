@@ -117,6 +117,15 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="group/[id]"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.flame,
+            headerTitleStyle: { color: Colors.text },
+          }}
+        />
+        <Stack.Screen
           name="streak"
           options={{
             headerShown: true,
@@ -142,6 +151,8 @@ function RootNavigator() {
         <Stack.Screen name="xp" options={{ presentation: 'modal' }} />
         <Stack.Screen name="share" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pep-talk/new" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="group/new" options={{ presentation: 'modal' }} />
+        <Stack.Screen name="group/join/[code]" options={{ presentation: 'modal' }} />
         <Stack.Screen name="pep-talk/[id]" options={{ presentation: 'fullScreenModal', animation: 'fade' }} />
         <Stack.Screen
           name="welcome"

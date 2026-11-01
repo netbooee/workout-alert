@@ -5,6 +5,7 @@ import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Mascot } from '@/components/mascots';
+import { SigamosName } from '@/components/sigamos-name';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useProfile } from '@/lib/auth';
@@ -117,9 +118,14 @@ export default function WelcomeScreen() {
                 <AppText style={styles.emoji}>{p.emoji}</AppText>
               )}
             </View>
-            <AppText variant="title" style={styles.center}>
-              {p.title}
-            </AppText>
+            {/* The first page teaches the name instead of a plain "Welcome to Sigamos". */}
+            {i === 0 ? (
+              <SigamosName />
+            ) : (
+              <AppText variant="title" style={styles.center}>
+                {p.title}
+              </AppText>
+            )}
             <AppText variant="body" color={Colors.textSecondary} style={[styles.center, styles.body]}>
               {p.body}
             </AppText>

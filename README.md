@@ -439,9 +439,9 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   capped at a 30-second maximum to keep storage small. Needs the camera in video mode,
   compression before upload, a size limit on the `evidence` bucket, and a player on the
   workout screen.
-- **Motivation from partners.** Let a partner send a motivational photo or short video
-  (same in-app, 30-second limit) back to someone, e.g. in reply to a nudge or on a workout,
-  with a push notification and a place to see it (Home banner or the daily greeting).
+- ~~**Motivation from partners.**~~ Shipped as pep talks: a photo or a video of up to 30
+  seconds, taken in the app and sent from a partner's page, with a push notification, a Home
+  banner, and a full-screen viewer with "Send one back" (`src/lib/pep-talks.ts`).
 - **Hide Lotl.** A setting for people who'd rather not have a character: Home shows a plain
   header and the daily greeting becomes a simple summary card (or turns off).
 - **Special characters (one-time purchases).** Extra characters beyond the free four, bought

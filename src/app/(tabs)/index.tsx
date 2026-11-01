@@ -9,9 +9,11 @@ import { CheerBanner } from '@/components/cheer-banner';
 import { CheerCard } from '@/components/cheer-card';
 import { CrewCard } from '@/components/crew-card';
 import { EmptyState } from '@/components/empty-state';
+import { GroupsCard } from '@/components/groups-card';
 import { IncentiveCard } from '@/components/incentive-card';
 import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
+import { PepTalkBanner } from '@/components/pep-talk-banner';
 import { ProgressMini } from '@/components/progress-mini';
 import { StreakHero } from '@/components/streak-hero';
 import { ActionPill, AppText, Button, Card, SectionLabel } from '@/components/ui';
@@ -109,6 +111,7 @@ export default function HomeScreen() {
           </Card>
         )}
 
+        <PepTalkBanner />
         <CheerBanner />
 
         {/* Your streak and this week come first; everything else supports them. */}
@@ -139,6 +142,7 @@ export default function HomeScreen() {
         )}
 
         <CrewCard myDays={days} myWorkouts={data?.weekWorkouts ?? []} />
+        <GroupsCard compact />
         <NudgeBanner />
         <CheerCard />
         {incentives.length > 0 && <SectionLabel>Challenges</SectionLabel>}

@@ -9,6 +9,12 @@
   to = "/invite/index.html"
   status = 200
 
+# Every /group/<CODE> link shows the group invite page the same way.
+[[redirects]]
+  from = "/group/*"
+  to = "/group/index.html"
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]

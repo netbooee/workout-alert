@@ -55,6 +55,12 @@ export default function PartnerScreen() {
                 }}
               />
             )}
+            <Button
+              title="📣 Pep talk"
+              variant="secondary"
+              style={{ flex: 1 }}
+              onPress={() => router.push({ pathname: '/pep-talk/new', params: { to: partner.partner_id } })}
+            />
             {!given.some((i) => i.to_id === id && isOpen(i)) && (
               <Button
                 title="🎯 Challenge"

@@ -1,10 +1,11 @@
 import * as AppleAuthentication from 'expo-apple-authentication';
-import { SymbolView } from 'expo-symbols';
 import { useState } from 'react';
 import { Alert, KeyboardAvoidingView, StyleSheet, TextInput, useColorScheme, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { GoogleButton } from '@/components/google-button';
+import { Mascot } from '@/components/mascots';
+import { SigamosName } from '@/components/sigamos-name';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { friendlyError } from '@/lib/errors';
@@ -16,10 +17,11 @@ export default function SignInScreen() {
     <SafeAreaView style={styles.container}>
       <KeyboardAvoidingView behavior="padding" style={styles.inner}>
         <View style={styles.hero}>
-          <SymbolView name="flame.fill" size={72} tintColor={Colors.flame} />
-          <AppText variant="title">Sigamos</AppText>
+          <Mascot kind="lotl" mood="happy" size={110} />
+          <SigamosName />
           <AppText variant="body" color={Colors.textSecondary} style={{ textAlign: 'center' }}>
-            Work out with your people. Keep the streak alive together.
+            Spanish for “let’s keep going.” Work out with your people and keep the streak alive
+            together.
           </AppText>
         </View>
         <View style={styles.actions}>

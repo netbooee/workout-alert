@@ -10,7 +10,14 @@ import { Colors, Palettes } from '@/constants/theme';
 import { restoreAppearance } from '@/lib/appearance';
 import { AuthProvider, useAuth } from '@/lib/auth';
 import { inviteCodeFromUrl } from '@/lib/invite-link';
-import { clearPendingInvite, getPendingInvite, savePendingInvite } from '@/lib/pending-invite';
+import { groupCodeFromUrl } from '@/lib/groups';
+import {
+  clearPendingInvite,
+  getPendingInvite,
+  savePendingGroupInvite,
+  savePendingInvite,
+  takePendingGroupInvite,
+} from '@/lib/pending-invite';
 import { restoreSounds } from '@/lib/sounds';
 
 SplashScreen.preventAutoHideAsync();
@@ -64,9 +71,13 @@ function RootNavigator() {
   }, [ready]);
 
   // Hold on to an invite opened before onboarding is done; the partner step uses it.
+  // Group invites wait too, and open once onboarding is done (below).
   useEffect(() => {
-    const code = url && inviteCodeFromUrl(url);
-    if (ready && code && !(signedIn && onboarded)) savePendingInvite(code);
+    if (!ready || !url || (signedIn && onboarded)) return;
+    const code = inviteCodeFromUrl(url);
+    if (code) savePendingInvite(code);
+    const groupCode = groupCodeFromUrl(url);
+    if (groupCode) savePendingGroupInvite(groupCode);
   }, [url, ready, signedIn, onboarded]);
 
   // Someone already onboarded who opened an invite while signed out (say, after
@@ -78,6 +89,16 @@ function RootNavigator() {
         if (!code) return;
         await clearPendingInvite();
         router.push({ pathname: '/invite/[code]', params: { code } });
+      })
+      .catch(() => {});
+  }, [ready, signedIn, onboarded]);
+
+  // A group link opened before signing up: show the group to join once onboarding is done.
+  useEffect(() => {
+    if (!ready || !signedIn || !onboarded) return;
+    takePendingGroupInvite()
+      .then((code) => {
+        if (code) router.push({ pathname: '/group/join/[code]', params: { code } });
       })
       .catch(() => {});
   }, [ready, signedIn, onboarded]);

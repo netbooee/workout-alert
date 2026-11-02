@@ -256,22 +256,37 @@ Sensitive Info, Device ID. There are no analytics or advertising SDKs.
 Required: **6.9-inch iPhone** (1320 × 2868 portrait). Apple scales these down
 for smaller iPhones. No iPad screenshots (iPhone only).
 
-Capture on a TestFlight build on a real iPhone with good-looking data (the
-demo accounts from 1a are ideal), or in the Simulator on **iPhone 17 Pro Max**
-(⌘S saves a screenshot to the Desktop). Light mode, full battery, 9:41 if
-possible. Order:
+`scripts/screenshots/capture.mjs` takes them automatically in the Simulator,
+signed in as Riley, with a 9:41 status bar, saved to `screenshots/app-store/`
+(not committed to git):
 
-1. **Home**: big streak number, week dots, the "today" sentence, the crew card
-2. **Celebration** after logging a workout: confetti, +XP
-3. **Private group**, Squad tab: squad streak and who's made it
-4. **A partner's page** with workouts and the 📣 Pep talk button
-5. **Pep talk viewer** (a fun photo with a message)
-6. **Leagues** table with medals
-7. **Me** with the stat tiles, or **the widget** on a Home Screen
+1. Rerun the seed script (1a), so Riley's pep talk is unopened.
+2. Run a **Release** build on the **iPhone 17 Pro Max** Simulator. Release
+   builds have no developer-menu button in the corner, and the Simulator
+   needs no signing:
+   ```bash
+   npx expo run:ios --configuration Release --device
+   ```
+   Pick "iPhone 17 Pro Max" (a Simulator, iOS 27.0), not the real iPhone.
+3. In the Simulator, sign in as `review@sigamos.cloud` and close anything on
+   top of Home.
+4. Run:
+   ```bash
+   read -s REVIEW_PASSWORD && export REVIEW_PASSWORD
+   node --env-file=.env.local scripts/screenshots/capture.mjs
+   ```
+5. Check each picture, then upload them in this order:
+   - `01-home.png`: streak, today's sentence, crew, the pep talk banner
+   - `02-partner.png`: Sam's page with the 📣 Pep talk button
+   - `03-group-squad.png`: Cupertino Crew's squad streak
+   - `04-streak.png`: the streak calendar
+   - `05-me.png`: the stat tiles
+   - `06-celebration.png`: confetti after a workout
+   - `07-pep-talk.png`: Sam's pep talk, full screen
+6. Rerun the seed script afterwards: opening the pep talk marks it seen.
 
-Optional: a short caption at the top of each ("Keep the streak alive
-together", and so on) made in Figma or Canva. Plain screenshots are fine for
-1.0.
+To retake one, run the script again, or press ⌘S in the Simulator (it saves to
+the Desktop at full size).
 
 ### 2f. Build, review information and release
 

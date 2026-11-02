@@ -4,6 +4,12 @@ Written for a Claude Code session on Tony's Mac with browser access, working
 through App Store Connect with him. Read it top to bottom before doing
 anything.
 
+**Where things stand:** the app code, the database and a 1.0.0 TestFlight
+build are ready, and the reviewer demo account works. What's left is App
+Store Connect (section 2), plus the Sign in with Apple key (1c), which this
+session can help with since it can use Tony's browser and Terminal. See the
+Status table at the end.
+
 **Ground rules for the browser session**
 
 - Tony signs in to Apple, Expo and Supabase himself, including two-factor codes.
@@ -313,13 +319,15 @@ App Store Connect → App Review; answer it there or fix and resubmit.
 
 ## Status
 
+Last updated by the cloud session, after Tony's TestFlight check.
+
 | Item | Status |
 |---|---|
-| Version set to 1.0.0 | Done (in the cloud session) |
-| 1a Reviewer demo account | Built; Tony runs the seed script before submitting |
-| 1b Report and block | Built (migration 20261103000000 needs `db push`) |
-| 1c Apple revocation secrets | Waiting on Tony's Apple key |
-| 1d Supabase plan | Tony to check |
-| 1e Legal review | Tony to arrange |
-| 1f 1.0.0 build | After the report-and-block PR is merged and `db push` is done |
-| 2a–2f App Store Connect | Browser session |
+| Version set to 1.0.0 | Done |
+| 1a Reviewer demo account | Done. Accounts seeded on the live database, and Tony signed in as Riley on TestFlight; all good. Rerun the seed script right before Submit for Review |
+| 1b Report and block | Done and live (migrations through `20261104000000` applied) |
+| 1c Apple revocation secrets | **Not done.** The local session can walk Tony through it (developer.apple.com in the browser, then the two Terminal commands) |
+| 1d Supabase plan | **Ask Tony** whether he has checked it |
+| 1e Legal review | Tony's call; doesn't block submission |
+| 1f 1.0.0 build | Done. A 1.0.0 build is on TestFlight; select that one in 2f, the build Tony tested with Riley |
+| 2a–2g App Store Connect | **Start here** in the browser session |

@@ -20,11 +20,12 @@ type Tab = 'board' | 'squad';
  * week's winner) and the squad streak everyone keeps alive together.
  */
 export default function GroupScreen() {
-  const { id, created } = useLocalSearchParams<{ id: string; created?: string }>();
+  // ?tab=squad opens the Squad tab (links and the App Store screenshot script).
+  const { id, created, tab: startTab } = useLocalSearchParams<{ id: string; created?: string; tab?: string }>();
   const { data: groups, isPending } = useMyGroups();
   const group = groups?.find((g) => g.id === id);
   const { data: rows } = useGroupBoard(id);
-  const [tab, setTab] = useState<Tab>('board');
+  const [tab, setTab] = useState<Tab>(startTab === 'squad' ? 'squad' : 'board');
 
   if (!group) {
     return (

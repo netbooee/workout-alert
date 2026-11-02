@@ -41,3 +41,6 @@ yarn-error.*
 /ios
 /android
 .env
+
+# App Store screenshots made by scripts/screenshots/capture.mjs
+screenshots/

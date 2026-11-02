@@ -29,6 +29,7 @@ import { AppText, Button, Card, Segmented } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
 import { useLeagueSettings } from '@/hooks/use-league';
+import { useBlocks, useUnblock } from '@/hooks/use-safety';
 import { useXpTotal } from '@/hooks/use-social';
 import { useAppearancePref, type AppearancePref } from '@/lib/appearance';
 import { deleteAccount, signOut, useProfile, useUpdateProfile } from '@/lib/auth';
@@ -489,7 +490,44 @@ function LeaguePrivacyCard() {
           <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />
         </Pressable>
       </Link>
+      <BlockedPeople />
     </Card>
+  );
+}
+
+/** People you've blocked, each with Unblock. Hidden when there are none. */
+function BlockedPeople() {
+  const { data: blocks } = useBlocks();
+  const unblock = useUnblock();
+  if (!blocks?.length) return null;
+  return (
+    <View style={{ gap: Spacing.xs, marginTop: Spacing.sm }}>
+      <AppText variant="body">Blocked</AppText>
+      {blocks.map((b) => (
+        <View key={b.user_id} style={styles.toggle}>
+          <AppText variant="body" color={Colors.textSecondary} style={{ flex: 1 }}>
+            {b.name}
+          </AppText>
+          <Pressable
+            onPress={() =>
+              Alert.alert(`Unblock ${b.name}?`, 'They’ll be able to send you partner requests again.', [
+                { text: 'Cancel', style: 'cancel' },
+                {
+                  text: 'Unblock',
+                  onPress: () =>
+                    unblock.mutate(b.user_id, { onError: (e) => Alert.alert('Couldn’t unblock', friendlyError(e)) }),
+                },
+              ])
+            }
+            hitSlop={8}
+            accessibilityRole="button">
+            <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+              Unblock
+            </AppText>
+          </Pressable>
+        </View>
+      ))}
+    </View>
   );
 }
 

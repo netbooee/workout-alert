@@ -1,6 +1,7 @@
 import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { ActivityIndicator, Alert, ScrollView, StyleSheet, View } from 'react-native';
+import { SymbolView } from 'expo-symbols';
+import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { EmptyState } from '@/components/empty-state';
@@ -9,6 +10,7 @@ import { IncentiveCard } from '@/components/incentive-card';
 import { AppText, Button, Card, SectionLabel } from '@/components/ui';
 import { Colors, Spacing } from '@/constants/theme';
 import { useMyIncentives } from '@/hooks/use-incentives';
+import { useSafetyMenu } from '@/hooks/use-safety';
 import { useNudge, usePartners, usePartnerWorkouts } from '@/hooks/use-social';
 import { friendlyError } from '@/lib/errors';
 import { isOpen } from '@/lib/incentives';
@@ -21,6 +23,7 @@ export default function PartnerScreen() {
   const { data: workouts, isPending } = usePartnerWorkouts(id);
   const { given, received } = useMyIncentives();
   const nudge = useNudge();
+  const safety = useSafetyMenu();
   const firstName = partner?.display_name?.split(' ')[0] ?? 'Partner';
   const challenges = [...given, ...received].filter(
     (i) => (i.from_id === id || i.to_id === id) && (isOpen(i) || i.status === 'earned'),
@@ -29,7 +32,23 @@ export default function PartnerScreen() {
 
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      <Stack.Screen options={{ title: firstName }} />
+      <Stack.Screen
+        options={{
+          title: firstName,
+          headerRight: () =>
+            partner ? (
+              <Pressable
+                onPress={() =>
+                  safety({ userId: partner.partner_id, name: firstName, kind: 'user', onBlocked: () => router.back() })
+                }
+                hitSlop={12}
+                accessibilityRole="button"
+                accessibilityLabel={`Report or block ${firstName}`}>
+                <SymbolView name="ellipsis.circle" size={22} tintColor={Colors.flame} />
+              </Pressable>
+            ) : null,
+        }}
+      />
       {partner && (
         <Card style={styles.header}>
           <Avatar id={partner.partner_id} name={partner.display_name} size={56} />

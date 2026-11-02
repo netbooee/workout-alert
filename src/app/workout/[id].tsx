@@ -23,6 +23,7 @@ import { ReactionBar, REACTIONS } from '@/components/reaction-bar';
 import { ActionPill, AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useMyIncentives } from '@/hooks/use-incentives';
+import { useSafetyMenu } from '@/hooks/use-safety';
 import { useNames, useWorkout } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import { showCelebrationIfEarned } from '@/lib/celebrate';
@@ -115,9 +116,31 @@ export default function WorkoutScreen() {
 
         {!isOwner && <RewardPrompt partnerId={w.user_id} name={nameOf(w.user_id)} />}
 
-        {isOwner && <DeleteWorkout workout={w} />}
+        {isOwner ? (
+          <DeleteWorkout workout={w} />
+        ) : (
+          <ReportWorkout userId={w.user_id} name={nameOf(w.user_id)} workoutId={w.id} />
+        )}
       </ScrollView>
     </SafeAreaView>
+  );
+}
+
+/** On a partner's workout: report its photos or note, or block them. */
+function ReportWorkout({ userId, name, workoutId }: { userId: string; name: string; workoutId: string }) {
+  const safety = useSafetyMenu();
+  return (
+    <Pressable
+      onPress={() =>
+        safety({ userId, name, kind: 'workout', refId: workoutId, onBlocked: () => router.back() })
+      }
+      hitSlop={8}
+      accessibilityRole="button"
+      style={{ alignSelf: 'center', paddingVertical: Spacing.md }}>
+      <AppText variant="caption" color={Colors.textMuted}>
+        Report or block
+      </AppText>
+    </Pressable>
   );
 }
 

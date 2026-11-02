@@ -3,6 +3,8 @@
 //   npx supabase gen types typescript --linked > src/lib/database.types.ts
 
 export type ReactionKind = 'fire' | 'strong' | 'clap' | 'verified';
+export type ReportKind = 'user' | 'comment' | 'pep_talk' | 'workout';
+export type ReportReason = 'spam' | 'inappropriate' | 'harassment' | 'other';
 export type IncentiveGoalKind = 'workout_days' | 'active_minutes' | 'workouts' | 'streak_weeks';
 export type IncentiveStatus =
   | 'offered'
@@ -253,6 +255,16 @@ export type Database = {
         Update: { seen_at?: string | null };
         Relationships: [];
       };
+      blocks: {
+        Row: {
+          blocker_id: string;
+          blocked_id: string;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       groups: {
         Row: {
           id: string;
@@ -400,6 +412,22 @@ export type Database = {
       nudge_partner: {
         Args: { p_partner: string };
         Returns: Database['public']['Tables']['nudges']['Row'];
+      };
+      report_content: {
+        Args: { p_user: string; p_kind: ReportKind; p_ref: string | null; p_reason: ReportReason };
+        Returns: undefined;
+      };
+      block_user: {
+        Args: { p_user: string };
+        Returns: undefined;
+      };
+      unblock_user: {
+        Args: { p_user: string };
+        Returns: undefined;
+      };
+      my_blocks: {
+        Args: Record<string, never>;
+        Returns: { user_id: string; name: string; created_at: string }[];
       };
       create_group: {
         Args: { p_name: string; p_emoji?: string };

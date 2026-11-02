@@ -6,6 +6,7 @@ import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, Vie
 import { Avatar } from '@/components/avatar';
 import { AppText, Button, Card, Segmented, SectionLabel } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
+import { useSafetyMenu } from '@/hooks/use-safety';
 import { useGroupBoard, useLeaveGroup, useMyGroups, useRemoveGroupMember, useUpdateGroup } from '@/hooks/use-groups';
 import type { GroupMemberRow, MyGroup } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
@@ -99,6 +100,7 @@ export default function GroupScreen() {
 function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }) {
   const crown = crownHolder(rows);
   const remove = useRemoveGroupMember();
+  const safety = useSafetyMenu();
 
   const confirmRemove = (r: GroupMemberRow) =>
     Alert.alert(`Remove ${r.name}?`, 'They’ll leave the group. They can rejoin with the code.', [
@@ -121,7 +123,20 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
         {rows.map((r, i) => (
           <Pressable
             key={r.user_id}
-            onLongPress={group.role === 'owner' && !r.is_me ? () => confirmRemove(r) : undefined}
+            onLongPress={
+              r.is_me
+                ? undefined
+                : () =>
+                    safety({
+                      userId: r.user_id,
+                      name: r.name,
+                      kind: 'user',
+                      extra:
+                        group.role === 'owner'
+                          ? { label: 'Remove from group', onPress: () => confirmRemove(r) }
+                          : undefined,
+                    })
+            }
             delayLongPress={400}
             accessibilityLabel={`${i + 1}. ${r.name}${r.is_me ? ' (you)' : ''}, ${r.xp} XP${r.user_id === crown ? ', last week’s winner' : ''}`}
             style={[styles.row, r.is_me && styles.meRow]}>
@@ -139,7 +154,9 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
       </Card>
       <AppText variant="caption" style={styles.note}>
         Resets every Sunday. 👑 marks last week’s winner.
-        {group.role === 'owner' ? ' Press and hold someone to remove them.' : ''}
+        {group.role === 'owner'
+          ? ' Press and hold someone to remove, report or block them.'
+          : ' Press and hold someone to report or block them.'}
       </AppText>
     </>
   );

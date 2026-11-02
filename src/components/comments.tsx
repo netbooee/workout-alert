@@ -16,6 +16,7 @@ import { AppText, Card } from '@/components/ui';
 import { VoiceMessage } from '@/components/voice-message';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useAddComment, useComments, useDeleteComment } from '@/hooks/use-comments';
+import { useSafetyMenu } from '@/hooks/use-safety';
 import { useNames } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import type { Workout, WorkoutComment } from '@/lib/database.types';
@@ -41,6 +42,7 @@ export function Comments({ workout }: { workout: Workout }) {
   const { data: urls } = useEvidenceUrls(audioPaths);
   const remove = useDeleteComment(workout.id);
   const isOwner = workout.user_id === me;
+  const safety = useSafetyMenu();
 
   const confirmDelete = (comment: WorkoutComment) =>
     Alert.alert('Delete comment?', undefined, [
@@ -66,11 +68,23 @@ export function Comments({ workout }: { workout: Workout }) {
         </AppText>
       )}
       {comments?.map((c) => {
-        const canDelete = c.user_id === me || isOwner;
+        // Your own comment: delete it. Someone else's: report or block them
+        // (and, on your workout, delete it).
+        const mine = c.user_id === me;
+        const onLongPress = mine
+          ? () => confirmDelete(c)
+          : () =>
+              safety({
+                userId: c.user_id,
+                name: nameOf(c.user_id),
+                kind: 'comment',
+                refId: c.id,
+                extra: isOwner ? { label: 'Delete comment', onPress: () => confirmDelete(c) } : undefined,
+              });
         return (
           <Pressable
             key={c.id}
-            onLongPress={canDelete ? () => confirmDelete(c) : undefined}
+            onLongPress={onLongPress}
             style={styles.comment}>
             <Avatar id={c.user_id} name={nameOf(c.user_id)} size={30} />
             <View style={styles.commentBody}>

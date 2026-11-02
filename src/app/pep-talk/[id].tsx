@@ -11,6 +11,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Avatar } from '@/components/avatar';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useSafetyMenu } from '@/hooks/use-safety';
 import { usePartners } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import { useMarkPepTalksSeen, usePepTalk, usePepTalkMediaUrl } from '@/lib/pep-talks';
@@ -26,6 +27,7 @@ export default function PepTalkScreen() {
   const { data: pepTalk, isPending } = usePepTalk(id);
   const { data: url } = usePepTalkMediaUrl(pepTalk?.media_path);
   const { data: partners } = usePartners();
+  const safety = useSafetyMenu();
   // react-query keeps mutate stable, so it's safe in the effect below.
   const { mutate: markSeen } = useMarkPepTalksSeen();
   const received = !!pepTalk && pepTalk.to_id === me;
@@ -70,6 +72,23 @@ export default function PepTalkScreen() {
           <AppText variant="heading" color="#fff" style={{ flex: 1 }} numberOfLines={1}>
             {pepTalk ? (received ? `${otherName} sent you a pep talk` : `Your pep talk for ${otherName}`) : ''}
           </AppText>
+          {received && otherId && (
+            <Pressable
+              onPress={() =>
+                safety({
+                  userId: otherId,
+                  name: otherName,
+                  kind: 'pep_talk',
+                  refId: pepTalk.id,
+                  onBlocked: () => router.back(),
+                })
+              }
+              hitSlop={12}
+              accessibilityLabel={`Report or block ${otherName}`}
+              style={styles.close}>
+              <SymbolView name="ellipsis" size={14} weight="bold" tintColor="#fff" />
+            </Pressable>
+          )}
           <Pressable onPress={() => router.back()} hitSlop={12} accessibilityLabel="Close" style={styles.close}>
             <SymbolView name="xmark" size={14} weight="bold" tintColor="#fff" />
           </Pressable>

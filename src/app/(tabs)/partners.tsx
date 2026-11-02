@@ -15,6 +15,7 @@ import { PartnerCard } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
 import { ActionPill, AppText, Button, Card, SectionLabel } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useSafetyMenu } from '@/hooks/use-safety';
 import { useLeague, useNames, usePartnerFeed, usePartners, useRemovePartner, useRespondToPartner } from '@/hooks/use-social';
 import type { Partner } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
@@ -176,6 +177,8 @@ function CancelRequest({ partnershipId, name }: { partnershipId: string; name: s
 
 function IncomingRequest({ partner }: { partner: Partner }) {
   const respond = useRespondToPartner();
+  const safety = useSafetyMenu();
+  const name = partner.display_name?.split(' ')[0] ?? 'them';
   const answer = (accept: boolean) =>
     respond.mutate(
       { id: partner.partnership_id, accept },
@@ -189,6 +192,13 @@ function IncomingRequest({ partner }: { partner: Partner }) {
           <AppText variant="heading">{partner.display_name ?? 'Someone'}</AppText>
           <AppText variant="caption">wants to be your workout partner</AppText>
         </View>
+        <Pressable
+          onPress={() => safety({ userId: partner.partner_id, name, kind: 'user' })}
+          hitSlop={12}
+          accessibilityRole="button"
+          accessibilityLabel={`Report or block ${name}`}>
+          <SymbolView name="ellipsis.circle" size={22} tintColor={Colors.textMuted} />
+        </Pressable>
       </View>
       <View style={styles.actions}>
         <Button title="Decline" variant="secondary" style={{ flex: 1 }} disabled={respond.isPending} onPress={() => answer(false)} />

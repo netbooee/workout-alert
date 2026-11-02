@@ -37,38 +37,82 @@ anything.
 
 ## 1. Blockers: do these before submitting
 
-### 1a. A way in for Apple's reviewer (needs a code change, not started)
+### 1a. A way in for Apple's reviewer (built)
 
 Apple requires a working demo account (Guideline 2.1). Email sign-in sends a
-one-time code to an inbox the reviewer can't read, and the app's core
-(partners, groups, pep talks) needs a second person. Options:
+code to an inbox the reviewer can't read, so two review addresses sign in
+with a password instead (`src/lib/review-account.ts`). Typing either one on
+the sign-in screen shows a password field; everyone else still gets a code.
 
-- **Recommended: a review account with a password.** One email address, for
-  example `review@sigamos.cloud`, signs in with a password instead of a code.
-  The sign-in screen shows a password field only for that address. Seed it
-  with a partner ("Sam", a second demo account) who has a few weeks of
-  workouts, a group, and a pep talk waiting, so every feature has something
-  to show. Ask Claude (in the cloud session or locally) to build this; it's a
-  small sign-in change plus a seed script.
-- Fallback: tell the reviewer to use Sign in with Apple. It works, but they
-  land in an empty app with no partner, and reviews often bounce on that.
+| Account | Email | Who |
+|---|---|---|
+| Reviewer | `review@sigamos.cloud` | "Riley": the account Apple signs in with |
+| Demo partner | `sam.review@sigamos.cloud` | "Sam Rivera": Riley's partner |
 
-### 1b. Report and block for user content (recommended, likely required)
+`scripts/review/seed-review-accounts.mjs` creates both accounts (or resets
+them) and fills them in:
+- partners for about five weeks, both on a 5-week streak
+- this week Riley has 1 of 3 days, so Home says "2 more workouts"
+- cheers and a comment from Sam
+- a private group, "Cupertino Crew", with a 5-week squad streak
+- a pep talk from Sam waiting on Riley's Home screen
 
-Apple's Guideline 1.2 asks apps with user-generated content (comments, voice
-messages, photos, pep talk videos, group names) for a way to report offensive
-content and block abusive users. Today:
+Neither account joins public leagues.
 
-- Public leagues have **Report** (press a player).
-- Partners can be removed, groups can be left, and group owners can remove
-  people. There is no **block** (a removed partner can send a new request) and
-  no **report** on comments, photos, pep talks or partners.
+**Tony runs it on the Mac, in the project folder**, right before submitting so
+the current week is fresh (and again if a review drags on):
 
-Build before submitting: "Report" and "Block" on a partner's page, on a pep
-talk, and on comments. Blocking removes the partnership and stops new
-requests, pep talks and nudges from that person. Reports go to a table Tony
-can review, with an email to netbooee@gmail.com. The support page and terms
-should mention it.
+```bash
+read -s SUPABASE_SECRET_KEY && export SUPABASE_SECRET_KEY
+read -s REVIEW_PASSWORD && export REVIEW_PASSWORD
+node --env-file=.env.local scripts/review/seed-review-accounts.mjs
+```
+
+- `SUPABASE_SECRET_KEY`: Supabase dashboard → Project Settings → **API Keys**
+  → a **secret** key (`sb_secret_…`). Paste it at the silent prompt; never in a
+  chat.
+- `REVIEW_PASSWORD`: a new password, 10+ characters, for both accounts. It
+  goes into App Store Connect (step 2f).
+
+Then sign in on a phone as `review@sigamos.cloud` and check it looks right.
+
+### 1b. Report and block (built)
+
+Apple's Guideline 1.2 asks apps with user content to let people report it and
+block abusive users. Built in migration `20261103000000_report_block`:
+
+- **Report** a person, a comment, a pep talk or a workout (its photos and
+  notes), with a reason. Each report keeps a copy of what was reported.
+- **Block**: ends the partnership and stops partner requests, nudges and pep
+  talks both ways. The other person isn't told. Unblock in Me → Settings →
+  Privacy.
+- **Where**:
+  - **•••** at the top right of a partner's page
+  - **•••** on a received pep talk
+  - **•••** on an incoming partner request
+  - press and hold a comment or a group member
+  - "Report or block" at the bottom of a partner's workout
+- The terms, the support page and the privacy policy describe it. The terms
+  promise review within 24 hours.
+
+**Reviewing reports (Tony, daily once live).** Supabase dashboard → SQL Editor:
+
+```sql
+select r.created_at, r.kind, r.reason, r.snapshot,
+       reporter.display_name as reporter, reported.display_name as reported, r.id
+from content_reports r
+left join profiles reporter on reporter.id = r.reporter_id
+left join profiles reported on reported.id = r.reported_id
+where r.reviewed_at is null
+order by r.created_at;
+
+-- after dealing with one:
+update content_reports set reviewed_at = now() where id = '<id>';
+```
+
+Acting on a report: delete the content in the Table Editor, or, for serious
+abuse, delete the account under Authentication → Users. A later improvement
+could email a notice for each new report.
 
 ### 1c. Sign in with Apple revocation (code shipped, needs Tony's key)
 
@@ -226,13 +270,13 @@ together", and so on) made in Figma or Canva. Plain screenshots are fine for
 ### 2f. Build, review information and release
 
 - **Build:** select **1.0.0 (N)** from step 1f.
-- **Sign-in required:** Yes. Username and password from 1a.
+- **Sign-in required:** Yes. Username `review@sigamos.cloud`, password `REVIEW_PASSWORD` from 1a.
 - **Contact:** Antonio Martinez, netbooee@gmail.com, Tony's phone.
 - **Notes for the reviewer:**
 
   > Sigamos is a workout-accountability app. Partners keep weekly workout streaks together.
   >
-  > DEMO ACCOUNT: sign in with the email and password above (enter the email, then the password field appears). It's paired with a demo partner, "Sam", so you can see partner workouts, cheers, comments, a challenge, a private group and a pep talk.
+  > DEMO ACCOUNT: on the sign-in screen, type review@sigamos.cloud in the email field. A password field appears; enter the password above. The account ("Riley") is paired with a demo partner, "Sam", so you can see partner workouts, cheers and comments (Partners tab), a private group with a squad streak (Partners → Your groups), and a pep talk from Sam on Home.
   >
   > APPLE HEALTH: Sigamos reads workouts, steps, active energy, exercise minutes and heart rate (with permission) to count workouts toward the weekly goal. It never writes to Health. Without Health access, workouts can be logged by hand with "+ Log" on Home.
   >
@@ -240,7 +284,7 @@ together", and so on) made in Figma or Canva. Plain screenshots are fine for
   >
   > ACCOUNT DELETION: Me → Settings → Delete account. It deletes everything immediately and revokes Sign in with Apple.
   >
-  > REPORTING: Partners → a partner → ••• → Report or Block. (Update once 1b is built.)
+  > REPORTING AND BLOCKING: open a partner (Partners → Sam) and tap ••• at the top right to report or block them. Comments and group members: press and hold. Pep talks: ••• next to the close button. Blocked people are listed in Me → Settings → Privacy. Reports are reviewed within 24 hours.
   >
   > There are no in-app purchases, ads or tracking.
 
@@ -251,7 +295,7 @@ together", and so on) made in Figma or Canva. Plain screenshots are fine for
 - [ ] Every field above is filled, and screenshots are uploaded
 - [ ] The demo account works on the selected build (sign in on a phone)
 - [ ] The website is live with the current privacy policy and support pages
-- [ ] Report and block (1b) is in this build, and the reviewer note matches
+- [ ] The seed script (1a) ran today, and the reviewer note matches
 - [ ] Sign in with Apple revocation (1c) works
 - [ ] Tony has reviewed the age rating and privacy answers
 
@@ -272,10 +316,10 @@ App Store Connect → App Review; answer it there or fix and resubmit.
 | Item | Status |
 |---|---|
 | Version set to 1.0.0 | Done (in the cloud session) |
-| 1a Reviewer demo account | Not started (code change) |
-| 1b Report and block | Not started (code change) |
+| 1a Reviewer demo account | Built; Tony runs the seed script before submitting |
+| 1b Report and block | Built (migration 20261103000000 needs `db push`) |
 | 1c Apple revocation secrets | Waiting on Tony's Apple key |
 | 1d Supabase plan | Tony to check |
 | 1e Legal review | Tony to arrange |
-| 1f 1.0.0 build | After 1a and 1b |
+| 1f 1.0.0 build | After the report-and-block PR is merged and `db push` is done |
 | 2a–2f App Store Connect | Browser session |

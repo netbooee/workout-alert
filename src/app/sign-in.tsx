@@ -10,6 +10,7 @@ import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { friendlyError } from '@/lib/errors';
 import { googleEnabled, signInWithGoogle } from '@/lib/google-auth';
+import { isReviewEmail } from '@/lib/review-account';
 import { supabase } from '@/lib/supabase';
 
 export default function SignInScreen() {
@@ -100,6 +101,7 @@ function GoogleSignIn() {
 
 function EmailSignIn() {
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [code, setCode] = useState('');
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -111,6 +113,9 @@ function EmailSignIn() {
     if (error) Alert.alert('Something went wrong', error.message);
     return !error;
   };
+
+  // App Review accounts sign in with a password (see lib/review-account).
+  const review = isReviewEmail(email);
 
   if (!sent) {
     return (
@@ -125,15 +130,38 @@ function EmailSignIn() {
           value={email}
           onChangeText={setEmail}
         />
-        <Button
-          title="Email me a code"
-          variant="secondary"
-          loading={loading}
-          disabled={!email.includes('@')}
-          onPress={async () => {
-            if (await run(() => supabase.auth.signInWithOtp({ email: email.trim() }))) setSent(true);
-          }}
-        />
+        {review ? (
+          <>
+            <TextInput
+              style={styles.input}
+              placeholder="Password"
+              placeholderTextColor={Colors.textMuted}
+              autoCapitalize="none"
+              autoComplete="password"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+            />
+            <Button
+              title="Sign in"
+              loading={loading}
+              disabled={!password}
+              onPress={() =>
+                run(() => supabase.auth.signInWithPassword({ email: email.trim().toLowerCase(), password }))
+              }
+            />
+          </>
+        ) : (
+          <Button
+            title="Email me a code"
+            variant="secondary"
+            loading={loading}
+            disabled={!email.includes('@')}
+            onPress={async () => {
+              if (await run(() => supabase.auth.signInWithOtp({ email: email.trim() }))) setSent(true);
+            }}
+          />
+        )}
       </>
     );
   }

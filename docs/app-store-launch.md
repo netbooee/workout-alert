@@ -137,7 +137,7 @@ Function, which needs Apple credentials:
    npx supabase functions deploy revoke-apple
    ```
 3. Test: on a TestFlight build, sign up with Sign in with Apple using a spare
-   Apple ID, delete the account (Me → Settings → Delete account), then check
+   Apple ID, delete the account (Me tab → "Settings" (top of the screen) → scroll to the bottom → "Delete account" (below Sign out)), then check
    Settings → Apple ID → Sign-In & Security → Sign in with Apple: Sigamos
    should be gone.
 
@@ -303,7 +303,7 @@ the Desktop at full size).
   >
   > CAMERA AND MICROPHONE: for optional check-in photos, voice messages and pep talk videos (Partners → a partner → 📣 Pep talk).
   >
-  > ACCOUNT DELETION: Me → Settings → Delete account. It deletes everything immediately and revokes Sign in with Apple.
+  > ACCOUNT DELETION: Me tab → "Settings" (top of the screen) → scroll to the bottom → "Delete account" (below Sign out). It deletes everything immediately and revokes Sign in with Apple.
   >
   > REPORTING AND BLOCKING: open a partner (Partners → Sam) and tap ••• at the top right to report or block them. Comments and group members: press and hold. Pep talks: ••• next to the close button. Blocked people are listed in Me → Settings → Privacy. Reports are reviewed within 24 hours.
   >
@@ -317,7 +317,7 @@ the Desktop at full size).
 - [ ] The demo account works on the selected build (sign in on a phone)
 - [ ] The website is live with the current privacy policy and support pages
 - [ ] The seed script (1a) ran today, and the reviewer note matches
-- [ ] Sign in with Apple revocation (1c) works
+- [x] Sign in with Apple revocation (1c) works
 - [ ] Tony has reviewed the age rating and privacy answers
 
 Apple usually reviews within 1–3 days. A rejection comes with a message in
@@ -334,15 +334,21 @@ App Store Connect → App Review; answer it there or fix and resubmit.
 
 ## Status
 
-Last updated by the cloud session, after Tony's TestFlight check.
+Last updated by the local browser session, 2026-11-02.
 
 | Item | Status |
 |---|---|
 | Version set to 1.0.0 | Done |
-| 1a Reviewer demo account | Done. Accounts seeded on the live database, and Tony signed in as Riley on TestFlight; all good. Rerun the seed script right before Submit for Review |
+| 1a Reviewer demo account | Done. Rerun the seed script right before Submit for Review |
 | 1b Report and block | Done and live (migrations through `20261104000000` applied) |
-| 1c Apple revocation secrets | **Not done.** The local session can walk Tony through it (developer.apple.com in the browser, then the two Terminal commands) |
+| 1c Apple revocation secrets | **Done.** Key 8JAJQNTM6D; all four APPLE_* secrets set (digests checked), `revoke-apple` deployed. Tested 2026-11-02 on TestFlight: Sign in with Apple account deleted, all its data gone, and Sigamos removed from the iPhone's Sign in with Apple list |
 | 1d Supabase plan | **Ask Tony** whether he has checked it |
 | 1e Legal review | Tony's call; doesn't block submission |
-| 1f 1.0.0 build | Done. A 1.0.0 build is on TestFlight; select that one in 2f, the build Tony tested with Riley |
-| 2a–2g App Store Connect | **Start here** in the browser session |
+| 1f 1.0.0 build | Done. Build 12 (1.0.0) |
+| 2a App Information | Done: subtitle, categories, age rating 13+ (not sold in Afghanistan or Morocco), declared not a regulated medical device. **Content Rights: Tony to declare** |
+| 2b Pricing and Availability | Done: Free, 174 countries and regions (China mainland removed: no ICP filing) |
+| 2c App Privacy | Answers entered as in 2c. **Tony to review and click Publish** |
+| 2d Version text | Done |
+| 2e Screenshots | Done: 8 on the medium-display iPhone slot, which is the required slot in App Store Connect now (6.9-inch is optional) |
+| 2f Build, review info, release | Done: build 12, demo account, contact, notes, manual release |
+| 2g Submit for Review | **Tony**, after 1c and the items marked above |

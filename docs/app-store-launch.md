@@ -339,16 +339,16 @@ Last updated by the local browser session, 2026-11-02.
 | Item | Status |
 |---|---|
 | Version set to 1.0.0 | Done |
-| 1a Reviewer demo account | Done. Rerun the seed script right before Submit for Review |
+| 1a Reviewer demo account | Done. Reseeded 2026-11-03 after submitting, which cleared 104 of Tony's Apple Health workouts that had synced into Riley on 2026-11-02. Never sign in as Riley on a phone with real Health data; rerun the seed if the review drags on |
 | 1b Report and block | Done and live (migrations through `20261104000000` applied) |
 | 1c Apple revocation secrets | **Done.** Key 8JAJQNTM6D; all four APPLE_* secrets set (digests checked), `revoke-apple` deployed. Tested 2026-11-02 on TestFlight: Sign in with Apple account deleted, all its data gone, and Sigamos removed from the iPhone's Sign in with Apple list |
 | 1d Supabase plan | **Ask Tony** whether he has checked it |
 | 1e Legal review | Tony's call; doesn't block submission |
 | 1f 1.0.0 build | Done. Build 12 (1.0.0) |
-| 2a App Information | Done: subtitle, categories, age rating 13+ (not sold in Afghanistan or Morocco), declared not a regulated medical device. **Content Rights: Tony to declare** |
+| 2a App Information | Done: subtitle, categories, age rating 13+ (not sold in Afghanistan or Morocco), declared not a regulated medical device. Content Rights: no third-party content (Tony) |
 | 2b Pricing and Availability | Done: Free, 174 countries and regions (China mainland removed: no ICP filing) |
-| 2c App Privacy | Answers entered as in 2c. **Tony to review and click Publish** |
+| 2c App Privacy | Done: Tony reviewed and published |
 | 2d Version text | Done |
 | 2e Screenshots | Done: 8 on the medium-display iPhone slot, which is the required slot in App Store Connect now (6.9-inch is optional) |
 | 2f Build, review info, release | Done: build 12, demo account, contact, notes, manual release |
-| 2g Submit for Review | **Tony**, after 1c and the items marked above |
+| 2g Submit for Review | Submitted 2026-11-03 (build 12, manual release). Waiting for Review |

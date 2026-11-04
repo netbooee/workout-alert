@@ -397,8 +397,10 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 
 ### Next: after TestFlight testing (required before the App Store)
 
-- ~~**App icon.**~~ Lotl (blazing, in sunglasses) on flame orange, rendered from
-  `website/img/lotl-blazing.svg`; the splash is happy Lotl (`assets/images/`).
+- ~~**App icon.**~~ Lotl's head (blazing, in sunglasses) on near-black with a flame-orange
+  glow; the source is `assets/icon-src/icon.svg` (built from `website/img/lotl-blazing.svg`).
+  v1.0 used the whole Lotl on flame orange, which was hard to make out at home-screen size.
+  The splash is happy Lotl (`assets/images/`).
 - ~~**In-app account deletion**~~ (App Store guideline 5.1.1(v)): "Delete account" on the Me
   tab removes the user's files from storage, then `delete_my_account()` deletes the auth user and
   cascades their data. Still to do: revoke the Sign in with Apple token on deletion (Apple asks

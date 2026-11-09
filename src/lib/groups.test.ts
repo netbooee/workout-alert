@@ -1,6 +1,15 @@
 import { describe, expect, it } from 'vitest';
 
-import { crownHolder, groupCodeFromUrl, groupInviteMessage, madeIt, squadLine, squadNeed } from './groups';
+import {
+  crownHolder,
+  groupCodeFromUrl,
+  groupInviteMessage,
+  madeIt,
+  podium,
+  showPodium,
+  squadLine,
+  squadNeed,
+} from './groups';
 
 describe('squadNeed', () => {
   it('needs everyone in small groups and 80% in bigger ones', () => {
@@ -49,5 +58,28 @@ describe('madeIt and squadLine', () => {
     expect(squadLine({ made: 3, need: 4, member_count: 4 })).toBe('One more goal keeps the squad streak alive');
     expect(squadLine({ made: 1, need: 4, member_count: 4 })).toBe('3 more goals keep the squad streak alive');
     expect(squadLine({ made: 0, need: 1, member_count: 1 })).toBe('Invite people to start a squad streak');
+  });
+});
+
+describe('podium', () => {
+  const row = (name: string, last_week_xp: number, is_me = false) => ({ user_id: name, name, last_week_xp, is_me });
+
+  it('matches the Sunday push: shared medals on ties, XP earners only', () => {
+    const rows = [row('Drew', 100), row('Eli', 0), row('Blair', 300), row('Fay', 50), row('Alex', 300, true), row('Casey', 200)];
+    expect(podium(rows).map((p) => [p.name, p.medal, p.xp])).toEqual([
+      ['Alex', 0, 300],
+      ['Blair', 0, 300],
+      ['Casey', 1, 200],
+      ['Drew', 2, 100],
+    ]);
+  });
+
+  it('is empty when nobody earned XP, and short when few did', () => {
+    expect(podium([row('A', 0), row('B', 0)])).toEqual([]);
+    expect(podium([row('A', 40), row('B', 0)]).map((p) => p.name)).toEqual(['A']);
+  });
+
+  it('shows on Sunday and Monday only', () => {
+    expect([8, 9, 10, 14].map((d) => showPodium(new Date(2026, 10, d)))).toEqual([true, true, false, false]);
   });
 });

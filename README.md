@@ -260,6 +260,14 @@ buddy** in the mood that matches your week.
   - To keep it fair, hand-logged workouts without a photo count half in public leagues.
   - Anyone in your group can be reported. Reports land in `league_reports`.
   - Groups close hourly once the week is over everywhere (`close_league_weeks`, via pg_cron).
+- **Private groups** (up to 20 people, 3 groups each): a weekly XP leaderboard and a squad
+  streak (`20261102000000_groups.sql`). **Weekly podium**: on Sunday at 9am in each member's
+  time zone, groups of 2+ send everyone last week's 🥇🥈🥉 by XP (`send_group_podiums`, hourly
+  via pg_cron). Only people who earned XP place; ties share a medal and the next amount takes
+  the next one. Medalists get "🥈 You took silver in …"; everyone else gets the podium plus their
+  own place, and nobody is named for coming last. Groups of 2 get a head-to-head line, and a
+  group where nobody earned XP gets nothing. No bonus XP. The group screen shows a "Last week's
+  podium" card on Sunday and Monday (`podium()` in `src/lib/groups.ts`, same rule).
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
 - A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo),

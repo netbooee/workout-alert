@@ -56,3 +56,38 @@ export function squadLine(g: Pick<MyGroup, 'made' | 'need' | 'member_count'>): s
   const left = g.need - g.made;
   return left === 1 ? 'One more goal keeps the squad streak alive' : `${left} more goals keep the squad streak alive`;
 }
+
+export interface PodiumPlace {
+  user_id: string;
+  name: string;
+  xp: number;
+  /** 0 = 🥇, 1 = 🥈, 2 = 🥉 (an index into MEDALS). */
+  medal: number;
+  is_me: boolean;
+}
+
+/**
+ * Last week's medalists, as in the Sunday podium push (send_group_podiums):
+ * only people who earned XP place, ties share a medal, and the next amount
+ * down takes the next medal (300, 300, 200 → 🥇🥇🥈). You come first in a tie.
+ */
+export function podium(
+  rows: readonly Pick<GroupMemberRow, 'user_id' | 'name' | 'last_week_xp' | 'is_me'>[],
+): PodiumPlace[] {
+  const amounts = [...new Set(rows.map((r) => r.last_week_xp).filter((xp) => xp > 0))].sort((a, b) => b - a);
+  return rows
+    .filter((r) => r.last_week_xp > 0 && amounts.indexOf(r.last_week_xp) < 3)
+    .map((r) => ({
+      user_id: r.user_id,
+      name: r.name,
+      xp: r.last_week_xp,
+      medal: amounts.indexOf(r.last_week_xp),
+      is_me: r.is_me,
+    }))
+    .sort((a, b) => a.medal - b.medal || Number(b.is_me) - Number(a.is_me) || a.name.localeCompare(b.name));
+}
+
+/** The podium card shows on Sunday and Monday, while last week is still news. */
+export function showPodium(now: Date): boolean {
+  return now.getDay() <= 1;
+}

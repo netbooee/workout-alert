@@ -10,7 +10,7 @@ import { useSafetyMenu } from '@/hooks/use-safety';
 import { useGroupBoard, useLeaveGroup, useMyGroups, useRemoveGroupMember, useUpdateGroup } from '@/hooks/use-groups';
 import type { GroupMemberRow, MyGroup } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
-import { crownHolder, groupInviteMessage, madeIt, squadLine } from '@/lib/groups';
+import { crownHolder, groupInviteMessage, madeIt, podium, showPodium, squadLine } from '@/lib/groups';
 import { MEDALS } from '@/lib/leagues';
 
 type Tab = 'board' | 'squad';
@@ -119,6 +119,7 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
 
   return (
     <>
+      {showPodium(new Date()) && <LastWeekPodium rows={rows} />}
       <SectionLabel>This week’s XP</SectionLabel>
       <Card style={{ gap: 2, paddingHorizontal: Spacing.sm }}>
         {rows.map((r, i) => (
@@ -159,6 +160,36 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
           ? ' Press and hold someone to remove, report or block them.'
           : ' Press and hold someone to report or block them.'}
       </AppText>
+    </>
+  );
+}
+
+/** Last week's medalists, shown on Sunday and Monday (the same podium as the Sunday push). */
+function LastWeekPodium({ rows }: { rows: GroupMemberRow[] }) {
+  const places = podium(rows);
+  if (rows.length < 2 || places.length === 0) return null;
+  const avatar = (id: string) => rows.find((r) => r.user_id === id)?.avatar_url ?? null;
+  return (
+    <>
+      <SectionLabel>Last week’s podium</SectionLabel>
+      <Card style={[{ gap: 2, paddingHorizontal: Spacing.sm }, styles.podium]}>
+        {places.map((p) => (
+          <View
+            key={p.user_id}
+            accessible
+            accessibilityLabel={`${['Gold', 'Silver', 'Bronze'][p.medal]}: ${p.is_me ? 'you' : p.name}, ${p.xp} XP`}
+            style={[styles.row, p.is_me && styles.meRow]}>
+            <AppText style={[styles.rank, { fontSize: 22, lineHeight: 28 }]}>{MEDALS[p.medal]}</AppText>
+            <Avatar id={p.user_id} name={p.name} size={36} photoPath={avatar(p.user_id)} />
+            <AppText variant="heading" numberOfLines={1} style={{ flex: 1 }}>
+              {p.is_me ? `${p.name} (you)` : p.name}
+            </AppText>
+            <AppText variant="heading" color={Colors.xp} style={{ fontVariant: ['tabular-nums'] }}>
+              {p.xp} XP
+            </AppText>
+          </View>
+        ))}
+      </Card>
     </>
   );
 }
@@ -299,6 +330,7 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
   },
   meRow: { backgroundColor: Colors.flameSoft },
+  podium: { borderWidth: 1, borderColor: Colors.xpSoft },
   rank: { width: 28, textAlign: 'center', fontSize: 16, lineHeight: 22, fontWeight: '800', color: Colors.textSecondary },
   note: { marginHorizontal: Spacing.xs },
   squadHero: { alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.lg },

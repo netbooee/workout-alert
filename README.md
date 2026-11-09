@@ -407,13 +407,11 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   for this; it needs a server-side call with the app's client secret), and update
   `website/privacy/` and `website/support/`, which say "email us" and "coming soon", once a
   build with deletion is out.
-- **Make level progress easier to read.** The badge number (e.g. "⚡ 8") barely moves now that
-  levels are 800+ XP long, so the level feels stuck even though the bar fills. In
-  `src/components/level-bar.tsx`, label it "Level 8 · Iron" (the title covers levels 8–11,
-  which adds to the confusion) and show what's left ("357 XP to level 9") instead of
-  "443 / 800 XP". Keep the level curve in `src/lib/levels.ts` as it is.
-- **Show this week's XP on the celebration screen** (`src/app/celebrate.tsx`), e.g. "+180 XP
-  this week", so progress is visible on days the level doesn't change.
+- ~~**Make level progress easier to read.**~~ The level bar says "Level 8 · Iron" and
+  "357 XP to level 9" (`levelLabel` / `toNextLevel` in `src/lib/levels.ts`) instead of a title
+  and "443 / 800 XP", since a title spans several levels and the badge number moves slowly.
+- ~~**This week's XP on the celebration screen**~~ ("⚡ +180 XP this week", shown once it's
+  more than what you just earned) and on How XP works. It counts from Sunday, like the league.
 
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~

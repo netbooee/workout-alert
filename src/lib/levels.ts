@@ -41,3 +41,13 @@ export function levelFor(totalXp: number): LevelInfo {
   const span = levelStart(level + 1) - levelStart(level);
   return { level, title: levelTitle(level), into, span, progress: into / span };
 }
+
+/** "Level 8 · Iron": the number and its title together, since a title spans several levels. */
+export function levelLabel(info: Pick<LevelInfo, 'level' | 'title'>): string {
+  return `Level ${info.level} · ${info.title}`;
+}
+
+/** What's left until the next level, e.g. "357 XP to level 9". */
+export function toNextLevel(info: Pick<LevelInfo, 'level' | 'into' | 'span'>): string {
+  return `${(info.span - info.into).toLocaleString('en-US')} XP to level ${info.level + 1}`;
+}

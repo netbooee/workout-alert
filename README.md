@@ -268,6 +268,11 @@ buddy** in the mood that matches your week.
   own place, and nobody is named for coming last. Groups of 2 get a head-to-head line, and a
   group where nobody earned XP gets nothing. No bonus XP. The group screen shows a "Last week's
   podium" card on Sunday and Monday (`podium()` in `src/lib/groups.ts`, same rule).
+  **Medal ceremony** (`src/app/group/podium/[id].tsx`): the first time you open a group after
+  the week ends, last week's podium plays out bronze → silver → gold, each buddy dropping onto its
+  step as the medal swings in, with confetti for gold and your own line at the end. Once per group
+  and week (stored on the device, `src/lib/podium-seen.ts`); ▶ Replay on the podium card plays it
+  again. `?preview=1` shows sample results in development builds.
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
 - A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo),

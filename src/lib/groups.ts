@@ -3,6 +3,7 @@
 // native imports, so it stays unit-testable.
 
 import type { GroupMemberRow, MyGroup } from './database.types';
+import { addDays, dayKey, startOfWeek } from './week';
 
 export const MAX_GROUPS = 3;
 export const MAX_GROUP_SIZE = 20;
@@ -90,4 +91,43 @@ export function podium(
 /** The podium card shows on Sunday and Monday, while last week is still news. */
 export function showPodium(now: Date): boolean {
   return now.getDay() <= 1;
+}
+
+const MEDAL_NAMES = ['gold', 'silver', 'bronze'] as const;
+
+/** The three podium steps (🥇, 🥈, 🥉), each with whoever shares it. A step can be empty. */
+export function podiumSteps<T extends Pick<PodiumPlace, 'medal'>>(places: readonly T[]): T[][] {
+  return [0, 1, 2].map((m) => places.filter((p) => p.medal === m));
+}
+
+/** Your line at the end of the medal ceremony, in the same words as the Sunday push. */
+export function myPodiumLine(rows: readonly Pick<GroupMemberRow, 'last_week_xp' | 'is_me'>[]): string {
+  const me = rows.find((r) => r.is_me);
+  if (!me || me.last_week_xp <= 0) return 'Fresh week, fresh start. Let’s go 💪';
+  const amounts = [...new Set(rows.map((r) => r.last_week_xp).filter((xp) => xp > 0))].sort((a, b) => b - a);
+  const place = amounts.indexOf(me.last_week_xp);
+  if (place === 0) return 'You won gold! 🥇';
+  if (place < 3) return `You took ${MEDAL_NAMES[place]}! ${place === 1 ? '🥈' : '🥉'}`;
+  return `You were ${ordinal(place + 1)} with ${me.last_week_xp} XP. Fresh week, let’s go 💪`;
+}
+
+function ordinal(n: number): string {
+  const tens = n % 100;
+  if (tens >= 11 && tens <= 13) return `${n}th`;
+  return `${n}${['th', 'st', 'nd', 'rd'][n % 10] ?? 'th'}`;
+}
+
+/** Which finished week the ceremony is for: the Sunday it started, e.g. "2026-11-01". */
+export function podiumWeek(now: Date): string {
+  return dayKey(addDays(startOfWeek(now), -7));
+}
+
+/** "Nov 1 – 7" for the ceremony's subtitle. */
+export function podiumWeekLabel(now: Date): string {
+  const start = addDays(startOfWeek(now), -7);
+  const end = addDays(start, 6);
+  const month = (d: Date) => d.toLocaleDateString('en-US', { month: 'short' });
+  return start.getMonth() === end.getMonth()
+    ? `${month(start)} ${start.getDate()} – ${end.getDate()}`
+    : `${month(start)} ${start.getDate()} – ${month(end)} ${end.getDate()}`;
 }

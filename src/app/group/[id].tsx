@@ -1,16 +1,18 @@
 import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { AppText, Button, Card, Segmented, SectionLabel } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useSafetyMenu } from '@/hooks/use-safety';
+import { useAuth } from '@/lib/auth';
 import { useGroupBoard, useLeaveGroup, useMyGroups, useRemoveGroupMember, useUpdateGroup } from '@/hooks/use-groups';
 import type { GroupMemberRow, MyGroup } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
-import { crownHolder, groupInviteMessage, madeIt, podium, showPodium, squadLine } from '@/lib/groups';
+import { crownHolder, groupInviteMessage, madeIt, podium, podiumWeek, showPodium, squadLine } from '@/lib/groups';
+import { markPodiumSeen, podiumSeen } from '@/lib/podium-seen';
 import { MEDALS } from '@/lib/leagues';
 
 type Tab = 'board' | 'squad';
@@ -26,6 +28,7 @@ export default function GroupScreen() {
   const group = groups?.find((g) => g.id === id);
   const { data: rows } = useGroupBoard(id);
   const [tab, setTab] = useState<Tab>(startTab === 'squad' ? 'squad' : 'board');
+  useMedalCeremony(id, rows);
 
   if (!group) {
     return (
@@ -119,7 +122,7 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
 
   return (
     <>
-      {showPodium(new Date()) && <LastWeekPodium rows={rows} />}
+      {showPodium(new Date()) && <LastWeekPodium groupId={group.id} rows={rows} />}
       <SectionLabel>This week’s XP</SectionLabel>
       <Card style={{ gap: 2, paddingHorizontal: Spacing.sm }}>
         {rows.map((r, i) => (
@@ -164,14 +167,53 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
   );
 }
 
+/**
+ * The medal ceremony plays once per group and finished week: the first time you
+ * open the group after the week ends, if anyone earned XP last week.
+ */
+function useMedalCeremony(groupId: string, rows: GroupMemberRow[] | undefined) {
+  const userId = useAuth().session?.user.id;
+  const hasPodium = !!rows && rows.length >= 2 && podium(rows).length > 0;
+  useEffect(() => {
+    if (!userId || !hasPodium) return;
+    const week = podiumWeek(new Date());
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    podiumSeen(userId, groupId, week).then((seen) => {
+      if (seen || cancelled) return;
+      // A beat after the group screen appears, so the ceremony reads as its own moment.
+      timer = setTimeout(() => {
+        markPodiumSeen(userId, groupId, week);
+        router.push({ pathname: '/group/podium/[id]', params: { id: groupId } });
+      }, 400);
+    });
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [userId, groupId, hasPodium]);
+}
+
 /** Last week's medalists, shown on Sunday and Monday (the same podium as the Sunday push). */
-function LastWeekPodium({ rows }: { rows: GroupMemberRow[] }) {
+function LastWeekPodium({ groupId, rows }: { groupId: string; rows: GroupMemberRow[] }) {
   const places = podium(rows);
   if (rows.length < 2 || places.length === 0) return null;
   const avatar = (id: string) => rows.find((r) => r.user_id === id)?.avatar_url ?? null;
   return (
     <>
-      <SectionLabel>Last week’s podium</SectionLabel>
+      <View style={styles.podiumHeader}>
+        <SectionLabel>Last week’s podium</SectionLabel>
+        <Pressable
+          onPress={() => router.push({ pathname: '/group/podium/[id]', params: { id: groupId } })}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Replay the medal ceremony"
+          style={{ marginTop: Spacing.sm }}>
+          <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+            ▶ Replay
+          </AppText>
+        </Pressable>
+      </View>
       <Card style={[{ gap: 2, paddingHorizontal: Spacing.sm }, styles.podium]}>
         {places.map((p) => (
           <View
@@ -331,6 +373,7 @@ const styles = StyleSheet.create({
   },
   meRow: { backgroundColor: Colors.flameSoft },
   podium: { borderWidth: 1, borderColor: Colors.xpSoft },
+  podiumHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: Spacing.xs },
   rank: { width: 28, textAlign: 'center', fontSize: 16, lineHeight: 22, fontWeight: '800', color: Colors.textSecondary },
   note: { marginHorizontal: Spacing.xs },
   squadHero: { alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.lg },

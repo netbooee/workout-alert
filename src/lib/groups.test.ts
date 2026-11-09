@@ -5,7 +5,11 @@ import {
   groupCodeFromUrl,
   groupInviteMessage,
   madeIt,
+  myPodiumLine,
   podium,
+  podiumSteps,
+  podiumWeek,
+  podiumWeekLabel,
   showPodium,
   squadLine,
   squadNeed,
@@ -81,5 +85,33 @@ describe('podium', () => {
 
   it('shows on Sunday and Monday only', () => {
     expect([8, 9, 10, 14].map((d) => showPodium(new Date(2026, 10, d)))).toEqual([true, true, false, false]);
+  });
+});
+
+describe('medal ceremony', () => {
+  const row = (name: string, last_week_xp: number, is_me = false) => ({ user_id: name, name, last_week_xp, is_me });
+  const rows = [row('Alex', 300), row('Blair', 300), row('Casey', 200), row('Drew', 100), row('Fay', 50), row('Eli', 0)];
+  const as = (name: string) => rows.map((r) => ({ ...r, is_me: r.name === name }));
+
+  it('puts everyone on their step, ties together', () => {
+    expect(podiumSteps(podium(rows)).map((s) => s.map((p) => p.name))).toEqual([['Alex', 'Blair'], ['Casey'], ['Drew']]);
+    expect(podiumSteps(podium([row('A', 10), row('B', 0)])).map((s) => s.length)).toEqual([1, 0, 0]);
+  });
+
+  it('ends with your own line', () => {
+    expect(myPodiumLine(as('Blair'))).toBe('You won gold! 🥇');
+    expect(myPodiumLine(as('Casey'))).toBe('You took silver! 🥈');
+    expect(myPodiumLine(as('Drew'))).toBe('You took bronze! 🥉');
+    expect(myPodiumLine(as('Fay'))).toBe('You were 4th with 50 XP. Fresh week, let’s go 💪');
+    expect(myPodiumLine(as('Eli'))).toBe('Fresh week, fresh start. Let’s go 💪');
+  });
+
+  it('is about the week that just ended', () => {
+    expect(podiumWeek(new Date(2026, 10, 8, 9))).toBe('2026-11-01');
+    expect(podiumWeek(new Date(2026, 10, 14, 23))).toBe('2026-11-01');
+    expect(podiumWeekLabel(new Date(2026, 10, 9))).toBe('Nov 1 – 7');
+    expect(podiumWeekLabel(new Date(2026, 10, 3))).toBe('Oct 25 – 31');
+    expect(podiumWeekLabel(new Date(2026, 11, 2))).toBe('Nov 22 – 28');
+    expect(podiumWeekLabel(new Date(2026, 11, 7))).toBe('Nov 29 – Dec 5');
   });
 });

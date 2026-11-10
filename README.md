@@ -66,9 +66,11 @@ they're consistent across devices and can't be edited by the client.
   thumbnail opens the photos full screen (swipe, pinch to zoom, save).
 - **Partners tab** order: requests, workouts to cheer, your partners, partner activity, then
   the league (only with 2+ partners) and the incentive intro. **Your partners** are one "This
-  week" card (`PartnerList` in `src/components/partner-card.tsx`): a row of buddies you scroll
-  sideways, each inside a ring that fills with their week (green once the goal is hit), with
-  "1/3 · 🔥 2" (days, friend streak) and Nudge and Challenge under it, then a dashed **Add** tile.
+  week" card (`PartnerList` in `src/components/partner-card.tsx`): a grid of buddies, three
+  across, each inside a ring that fills with their week (green once the goal is hit), with
+  "1/3 · 🔥 2" (days, friend streak), Challenge, and Nudge while it can help, then a dashed **Add**
+  tile. Whoever needs a nudge comes first, then partners already nudged, resting, and done
+  (`orderPartners` in `src/lib/partner-order.ts`), so nobody who needs you is out of view.
   Challenges with each partner are listed under the row. Tapping a partner's buddy opens
   their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,
   Incentive, anything going on between you, and their recent workouts.

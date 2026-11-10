@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState, type ReactNode } from 'react';
-import { Alert, LayoutAnimation, Pressable, ScrollView, StyleSheet, View } from 'react-native';
+import { Alert, LayoutAnimation, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Mascot } from '@/components/mascots';
@@ -16,16 +16,19 @@ import { friendlyError } from '@/lib/errors';
 import { goalOption, isOpen, progressFraction, timeLeft } from '@/lib/incentives';
 import { partnerMood } from '@/lib/lotl';
 import { MASCOTS, mascotKind } from '@/lib/mascots';
+import { orderPartners } from '@/lib/partner-order';
 
-/** A tile is this wide, so three fit on a phone and the next one peeks in at the edge. */
-const TILE_WIDTH = 92;
+/** Three tiles across; the screen and the card each have Spacing.md padding on both sides. */
+const COLUMNS = 3;
+const TILE_GAP = 10;
 const RING = 84;
 const RING_STROKE = 6;
 
 /**
- * Your partners as one row of buddies you scroll sideways, each inside a ring
- * that fills with their week, with Nudge and Challenge under it, then an Add
- * tile. Challenges between you and a partner are listed under the row.
+ * Your partners as a grid of buddies, three across, each inside a ring that
+ * fills with their week, with Nudge and Challenge under it, then an Add tile.
+ * Whoever needs a nudge comes first, so nobody who needs you is hidden.
+ * Challenges between you and a partner are listed under the grid.
  */
 export function PartnerList({ partners }: { partners: PartnerState[] }) {
   // Every challenge between you and each partner that's still going, or earned and waiting to be delivered.
@@ -35,21 +38,20 @@ export function PartnerList({ partners }: { partners: PartnerState[] }) {
       (i) => (i.to_id === p.partner_id || i.from_id === p.partner_id) && (isOpen(i) || i.status === 'earned'),
     );
   const canChallenge = (p: PartnerState) => !given.some((i) => i.to_id === p.partner_id && isOpen(i));
+  const ordered = orderPartners(partners);
+  const { width } = useWindowDimensions();
+  const tileWidth = Math.floor((width - Spacing.md * 4 - TILE_GAP * (COLUMNS - 1)) / COLUMNS);
 
   return (
     <Card style={{ gap: Spacing.md }}>
       <AppText variant="label">This week</AppText>
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.strip}
-        contentContainerStyle={styles.stripContent}>
-        {partners.map((p) => (
-          <PartnerTile key={p.partnership_id} partner={p} canChallenge={canChallenge(p)} />
+      <View style={styles.grid}>
+        {ordered.map((p) => (
+          <PartnerTile key={p.partnership_id} partner={p} canChallenge={canChallenge(p)} width={tileWidth} />
         ))}
-        <AddTile />
-      </ScrollView>
-      {partners.map((p) => {
+        <AddTile width={tileWidth} />
+      </View>
+      {ordered.map((p) => {
         const challenges = challengesWith(p);
         const firstName = p.display_name?.split(' ')[0] ?? '';
         return challenges.length > 0 ? (
@@ -60,7 +62,15 @@ export function PartnerList({ partners }: { partners: PartnerState[] }) {
   );
 }
 
-function PartnerTile({ partner, canChallenge }: { partner: PartnerState; canChallenge: boolean }) {
+function PartnerTile({
+  partner,
+  canChallenge,
+  width,
+}: {
+  partner: PartnerState;
+  canChallenge: boolean;
+  width: number;
+}) {
   const nudge = useNudge();
   const remove = useRemovePartner();
   const done = partner.this_week_days >= partner.this_week_goal;
@@ -87,7 +97,7 @@ function PartnerTile({ partner, canChallenge }: { partner: PartnerState; canChal
     ]);
 
   return (
-    <View style={styles.tile}>
+    <View style={[styles.tile, { width }]}>
       <Pressable
         onPress={() => router.push({ pathname: '/partner/[id]', params: { id: partner.partner_id } })}
         onLongPress={confirmRemove}
@@ -117,27 +127,6 @@ function PartnerTile({ partner, canChallenge }: { partner: PartnerState; canChal
         </AppText>
       </Pressable>
       <View style={styles.tileActions}>
-        {/* The Nudge slot stays even when it's empty, so every tile's Challenge lines up. */}
-        {done || partner.resting ? (
-          <View style={styles.mini} />
-        ) : (
-          <Pressable
-            disabled={recentlyNudged || nudge.isPending}
-            onPress={() => {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              nudge.mutate(partner.partner_id, {
-                onError: (e) => Alert.alert('Couldn’t nudge', friendlyError(e)),
-              });
-            }}
-            hitSlop={4}
-            accessibilityRole="button"
-            accessibilityLabel={recentlyNudged ? `Nudged ${firstName}` : `Nudge ${firstName}`}
-            style={[styles.mini, styles.miniFilled, recentlyNudged && { opacity: 0.5 }]}>
-            <AppText variant="heading" style={styles.miniText} numberOfLines={1}>
-              {recentlyNudged ? 'Nudged 👋' : '👋 Nudge'}
-            </AppText>
-          </Pressable>
-        )}
         {canChallenge ? (
           <Pressable
             onPress={() => {
@@ -159,7 +148,27 @@ function PartnerTile({ partner, canChallenge }: { partner: PartnerState; canChal
             </AppText>
           </Pressable>
         ) : (
+          // An open challenge already exists: keep the space so the tiles in a row line up.
           <View style={styles.mini} />
+        )}
+        {/* Nudge only when it can help; it sits under Challenge so Challenge lines up across a row. */}
+        {!done && !partner.resting && (
+          <Pressable
+            disabled={recentlyNudged || nudge.isPending}
+            onPress={() => {
+              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+              nudge.mutate(partner.partner_id, {
+                onError: (e) => Alert.alert('Couldn’t nudge', friendlyError(e)),
+              });
+            }}
+            hitSlop={4}
+            accessibilityRole="button"
+            accessibilityLabel={recentlyNudged ? `Nudged ${firstName}` : `Nudge ${firstName}`}
+            style={[styles.mini, styles.miniFilled, recentlyNudged && { opacity: 0.5 }]}>
+            <AppText variant="heading" style={styles.miniText} numberOfLines={1}>
+              {recentlyNudged ? 'Nudged 👋' : '👋 Nudge'}
+            </AppText>
+          </Pressable>
         )}
       </View>
     </View>
@@ -194,14 +203,14 @@ function WeekRing({ progress, done, children }: { progress: number; done: boolea
 }
 
 /** The last tile: a dashed ring that adds a partner. */
-function AddTile() {
+function AddTile({ width }: { width: number }) {
   return (
     <Pressable
       onPress={() => router.push('/add-partner')}
       accessibilityRole="button"
       accessibilityLabel="Add a partner"
       accessibilityHint="Plus 100 XP for you both when a new friend joins and works out"
-      style={({ pressed }) => [styles.tile, pressed && { opacity: 0.7 }]}>
+      style={({ pressed }) => [styles.tile, { width }, pressed && { opacity: 0.7 }]}>
       <View style={styles.addRing}>
         <SymbolView name="plus" size={26} weight="semibold" tintColor={Colors.flame} />
       </View>
@@ -292,10 +301,8 @@ function ChallengeRow({ incentive: i, firstName, nested = false }: { incentive: 
 }
 
 const styles = StyleSheet.create({
-  // The row runs to the card's edges so the next tile peeks in.
-  strip: { marginHorizontal: -Spacing.md },
-  stripContent: { paddingHorizontal: Spacing.md, gap: 10 },
-  tile: { width: TILE_WIDTH, alignItems: 'center', gap: 2 },
+  grid: { flexDirection: 'row', flexWrap: 'wrap', columnGap: TILE_GAP, rowGap: Spacing.md },
+  tile: { alignItems: 'center', gap: 2 },
   tileTop: { alignItems: 'center', gap: 2 },
   ring: { width: RING, height: RING, alignItems: 'center', justifyContent: 'center' },
   addRing: {

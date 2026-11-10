@@ -7,12 +7,14 @@ import { Avatar } from '@/components/avatar';
 import { AppText, Button, Card, Segmented, SectionLabel } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useSafetyMenu } from '@/hooks/use-safety';
+import { useXpThisWeekByKind } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import { useGroupBoard, useLeaveGroup, useMyGroups, useRemoveGroupMember, useUpdateGroup } from '@/hooks/use-groups';
 import type { GroupMemberRow, MyGroup } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
-import { crownHolder, groupInviteMessage, madeIt, podium, podiumWeek, showPodium, squadLine } from '@/lib/groups';
+import { climbLine, crownHolder, groupInviteMessage, madeIt, podium, podiumWeek, showPodium, squadLine } from '@/lib/groups';
 import { markPodiumSeen, podiumSeen } from '@/lib/podium-seen';
+import { XP_RULES, xpBreakdown } from '@/lib/xp-rules';
 import { MEDALS } from '@/lib/leagues';
 
 type Tab = 'board' | 'squad';
@@ -163,7 +165,81 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
           ? ' Press and hold someone to remove, report or block them.'
           : ' Press and hold someone to report or block them.'}
       </AppText>
+      <HowToEarn rows={rows} />
     </>
+  );
+}
+
+/**
+ * What gets you XP on this board: your own XP this week by source, the gap to
+ * the next person up, and (tap to open) every way to earn it.
+ */
+function HowToEarn({ rows }: { rows: GroupMemberRow[] }) {
+  const { data: byKind } = useXpThisWeekByKind();
+  const [open, setOpen] = useState(false);
+  const mine = xpBreakdown(byKind ?? {});
+  const total = mine.reduce((sum, k) => sum + k.xp, 0);
+  const climb = climbLine(rows);
+
+  return (
+    <Card style={{ gap: Spacing.sm }}>
+      <Pressable
+        onPress={() => setOpen((o) => !o)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityHint="Shows what earns XP on this board"
+        style={styles.earnHeader}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <AppText variant="heading">⚡ How to earn XP</AppText>
+          {climb && <AppText variant="caption">{climb}</AppText>}
+        </View>
+        <AppText variant="heading" color={Colors.textSecondary}>
+          {open ? '−' : '+'}
+        </AppText>
+      </Pressable>
+
+      {mine.length > 0 && (
+        <View style={styles.chips}>
+          {mine.map((k) => (
+            <View key={k.kind} style={styles.chip}>
+              <AppText variant="caption" color={Colors.text}>
+                {k.emoji} {k.label} {k.xp}
+              </AppText>
+            </View>
+          ))}
+        </View>
+      )}
+      <AppText variant="caption">
+        {total > 0
+          ? `Your ${total} XP this week, by what earned it.`
+          : 'No XP yet this week. A workout is the quickest way onto the board.'}
+      </AppText>
+
+      {open && (
+        <View style={{ gap: Spacing.sm, marginTop: Spacing.xs }}>
+          {XP_RULES.map((r) => (
+            <View key={r.what} style={styles.earnRow}>
+              <AppText style={{ width: 24, textAlign: 'center' }}>{r.emoji}</AppText>
+              <AppText variant="body" style={{ flex: 1 }}>
+                {r.what}
+              </AppText>
+              <AppText variant="heading" color={Colors.xp}>
+                {r.xp}
+              </AppText>
+            </View>
+          ))}
+          <AppText variant="caption">
+            It’s your own XP, so the same points count in every group you’re in and in the weekly league. The squad
+            streak is separate: it only needs everyone to hit their own weekly goal.
+          </AppText>
+          <Pressable onPress={() => router.push('/xp')} hitSlop={8} accessibilityRole="button">
+            <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+              More on XP and levels →
+            </AppText>
+          </Pressable>
+        </View>
+      )}
+    </Card>
   );
 }
 
@@ -373,6 +449,15 @@ const styles = StyleSheet.create({
   },
   meRow: { backgroundColor: Colors.flameSoft },
   podium: { borderWidth: 1, borderColor: Colors.xpSoft },
+  earnHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  earnRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs },
+  chip: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.xpSoft,
+  },
   podiumHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: Spacing.xs },
   rank: { width: 28, textAlign: 'center', fontSize: 16, lineHeight: 22, fontWeight: '800', color: Colors.textSecondary },
   note: { marginHorizontal: Spacing.xs },

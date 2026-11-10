@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 
 import {
+  climbLine,
   crownHolder,
   groupCodeFromUrl,
   groupInviteMessage,
@@ -113,5 +114,25 @@ describe('medal ceremony', () => {
     expect(podiumWeekLabel(new Date(2026, 10, 3))).toBe('Oct 25 – 31');
     expect(podiumWeekLabel(new Date(2026, 11, 2))).toBe('Nov 22 – 28');
     expect(podiumWeekLabel(new Date(2026, 11, 7))).toBe('Nov 29 – Dec 5');
+  });
+});
+
+describe('climbLine', () => {
+  const row = (name: string, xp: number, is_me = false) => ({ name, xp, is_me });
+
+  it('shows the gap to the next person up', () => {
+    expect(climbLine([row('Maria', 300), row('Sam', 200), row('Alex', 150, true)])).toBe('50 XP to pass Sam');
+  });
+
+  it('celebrates the lead and calls a tie', () => {
+    expect(climbLine([row('Alex', 300, true), row('Maria', 215)])).toBe('You’re in the lead by 85 XP 🥇');
+    expect(climbLine([row('Alex', 300, true), row('Maria', 300)])).toBe('You’re tied for first. One more workout breaks it.');
+  });
+
+  it('invites the first move on an empty board, and says nothing alone', () => {
+    expect(climbLine([row('Alex', 0, true), row('Maria', 0)])).toBe(
+      'Nobody’s on the board yet. Your first workout takes the lead.',
+    );
+    expect(climbLine([row('Alex', 40, true)])).toBeNull();
   });
 });

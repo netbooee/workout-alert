@@ -131,3 +131,17 @@ export function podiumWeekLabel(now: Date): string {
     ? `${month(start)} ${start.getDate()} – ${end.getDate()}`
     : `${month(start)} ${start.getDate()} – ${month(end)} ${end.getDate()}`;
 }
+
+/** Where you stand on this week's board, as a nudge: the lead, a tie, or the gap to the next person up. */
+export function climbLine(rows: readonly Pick<GroupMemberRow, 'name' | 'xp' | 'is_me'>[]): string | null {
+  const me = rows.find((r) => r.is_me);
+  if (!me || rows.length < 2) return null;
+  const others = rows.filter((r) => !r.is_me);
+  const best = Math.max(...others.map((r) => r.xp));
+  if (me.xp === 0 && best === 0) return 'Nobody’s on the board yet. Your first workout takes the lead.';
+  if (me.xp > best) return `You’re in the lead by ${me.xp - best} XP 🥇`;
+  if (me.xp === best) return 'You’re tied for first. One more workout breaks it.';
+  // The closest person ahead of you.
+  const ahead = others.filter((r) => r.xp > me.xp).sort((a, b) => a.xp - b.xp || a.name.localeCompare(b.name))[0]!;
+  return `${ahead.xp - me.xp} XP to pass ${ahead.name}`;
+}

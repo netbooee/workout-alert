@@ -273,6 +273,10 @@ buddy** in the mood that matches your week.
   step as the medal swings in, with confetti for gold and your own line at the end. Once per group
   and week (stored on the device, `src/lib/podium-seen.ts`); ▶ Replay on the podium card plays it
   again. `?preview=1` shows sample results in development builds.
+  **How to earn XP** (under the leaderboard): your XP this week by source (🏃 Workouts 120 ·
+  👟 Steps 45 …, `xpBreakdown` in `src/lib/xp-rules.ts`), where you stand ("50 XP to pass Sam",
+  `climbLine` in `src/lib/groups.ts`), and, tapped open, every way to earn XP plus a note that it's
+  the same personal XP in every group and the league.
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
 - A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo),

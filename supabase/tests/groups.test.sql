@@ -4,7 +4,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(24);
+select plan(28);
 
 create function pg_temp.act_as(p_user uuid) returns void language sql as $$
   select set_config('request.jwt.claims', json_build_object('sub', p_user)::text, true);
@@ -73,6 +73,25 @@ select is((select count(*)::int from public.workouts where user_id = '00000000-0
 select throws_ok(
   $$ select public.remove_group_member((select id from g), '00000000-0000-0000-0000-00000000000c') $$,
   '42501', null, 'only the owner can remove people');
+
+-- ─── Renaming ────────────────────────────────────────────────────────────────
+
+-- Still Blair, a member.
+select throws_ok(
+  $$ select public.update_group((select id from g), 'Blair''s Gym', '💪') $$,
+  '42501', null, 'only the owner can rename the group or change its emoji');
+-- Row level security has no update policy, so a direct edit quietly changes nothing.
+update public.groups set name = 'Blair''s Gym' where id = (select id from g);
+select is((select name from public.groups where id = (select id from g)), 'Gym Rats',
+  'and editing the groups table directly changes nothing');
+
+select pg_temp.act_as('00000000-0000-0000-0000-00000000000a');
+select is(
+  (select name || ' ' || emoji from public.update_group((select id from g), '  Gym Crew ', '💪')),
+  'Gym Crew 💪', 'the owner can rename it (trimmed) and change its emoji');
+select throws_ok(
+  $$ select public.update_group((select id from g), 'x', '💪') $$,
+  'P0001', null, 'a new name still needs 2 to 30 characters');
 
 -- ─── Squad streak ────────────────────────────────────────────────────────────
 

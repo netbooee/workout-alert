@@ -64,8 +64,12 @@ they're consistent across devices and can't be edited by the client.
   with a "+N" badge, or the workout's icon), three single lines (who and what; duration,
   heart rate and when; the note or where it was recorded), then Cheer and Verify. Tapping the
   thumbnail opens the photos full screen (swipe, pinch to zoom, save).
-- **Partners tab** order: requests, workouts to cheer, partner cards, partner activity, then
-  the league (only with 2+ partners) and the incentive intro. Tapping a partner card opens
+- **Partners tab** order: requests, workouts to cheer, your partners, partner activity, then
+  the league (only with 2+ partners) and the incentive intro. **Your partners** are one "This
+  week" card (`PartnerList` in `src/components/partner-card.tsx`): a row of buddies you scroll
+  sideways, each inside a ring that fills with their week (green once the goal is hit), with
+  "1/3 · 🔥 2" (days, friend streak) and Nudge and Challenge under it, then a dashed **Add** tile.
+  Challenges with each partner are listed under the row. Tapping a partner's buddy opens
   their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,
   Incentive, anything going on between you, and their recent workouts.
 - **Delete** a hand-logged workout from its detail screen (its photos, reactions, and XP go
@@ -75,7 +79,7 @@ they're consistent across devices and can't be edited by the client.
   your partners; the workout owner sees them all and can reply. Long-press a comment to delete
   it (your own, or any on your workout).
 - **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
-- Long-press a partner card to remove them.
+- Long-press a partner's buddy to remove them.
 
 ## Progress
 
@@ -122,8 +126,8 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
 - An active incentive shows as a **quest card** (like Duolingo's Friends Quest,
   `src/components/quest-progress.tsx`): the count, one pip per day or workout (a bar for
   minutes), what's left and the days remaining, with the next action on the card: **Log a
-  workout** for the recipient on Home, **Nudge** for the giver. The giver's partner card shows
-  the same progress. The nudge banner also has **Log a workout**.
+  workout** for the recipient on Home, **Nudge** for the giver. The challenge row under the
+  giver's partner list shows the same progress. The nudge banner also has **Log a workout**.
 - **Do it together** (shared quests; the **Do it together** switch on the challenge screen) work like Duolingo's Friends
   Quest: both partners' workouts count toward one goal ("8 workout days between us this week →
   🍕 Pizza night together"). Workout days, workouts or minutes, with targets up to twice as high;
@@ -156,7 +160,7 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   same six moods with the same signature on the face (sunglasses, ^ ^ eyes, sweatband,
   sweat drop, gritted teeth, sleep bubble); ears and arms stand in for Lotl's gills. Each
   has its own voice mixed into the shared greeting lines.
-- **Partners see your buddy** on your partner card, in a mood that matches your week
+- **Partners see your buddy** in your partners' list, in a mood that matches your week
   (never fired up; asleep in rest mode, which is only shared once you're partners).
 - Drawings live in `src/components/mascots/` (shared face and motion, one file per animal).
 
@@ -286,7 +290,7 @@ buddy** in the mood that matches your week.
 - Tapping the streak card on Home opens the **streak screen**. **Personal**: next milestone,
   freezes banked and how they're earned, and week-by-week history linking to each week.
   **Friends**: a friend streak row per partner ("🔥 12 weeks together"), open "Invite a friend"
-  slots, and **Edit** to remove a partner. The "wk together" badge on a partner card opens it.
+  slots, and **Edit** to remove a partner. The "🔥 2" friend streak under a partner's buddy opens it.
 - **Verifying** doesn't change streaks: every 15+ minute workout counts, verified or not. It
   earns XP on both sides, and "verified only" incentives count hand-logged workouts only once a
   partner verifies them. Removing a ✅ takes its XP back.
@@ -307,7 +311,7 @@ src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
   onboarding.tsx         Buddy, name (if missing), goal, Apple Health, notifications, invite a partner
   (tabs)/index.tsx       Home: streak + week dots, rings, 8-week trend, recent workouts
-  (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
+  (tabs)/partners.tsx    League, your partners, requests, partner activity feed
   league.tsx             Public leagues (join, group table, results) and the partner league
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code
   week/[start].tsx       One week from the progress chart: totals and workouts by day

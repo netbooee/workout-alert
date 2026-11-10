@@ -110,7 +110,7 @@ export default function CelebrateScreen() {
           </AppText>
           {uncounted && (
             <AppText variant="caption" style={{ textAlign: 'center', maxWidth: 300 }}>
-              This one is under your What counts bar, so it won’t fill a day this week. The XP is still yours.
+              This one is under your What counts bar, so it won’t fill a day this week or earn XP. It’s still saved in your history.
             </AppText>
           )}
         </Animated.View>

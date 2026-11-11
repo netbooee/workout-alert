@@ -10,6 +10,7 @@ import { useStreakMonth } from '@/hooks/use-home-data';
 import { monthGrid, monthSpan, monthStats, workoutRuns, type WeekStatus } from '@/lib/streak-calendar';
 import { dayKey } from '@/lib/week';
 import { formatDuration, workoutLabel } from '@/lib/workout-types';
+import { treats } from '@/lib/treats';
 
 const WEEKDAYS = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
 /** How far back the arrows go. */
@@ -76,7 +77,7 @@ export function StreakCalendar() {
 
       <View style={styles.tiles}>
         <Tile emoji="🔥" value={stats.daysWorked} label="Days worked out" badge={stats.perfect ? 'PERFECT' : undefined} />
-        <Tile emoji="⚡" value={monthXp} label="XP earned" />
+        <Tile emoji="⚡" value={monthXp} label="treats earned" />
         <Tile emoji="❄️" value={stats.freezesUsed} label="Freezes used" />
       </View>
 
@@ -159,7 +160,7 @@ export function StreakCalendar() {
             </AppText>
             <View style={styles.xpChip}>
               <AppText variant="caption" color={Colors.text} style={{ fontWeight: '700' }}>
-                ⚡ {data?.xpByDay[selected] ?? 0} XP
+                ⚡ {treats(data?.xpByDay[selected] ?? 0)}
               </AppText>
             </View>
           </View>

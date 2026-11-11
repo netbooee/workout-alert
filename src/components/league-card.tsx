@@ -4,6 +4,7 @@ import { Avatar } from '@/components/avatar';
 import { AppText, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import type { LeagueRow } from '@/lib/database.types';
+import { treats } from '@/lib/treats';
 
 const MEDALS = ['🥇', '🥈', '🥉'];
 
@@ -31,7 +32,7 @@ export function LeagueCard({ rows }: { rows: LeagueRow[] }) {
             {r.is_me ? 'You' : (r.display_name ?? 'Partner')}
           </AppText>
           <AppText variant="heading" color={Colors.xp}>
-            {r.xp} XP
+            {treats(r.xp)}
           </AppText>
         </View>
       ))}

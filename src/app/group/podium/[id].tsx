@@ -15,6 +15,7 @@ import { myPodiumLine, podium, podiumSteps, podiumWeekLabel, type PodiumPlace } 
 import { MEDALS } from '@/lib/leagues';
 import { mascotKind } from '@/lib/mascots';
 import { playSound } from '@/lib/sounds';
+import { treats } from '@/lib/treats';
 
 /** When each step is revealed (ms): bronze, then silver, then gold, for suspense. */
 const REVEAL_AT = [2600, 1600, 600] as const;
@@ -149,7 +150,7 @@ function Step({ medal, people }: { medal: number; people: (PodiumPlace & { masco
               {people.length > MAX_SHOWN ? ` +${people.length - MAX_SHOWN}` : ''}
             </AppText>
             <AppText variant="caption" color={Colors.xp} style={{ fontWeight: '800' }}>
-              {people[0]!.xp} XP
+              {treats(people[0]!.xp)}
             </AppText>
           </Animated.View>
         </>

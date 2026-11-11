@@ -23,7 +23,7 @@ export function todayLine({ state, weeks, freezes, workedOutToday, resting }: To
   switch (state.kind) {
     case 'done':
       return workedOutToday
-        ? 'Goal hit! Anything extra is bonus XP ⚡'
+        ? 'Goal hit! Anything extra is bonus treats ⚡'
         : 'Goal hit this week. Your streak is safe 🔥';
     case 'on-track':
     case 'at-risk': {
@@ -35,7 +35,7 @@ export function todayLine({ state, weeks, freezes, workedOutToday, resting }: To
       return `${workouts(state.needed)} this week ${goal} 🔥`;
     }
     case 'out-of-reach':
-      if (weeks === 0) return 'A fresh week starts Sunday. Workouts today still earn XP.';
+      if (weeks === 0) return 'A fresh week starts Sunday. Workouts today still earn treats.';
       return freezes > 0
         ? 'This week is out of reach, but a freeze will cover it ❄️'
         : 'This week is out of reach. Hit next week’s goal to start a new streak.';

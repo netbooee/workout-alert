@@ -161,7 +161,7 @@ export default function NewIncentiveScreen() {
         />
         <AppText variant="caption" style={{ marginTop: -Spacing.sm }}>
           {shared
-            ? `Both of your workouts count toward one goal, and you both earn the reward and +100 XP.`
+            ? `Both of your workouts count toward one goal, and you both earn the reward and +100 treats.`
             : `${firstName} works toward the goal and you treat them when they hit it.`}
         </AppText>
 
@@ -328,7 +328,7 @@ export default function NewIncentiveScreen() {
           </AppText>
           {notes.trim() ? <AppText variant="body">{notes.trim()}</AppText> : null}
           <AppText variant="caption" color={Colors.xp}>
-            {shared ? '+100 XP for both of you when you finish it' : `+100 XP for ${firstName} when they earn it`}
+            {shared ? '+100 treats for both of you when you finish it' : `+100 treats for ${firstName} when they earn it`}
           </AppText>
         </Card>
       </ScrollView>

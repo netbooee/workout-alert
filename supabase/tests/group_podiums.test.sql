@@ -81,10 +81,10 @@ select is(public.send_group_podiums((select sun_9am_utc from t)), 7,
 select is((select title from pg_temp.push('0a', (select gym from groups_t))), '🥇 You won gold in 🏋️ Gym Rats!',
   'a gold medalist hears it first');
 select is((select body from pg_temp.push('0a', (select gym from groups_t))),
-  '🥇 You 300 · 🥇 Blair 300 · 🥈 Casey 200 · 🥉 Drew 100 XP',
+  '🥇 You 300 · 🥇 Blair 300 · 🥈 Casey 200 · 🥉 Drew 100 treats',
   'ties share a medal, the next amount takes the next one, and only last week counts');
 select is((select body from pg_temp.push('0b', (select gym from groups_t))),
-  '🥇 You 300 · 🥇 Alex 300 · 🥈 Casey 200 · 🥉 Drew 100 XP',
+  '🥇 You 300 · 🥇 Alex 300 · 🥈 Casey 200 · 🥉 Drew 100 treats',
   'each person sees themselves as You, first among a tie');
 select is((select title from pg_temp.push('0c', (select gym from groups_t))), '🥈 You took silver in 🏋️ Gym Rats!',
   'silver');
@@ -93,10 +93,10 @@ select is((select title from pg_temp.push('0d', (select gym from groups_t))), '�
 select is((select title from pg_temp.push('0f', (select gym from groups_t))), '🏋️ Gym Rats: the podium is in',
   'off the podium, a neutral title');
 select is((select body from pg_temp.push('0f', (select gym from groups_t))),
-  E'🥇 Alex 300 · 🥇 Blair 300 · 🥈 Casey 200 · 🥉 Drew 100 XP\nYou were 4th with 50 XP. Fresh week, let''s go 💪',
+  E'🥇 Alex 300 · 🥇 Blair 300 · 🥈 Casey 200 · 🥉 Drew 100 treats\nYou were 4th with 50 treats. Fresh week, let''s go 💪',
   'with your own place');
 select is((select body from pg_temp.push('0e', (select gym from groups_t))),
-  E'🥇 Alex 300 · 🥇 Blair 300 · 🥈 Casey 200 · 🥉 Drew 100 XP\nFresh week, fresh start. Let''s go 💪',
+  E'🥇 Alex 300 · 🥇 Blair 300 · 🥈 Casey 200 · 🥉 Drew 100 treats\nFresh week, fresh start. Let''s go 💪',
   'no XP, no place named');
 select is((select count(*)::int from public.notifications where user_id = pg_temp.uid('01')), 0,
   'Gus turned group notifications off');
@@ -104,7 +104,7 @@ select is((select count(*)::int from public.notifications where url = '/group/' 
   'a group where nobody earned XP stays quiet');
 
 select is((select title || ' / ' || body from pg_temp.push('0a', (select duo from groups_t))),
-  '🥇 You won the week in 🤝 Duo! / 300 to 120 XP against Hana. Fresh week, let''s go 💪',
+  '🥇 You won the week in 🤝 Duo! / 300 to 120 treats against Hana. Fresh week, let''s go 💪',
   'a group of two gets a head-to-head');
 select is((select count(*)::int from public.notifications where user_id = pg_temp.uid('02')), 0,
   'it''s 1am in Los Angeles, so Hana waits');
@@ -119,7 +119,7 @@ select is(public.send_group_podiums((select sun_10am_utc from t)) + public.send_
 
 select is(public.send_group_podiums((select sun_9am_la from t)), 1, '9am in Los Angeles: Hana''s turn');
 select is((select title || ' / ' || body from pg_temp.push('02', (select duo from groups_t))),
-  '🤝 Duo: Alex won the week / 300 to 120 XP. Fresh week, let''s go 💪',
+  '🤝 Duo: Alex won the week / 300 to 120 treats. Fresh week, let''s go 💪',
   'the runner-up hears who won');
 
 select * from finish();

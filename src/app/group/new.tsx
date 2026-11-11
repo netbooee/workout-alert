@@ -93,7 +93,7 @@ export default function NewGroupScreen() {
               ))}
             </View>
             <AppText variant="caption">
-              Up to 20 people. Everyone sees each other’s first name, buddy, photo, weekly XP and days toward
+              Up to 20 people. Everyone sees each other’s first name, buddy, photo, weekly treats and days toward
               their goal. Never workouts.
             </AppText>
             <Button

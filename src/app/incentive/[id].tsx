@@ -51,8 +51,8 @@ export default function IncentiveScreen() {
             <IncentiveCard incentive={incentive} linked={false} />
             <AppText variant="caption">
               {incentive.shared
-                ? 'Both of your workouts count and progress updates automatically. Finishing it is worth +100 XP each, and either of you can mark the reward done.'
-                : 'Progress updates automatically from workouts. Earning it is worth +100 XP, and the reward itself is between the two of you.'}
+                ? 'Both of your workouts count and progress updates automatically. Finishing it is worth +100 treats each, and either of you can mark the reward done.'
+                : 'Progress updates automatically from workouts. Earning it is worth +100 treats, and the reward itself is between the two of you.'}
             </AppText>
             {incentive.from_id === me && isOpen(incentive) && (
               <Pressable onPress={confirmCancel} style={styles.cancel} hitSlop={8}>

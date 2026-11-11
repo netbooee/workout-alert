@@ -16,6 +16,7 @@ import { climbLine, crownHolder, groupInviteMessage, madeIt, podium, podiumWeek,
 import { markPodiumSeen, podiumSeen } from '@/lib/podium-seen';
 import { XP_RULES, xpBreakdown } from '@/lib/xp-rules';
 import { MEDALS } from '@/lib/leagues';
+import { treats } from '@/lib/treats';
 
 type Tab = 'board' | 'squad';
 
@@ -125,7 +126,7 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
   return (
     <>
       {showPodium(new Date()) && <LastWeekPodium groupId={group.id} rows={rows} />}
-      <SectionLabel>This week’s XP</SectionLabel>
+      <SectionLabel>This week’s treats</SectionLabel>
       <Card style={{ gap: 2, paddingHorizontal: Spacing.sm }}>
         {rows.map((r, i) => (
           <Pressable
@@ -145,7 +146,7 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
                     })
             }
             delayLongPress={400}
-            accessibilityLabel={`${i + 1}. ${r.name}${r.is_me ? ' (you)' : ''}, ${r.xp} XP${r.user_id === crown ? ', last week’s winner' : ''}`}
+            accessibilityLabel={`${i + 1}. ${r.name}${r.is_me ? ' (you)' : ''}, ${treats(r.xp)}${r.user_id === crown ? ', last week’s winner' : ''}`}
             style={[styles.row, r.is_me && styles.meRow]}>
             <AppText style={styles.rank}>{r.xp > 0 && MEDALS[i] ? MEDALS[i] : i + 1}</AppText>
             <Avatar id={r.user_id} name={r.name} size={36} photoPath={r.avatar_url} />
@@ -154,7 +155,7 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
               {r.user_id === crown ? ' 👑' : ''}
             </AppText>
             <AppText variant="heading" style={{ fontVariant: ['tabular-nums'] }}>
-              {r.xp} XP
+              {treats(r.xp)}
             </AppText>
           </Pressable>
         ))}
@@ -187,10 +188,10 @@ function HowToEarn({ rows }: { rows: GroupMemberRow[] }) {
         onPress={() => setOpen((o) => !o)}
         accessibilityRole="button"
         accessibilityState={{ expanded: open }}
-        accessibilityHint="Shows what earns XP on this board"
+        accessibilityHint="Shows what earns treats on this board"
         style={styles.earnHeader}>
         <View style={{ flex: 1, gap: 2 }}>
-          <AppText variant="heading">⚡ How to earn XP</AppText>
+          <AppText variant="heading">⚡ How to earn treats</AppText>
           {climb && <AppText variant="caption">{climb}</AppText>}
         </View>
         <AppText variant="heading" color={Colors.textSecondary}>
@@ -211,8 +212,8 @@ function HowToEarn({ rows }: { rows: GroupMemberRow[] }) {
       )}
       <AppText variant="caption">
         {total > 0
-          ? `Your ${total} XP this week, by what earned it.`
-          : 'No XP yet this week. A workout is the quickest way onto the board.'}
+          ? `Your ${treats(total)} this week, by what earned it.`
+          : 'No treats yet this week. A workout is the quickest way onto the board.'}
       </AppText>
 
       {open && (
@@ -229,12 +230,12 @@ function HowToEarn({ rows }: { rows: GroupMemberRow[] }) {
             </View>
           ))}
           <AppText variant="caption">
-            It’s your own XP, so the same points count in every group you’re in and in the weekly league. The squad
+            They’re your own treats, so the same ones count in every group you’re in and in the weekly league. The squad
             streak is separate: it only needs everyone to hit their own weekly goal.
           </AppText>
           <Pressable onPress={() => router.push('/xp')} hitSlop={8} accessibilityRole="button">
             <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
-              More on XP and levels →
+              More on treats and levels →
             </AppText>
           </Pressable>
         </View>
@@ -295,7 +296,7 @@ function LastWeekPodium({ groupId, rows }: { groupId: string; rows: GroupMemberR
           <View
             key={p.user_id}
             accessible
-            accessibilityLabel={`${['Gold', 'Silver', 'Bronze'][p.medal]}: ${p.is_me ? 'you' : p.name}, ${p.xp} XP`}
+            accessibilityLabel={`${['Gold', 'Silver', 'Bronze'][p.medal]}: ${p.is_me ? 'you' : p.name}, ${treats(p.xp)}`}
             style={[styles.row, p.is_me && styles.meRow]}>
             <AppText style={[styles.rank, { fontSize: 22, lineHeight: 28 }]}>{MEDALS[p.medal]}</AppText>
             <Avatar id={p.user_id} name={p.name} size={36} photoPath={avatar(p.user_id)} />
@@ -303,7 +304,7 @@ function LastWeekPodium({ groupId, rows }: { groupId: string; rows: GroupMemberR
               {p.is_me ? `${p.name} (you)` : p.name}
             </AppText>
             <AppText variant="heading" color={Colors.xp} style={{ fontVariant: ['tabular-nums'] }}>
-              {p.xp} XP
+              {treats(p.xp)}
             </AppText>
           </View>
         ))}

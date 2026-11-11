@@ -7,30 +7,37 @@ import type { LotlMood } from '@/lib/lotl';
 
 export type MascotKind = 'lotl' | 'capybara' | 'sloth' | 'red_panda';
 
-export const MASCOTS: Record<MascotKind, { name: string; species: string; vibe: string; intro: string }> = {
+export const MASCOTS: Record<
+  MascotKind,
+  { name: string; species: string; vibe: string; intro: string; treat: { emoji: string; name: string } }
+> = {
   lotl: {
     name: 'Lotl',
     species: 'Axolotl',
     vibe: 'Playful and bubbly',
     intro: 'Hi, I’m Lotl! Bubbly, a little extra, and always cheering you on.',
+    treat: { emoji: '🦐', name: 'shrimp' },
   },
   capybara: {
     name: 'Capi',
     species: 'Capybara',
     vibe: 'Calm, zero pressure',
     intro: 'I’m Capi. Zero pressure. We’ll get there together.',
+    treat: { emoji: '🍊', name: 'oranges' },
   },
   sloth: {
     name: 'Lento',
     species: 'Sloth',
     vibe: 'Slow and steady still counts',
     intro: 'I’m Lento. Slow and steady still counts.',
+    treat: { emoji: '🌺', name: 'hibiscus flowers' },
   },
   red_panda: {
     name: 'Canela',
     species: 'Red panda',
     vibe: 'Cozy and cheerful',
     intro: 'I’m Canela! Cozy vibes, big cheers.',
+    treat: { emoji: '🍓', name: 'berries' },
   },
 };
 

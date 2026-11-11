@@ -5,13 +5,15 @@ import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 're
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import { Mascot } from '@/components/mascots';
+import { TreatFeeder } from '@/components/treat-feeder';
 import { SigamosName } from '@/components/sigamos-name';
 import { AppText, Button } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useProfile } from '@/lib/auth';
 import { MASCOT_KINDS, MASCOTS, mascotKind } from '@/lib/mascots';
 
-type Page = { emoji?: string; title: string; body: string; points?: string[] };
+/** `{buddy}` and `{treat}` in a body become your buddy's name and favorite treat. */
+type Page = { emoji?: string; art?: 'treats'; title: string; body: string; points?: string[] };
 
 const PAGES: Page[] = [
   {
@@ -44,20 +46,21 @@ const PAGES: Page[] = [
     title: 'Challenges',
     body: 'Challenge a partner to a stretch goal with a real reward, like “4 workouts this week → coffee on me,” or take one on together.',
     points: [
-      'Sigamos tracks it, and finishing is worth +100 XP',
-      'XP from every workout moves you up the weekly league',
+      'Sigamos tracks it, and finishing is worth +100 treats',
+      'Treats from every workout move you up the weekly league',
     ],
   },
   {
-    emoji: '⚡',
-    title: 'Earn XP, level up',
-    body: 'Everything you do earns XP. It never resets, so your level only goes up: Rookie, Regular, Grinder, Iron, Machine, Legend.',
+    art: 'treats',
+    title: 'Treats for your buddy',
+    body: 'Everything you do earns treats, and {buddy} loves {treat}. Try it: feed {buddy}!',
     points: [
-      'Workouts earn 10–40 XP; add a photo for +25',
+      'A workout: 10–40 treats, and +25 with a photo',
       'Hit your weekly goal: +50',
-      'Partner verifies your workout: +5; you verify theirs: +2',
+      'A partner verifies your workout: +5 (you get +2 for verifying theirs)',
       'Finish a challenge: +100',
-      'The weekly league starts over every Sunday',
+      'Treats fill your level and never go away: Rookie, Regular, Grinder, Iron, Machine, Legend',
+      'Your treats this week also count in the weekly league, which starts over every Sunday',
     ],
   },
   {
@@ -102,8 +105,10 @@ export default function WelcomeScreen() {
         onMomentumScrollEnd={(e) => setPage(Math.round(e.nativeEvent.contentOffset.x / width))}>
         {PAGES.map((p, i) => (
           <ScrollView key={p.title} style={{ width }} contentContainerStyle={styles.page}>
-            <View style={styles.art}>
-              {i === 0 ? (
+            <View style={[styles.art, p.art === 'treats' && styles.artTall]}>
+              {p.art === 'treats' ? (
+                <TreatFeeder kind={mine} />
+              ) : i === 0 ? (
                 <Mascot kind={mine} mood="happy" size={150} />
               ) : i === PAGES.length - 1 ? (
                 <View style={styles.buddies}>
@@ -127,7 +132,7 @@ export default function WelcomeScreen() {
               </AppText>
             )}
             <AppText variant="body" color={Colors.textSecondary} style={[styles.center, styles.body]}>
-              {p.body}
+              {p.body.replaceAll('{buddy}', MASCOTS[mine].name).replaceAll('{treat}', MASCOTS[mine].treat.name)}
             </AppText>
             {p.points && (
               <View style={styles.points}>
@@ -162,6 +167,7 @@ const styles = StyleSheet.create({
   top: { height: 44, paddingHorizontal: Spacing.lg, alignItems: 'flex-end', justifyContent: 'center' },
   page: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.lg, gap: Spacing.md, alignItems: 'stretch' },
   art: { height: 200, alignItems: 'center', justifyContent: 'center' },
+  artTall: { height: 260 },
   emoji: { fontSize: 96, lineHeight: 110 },
   buddies: { flexDirection: 'row', gap: Spacing.sm },
   center: { textAlign: 'center' },

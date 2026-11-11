@@ -37,7 +37,7 @@ export default function JoinGroupScreen() {
           <AppText variant="body" color={Colors.textSecondary} style={styles.center}>
             {group.is_member
               ? 'You’re already in this group.'
-              : `${group.member_count} ${group.member_count === 1 ? 'person' : 'people'} race for the top spot each week and keep a squad streak alive together. They’ll see your first name, buddy, photo, weekly XP and days toward your goal. Never your workouts.`}
+              : `${group.member_count} ${group.member_count === 1 ? 'person' : 'people'} race for the top spot each week and keep a squad streak alive together. They’ll see your first name, buddy, photo, weekly treats and days toward your goal. Never your workouts.`}
           </AppText>
           {group.is_member ? (
             <Button title="Open the group" style={styles.button} onPress={() => open(group.id)} />

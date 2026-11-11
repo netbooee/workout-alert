@@ -16,6 +16,7 @@ import { nextStepTier } from '@/lib/step-xp';
 import { dayKey, startOfWeek } from '@/lib/week';
 import { formatDuration, workoutIcon, workoutLabel } from '@/lib/workout-types';
 import { workoutXp } from '@/lib/workout-xp';
+import { treats } from '@/lib/treats';
 
 type LatestWorkout = {
   id: string;
@@ -104,9 +105,9 @@ function TodayRow({ today }: { today: DailyActivity | null }) {
       subtitle={`${kcal} kcal · ${min} min · ${steps.toLocaleString()} steps`}
       trail={
         next ? (
-          <View style={styles.xpChip} accessibilityLabel={`${next.xp} XP at ${next.steps.toLocaleString()} steps`}>
+          <View style={styles.xpChip} accessibilityLabel={`${treats(next.xp)} at ${next.steps.toLocaleString()} steps`}>
             <AppText style={styles.chipText}>
-              +{next.xp} XP at {next.steps / 1000}k
+              +{next.xp} treats at {next.steps / 1000}k
             </AppText>
           </View>
         ) : undefined
@@ -142,7 +143,7 @@ function WorkoutRowSummary({ latest, verified }: { latest: LatestWorkout | undef
       trail={
         latest.counted ? (
           <View style={styles.xpChip}>
-            <AppText style={styles.chipText}>+{xp.earned} XP</AppText>
+            <AppText style={styles.chipText}>+{treats(xp.earned)}</AppText>
           </View>
         ) : undefined
       }

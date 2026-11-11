@@ -32,8 +32,8 @@ describe('levels', () => {
   it('labels the level with its number and title, and what is left', () => {
     const info = levelFor(3243); // 443 XP into level 8 (2,800 to 3,600)
     expect(levelLabel(info)).toBe('Level 8 · Iron');
-    expect(toNextLevel(info)).toBe('357 XP to level 9');
-    expect(toNextLevel(levelFor(0))).toBe('100 XP to level 2');
-    expect(toNextLevel(levelFor(10_000))).toBe('500 XP to level 15');
+    expect(toNextLevel(info)).toBe('357 treats to level 9');
+    expect(toNextLevel(levelFor(0))).toBe('100 treats to level 2');
+    expect(toNextLevel(levelFor(10_000))).toBe('500 treats to level 15');
   });
 });

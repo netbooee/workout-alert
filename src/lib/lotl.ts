@@ -4,6 +4,7 @@
 
 import type { MascotKind } from '@/lib/mascots';
 import { dayKey, weekState } from '@/lib/week';
+import { treats } from '@/lib/treats';
 
 export type LotlMood = 'blazing' | 'happy' | 'ready' | 'worried' | 'fired_up' | 'sleepy';
 
@@ -233,7 +234,7 @@ export function lotlMessage(i: LotlInput): LotlMessage {
         ? { emoji: '🥇', text: 'You lead the league this week' }
         : {
             emoji: i.league.rank === 2 ? '🥈' : i.league.rank === 3 ? '🥉' : '🏅',
-            text: `${place} in the league, ${i.league.gapToNext} XP behind ${i.league.aheadName ?? 'the next spot'}`,
+            text: `${place} in the league, ${treats(i.league.gapToNext)} behind ${i.league.aheadName ?? 'the next spot'}`,
           },
     );
   }

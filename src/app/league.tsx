@@ -33,6 +33,7 @@ import {
 } from '@/lib/leagues';
 import { mascotKind } from '@/lib/mascots';
 import { dayKey } from '@/lib/week';
+import { treats } from '@/lib/treats';
 
 const fail = (title: string) => (e: unknown) => Alert.alert(title, friendlyError(e));
 
@@ -114,8 +115,8 @@ function JoinCard({ nickname: saved }: { nickname: string }) {
       </AppText>
       <View style={{ gap: Spacing.xs, alignSelf: 'stretch' }}>
         <Point text="Each week you’re matched with up to 20 people in time zones near yours." />
-        <Point text="Earn the most XP and the top 5 move up a league. Spark → Ember → Flame → Blaze → Inferno." />
-        <Point text="They see only your name, buddy and XP. Never your workouts, photos or partners." />
+        <Point text="Earn the most treats and the top 5 move up a league. Spark → Ember → Flame → Blaze → Inferno." />
+        <Point text="They see only your name, buddy and treats. Never your workouts, photos or partners." />
         <Point text="Hand-logged workouts without a photo count half here, to keep it fair." />
       </View>
       <View style={{ alignSelf: 'stretch', gap: 4 }}>
@@ -303,7 +304,7 @@ function Table({ rows }: { rows: PublicLeagueRow[] }) {
   const firstDown = rows.findIndex((r) => zoneFor(r.rank, n, tier, r.xp) === 'down');
 
   const ask = (r: PublicLeagueRow) =>
-    Alert.alert(r.name, `${r.xp} XP this week`, [
+    Alert.alert(r.name, `${treats(r.xp)} this week`, [
       { text: 'Close', style: 'cancel' },
       {
         text: 'Report',
@@ -327,7 +328,7 @@ function Table({ rows }: { rows: PublicLeagueRow[] }) {
           <Pressable
             disabled={r.is_me}
             onPress={() => ask(r)}
-            accessibilityLabel={`${r.rank}. ${r.is_me ? 'You' : r.name}, ${r.xp} XP`}
+            accessibilityLabel={`${r.rank}. ${r.is_me ? 'You' : r.name}, ${treats(r.xp)}`}
             style={[styles.row, r.is_me && meTint(zoneFor(r.rank, n, tier, r.xp))]}>
             <AppText
               style={[styles.rank, { color: i < ups ? Colors.success : Colors.textSecondary }]}>
@@ -338,7 +339,7 @@ function Table({ rows }: { rows: PublicLeagueRow[] }) {
               {r.is_me ? `${r.name} (you)` : r.name}
             </AppText>
             <AppText variant="heading" style={{ fontVariant: ['tabular-nums'] }}>
-              {r.xp} XP
+              {treats(r.xp)}
             </AppText>
           </Pressable>
           {ups > 0 && i === ups - 1 && i < n - 1 && <Divider label="Moving up" color={Colors.success} arrow="▲" />}
@@ -351,7 +352,7 @@ function Table({ rows }: { rows: PublicLeagueRow[] }) {
       )}
       {n > 1 && demoteCount(n) === 0 && tier > 1 && (
         <AppText variant="caption" style={{ textAlign: 'center', marginTop: Spacing.xs }}>
-          Only players with no XP move down in a group this small.
+          Only players with no treats move down in a group this small.
         </AppText>
       )}
     </Card>
@@ -399,7 +400,7 @@ function SampleTable({ tier }: { tier: number }) {
         ))}
       </View>
       <AppText variant="heading" style={{ textAlign: 'center' }}>
-        Earn XP to join this week’s group
+        Earn treats to join this week’s group
       </AppText>
       <AppText variant="caption" style={{ textAlign: 'center' }}>
         Your first workout, photo or step bonus this week puts you in a group of up to 20 people in{' '}

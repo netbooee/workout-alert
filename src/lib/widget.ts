@@ -7,6 +7,7 @@
 import { lotlMood, type LotlMood } from '@/lib/lotl';
 import type { MascotKind } from '@/lib/mascots';
 import { addDays, dayKey, startOfDay, startOfWeek } from '@/lib/week';
+import { treats } from '@/lib/treats';
 
 export type WidgetDot = 'done' | 'today' | 'missed' | 'future';
 export type WidgetIcon = 'bell' | 'gift' | 'person' | 'eyes' | 'trophy';
@@ -233,7 +234,7 @@ function widgetReminder(
   }
   if (i.league && i.league.rank > 0) {
     const behind =
-      i.league.rank > 1 && i.league.aheadName ? ` · ${i.league.gapToNext} XP behind ${i.league.aheadName}` : '';
+      i.league.rank > 1 && i.league.aheadName ? ` · ${treats(i.league.gapToNext)} behind ${i.league.aheadName}` : '';
     return {
       icon: 'trophy',
       text: i.league.rank === 1 ? 'You lead your league this week' : `#${i.league.rank} in your league${behind}`,

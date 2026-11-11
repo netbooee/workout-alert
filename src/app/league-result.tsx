@@ -13,6 +13,7 @@ import { useProfile } from '@/lib/auth';
 import { MEDALS, resultLine, sampleLeagueResult, tierInfo } from '@/lib/leagues';
 import { mascotKind } from '@/lib/mascots';
 import { playSound } from '@/lib/sounds';
+import { treats } from '@/lib/treats';
 
 /** Rows shown around you in last week's table. */
 const AROUND = 3;
@@ -91,13 +92,13 @@ export default function LeagueResultScreen() {
                     {r.is_me ? `${r.name} (you)` : r.name}
                   </AppText>
                   <AppText variant="heading" style={{ fontVariant: ['tabular-nums'] }}>
-                    {r.xp} XP
+                    {treats(r.xp)}
                   </AppText>
                 </View>
               ))}
               {!shown.length && (
                 <AppText variant="caption" style={{ textAlign: 'center', padding: Spacing.sm }}>
-                  {result.final_xp} XP · #{result.final_rank} of {result.group_size}
+                  {treats(result.final_xp)} · #{result.final_rank} of {result.group_size}
                 </AppText>
               )}
             </Card>

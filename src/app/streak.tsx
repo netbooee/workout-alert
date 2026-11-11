@@ -19,6 +19,7 @@ import {
   weeksToNextFreeze,
 } from '@/lib/streak';
 import { dayKey } from '@/lib/week';
+import { treats } from '@/lib/treats';
 
 /**
  * The streak in detail, Duolingo-style. Personal: the streak and what keeps it
@@ -90,7 +91,7 @@ function PersonalStreak() {
         {totalXp != null && (
           <View style={[styles.chip, { backgroundColor: Colors.xpSoft }]}>
             <AppText variant="caption" color={Colors.text}>
-              ⚡ {totalXp.toLocaleString()} XP · Level {levelFor(totalXp).level}
+              ⚡ {treats(totalXp)} · Level {levelFor(totalXp).level}
             </AppText>
           </View>
         )}
@@ -126,7 +127,7 @@ function PersonalStreak() {
           ) : (
             <>
               <AppText style={styles.strong}>Goal hit!</AppText> Your streak is safe this week. Extra
-              workouts still earn XP ⚡
+              workouts still earn treats ⚡
             </>
           )}
         </AppText>

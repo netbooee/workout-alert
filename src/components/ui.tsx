@@ -159,7 +159,70 @@ export function Segmented<T extends string>({
   );
 }
 
+/**
+ * Underline tabs for switching a whole screen's sections: icon and label in a
+ * full-width row with a hairline under it; the active tab is bold with a flame
+ * icon and bar. Bleeds `inset` past the parent's horizontal padding.
+ */
+export function Tabs<T extends string>({
+  options,
+  value,
+  onChange,
+  inset = Spacing.md,
+}: {
+  options: { key: T; label: string; icon: SFSymbol }[];
+  value: T;
+  onChange: (key: T) => void;
+  inset?: number;
+}) {
+  return (
+    <View accessibilityRole="tablist" style={[styles.tabs, { marginHorizontal: -inset, paddingHorizontal: inset }]}>
+      {options.map((o) => {
+        const selected = o.key === value;
+        return (
+          <Pressable
+            key={o.key}
+            onPress={() => {
+              if (selected) return;
+              Haptics.selectionAsync();
+              onChange(o.key);
+            }}
+            accessibilityRole="tab"
+            accessibilityState={{ selected }}
+            style={({ pressed }) => [styles.tab, pressed && !selected && { opacity: 0.6 }]}>
+            <View style={styles.tabLabel}>
+              <SymbolView
+                name={o.icon}
+                size={17}
+                weight={selected ? 'semibold' : 'regular'}
+                tintColor={selected ? Colors.flame : Colors.textSecondary}
+              />
+              <Text
+                style={[
+                  styles.tabText,
+                  { color: selected ? Colors.text : Colors.textSecondary, fontWeight: selected ? '700' : '500' },
+                ]}>
+                {o.label}
+              </Text>
+            </View>
+            <View style={[styles.tabBar, selected && { backgroundColor: Colors.flame }]} />
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}
+
 const styles = StyleSheet.create({
+  tabs: {
+    flexDirection: 'row',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: Colors.textMuted,
+  },
+  tab: { flex: 1, minHeight: 48, alignItems: 'center', justifyContent: 'flex-end', gap: 9 },
+  tabLabel: { flexDirection: 'row', alignItems: 'center', gap: 6 },
+  tabText: { fontSize: 16 },
+  tabBar: { width: 64, height: 3, borderTopLeftRadius: 3, borderTopRightRadius: 3 },
   segmented: {
     flexDirection: 'row',
     backgroundColor: Colors.cardRaised,

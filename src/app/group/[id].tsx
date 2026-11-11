@@ -1,16 +1,20 @@
 import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 
 import { Avatar } from '@/components/avatar';
 import { AppText, Button, Card, Segmented, SectionLabel } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useSafetyMenu } from '@/hooks/use-safety';
+import { useXpThisWeekByKind } from '@/hooks/use-social';
+import { useAuth } from '@/lib/auth';
 import { useGroupBoard, useLeaveGroup, useMyGroups, useRemoveGroupMember, useUpdateGroup } from '@/hooks/use-groups';
 import type { GroupMemberRow, MyGroup } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
-import { crownHolder, groupInviteMessage, madeIt, squadLine } from '@/lib/groups';
+import { climbLine, crownHolder, groupInviteMessage, madeIt, podium, podiumWeek, showPodium, squadLine } from '@/lib/groups';
+import { markPodiumSeen, podiumSeen } from '@/lib/podium-seen';
+import { XP_RULES, xpBreakdown } from '@/lib/xp-rules';
 import { MEDALS } from '@/lib/leagues';
 
 type Tab = 'board' | 'squad';
@@ -26,6 +30,7 @@ export default function GroupScreen() {
   const group = groups?.find((g) => g.id === id);
   const { data: rows } = useGroupBoard(id);
   const [tab, setTab] = useState<Tab>(startTab === 'squad' ? 'squad' : 'board');
+  useMedalCeremony(id, rows);
 
   if (!group) {
     return (
@@ -119,6 +124,7 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
 
   return (
     <>
+      {showPodium(new Date()) && <LastWeekPodium groupId={group.id} rows={rows} />}
       <SectionLabel>This week’s XP</SectionLabel>
       <Card style={{ gap: 2, paddingHorizontal: Spacing.sm }}>
         {rows.map((r, i) => (
@@ -159,6 +165,149 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
           ? ' Press and hold someone to remove, report or block them.'
           : ' Press and hold someone to report or block them.'}
       </AppText>
+      <HowToEarn rows={rows} />
+    </>
+  );
+}
+
+/**
+ * What gets you XP on this board: your own XP this week by source, the gap to
+ * the next person up, and (tap to open) every way to earn it.
+ */
+function HowToEarn({ rows }: { rows: GroupMemberRow[] }) {
+  const { data: byKind } = useXpThisWeekByKind();
+  const [open, setOpen] = useState(false);
+  const mine = xpBreakdown(byKind ?? {});
+  const total = mine.reduce((sum, k) => sum + k.xp, 0);
+  const climb = climbLine(rows);
+
+  return (
+    <Card style={{ gap: Spacing.sm }}>
+      <Pressable
+        onPress={() => setOpen((o) => !o)}
+        accessibilityRole="button"
+        accessibilityState={{ expanded: open }}
+        accessibilityHint="Shows what earns XP on this board"
+        style={styles.earnHeader}>
+        <View style={{ flex: 1, gap: 2 }}>
+          <AppText variant="heading">⚡ How to earn XP</AppText>
+          {climb && <AppText variant="caption">{climb}</AppText>}
+        </View>
+        <AppText variant="heading" color={Colors.textSecondary}>
+          {open ? '−' : '+'}
+        </AppText>
+      </Pressable>
+
+      {mine.length > 0 && (
+        <View style={styles.chips}>
+          {mine.map((k) => (
+            <View key={k.kind} style={styles.chip}>
+              <AppText variant="caption" color={Colors.text}>
+                {k.emoji} {k.label} {k.xp}
+              </AppText>
+            </View>
+          ))}
+        </View>
+      )}
+      <AppText variant="caption">
+        {total > 0
+          ? `Your ${total} XP this week, by what earned it.`
+          : 'No XP yet this week. A workout is the quickest way onto the board.'}
+      </AppText>
+
+      {open && (
+        <View style={{ gap: Spacing.sm, marginTop: Spacing.xs }}>
+          {XP_RULES.map((r) => (
+            <View key={r.what} style={styles.earnRow}>
+              <AppText style={{ width: 24, textAlign: 'center' }}>{r.emoji}</AppText>
+              <AppText variant="body" style={{ flex: 1 }}>
+                {r.what}
+              </AppText>
+              <AppText variant="heading" color={Colors.xp}>
+                {r.xp}
+              </AppText>
+            </View>
+          ))}
+          <AppText variant="caption">
+            It’s your own XP, so the same points count in every group you’re in and in the weekly league. The squad
+            streak is separate: it only needs everyone to hit their own weekly goal.
+          </AppText>
+          <Pressable onPress={() => router.push('/xp')} hitSlop={8} accessibilityRole="button">
+            <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+              More on XP and levels →
+            </AppText>
+          </Pressable>
+        </View>
+      )}
+    </Card>
+  );
+}
+
+/**
+ * The medal ceremony plays once per group and finished week: the first time you
+ * open the group after the week ends, if anyone earned XP last week.
+ */
+function useMedalCeremony(groupId: string, rows: GroupMemberRow[] | undefined) {
+  const userId = useAuth().session?.user.id;
+  const hasPodium = !!rows && rows.length >= 2 && podium(rows).length > 0;
+  useEffect(() => {
+    if (!userId || !hasPodium) return;
+    const week = podiumWeek(new Date());
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    podiumSeen(userId, groupId, week).then((seen) => {
+      if (seen || cancelled) return;
+      // A beat after the group screen appears, so the ceremony reads as its own moment.
+      timer = setTimeout(() => {
+        markPodiumSeen(userId, groupId, week);
+        router.push({ pathname: '/group/podium/[id]', params: { id: groupId } });
+      }, 400);
+    });
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [userId, groupId, hasPodium]);
+}
+
+/** Last week's medalists, shown on Sunday and Monday (the same podium as the Sunday push). */
+function LastWeekPodium({ groupId, rows }: { groupId: string; rows: GroupMemberRow[] }) {
+  const places = podium(rows);
+  if (rows.length < 2 || places.length === 0) return null;
+  const avatar = (id: string) => rows.find((r) => r.user_id === id)?.avatar_url ?? null;
+  return (
+    <>
+      <View style={styles.podiumHeader}>
+        <SectionLabel>Last week’s podium</SectionLabel>
+        <Pressable
+          onPress={() => router.push({ pathname: '/group/podium/[id]', params: { id: groupId } })}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="Replay the medal ceremony"
+          style={{ marginTop: Spacing.sm }}>
+          <AppText variant="caption" color={Colors.flame} style={{ fontWeight: '700' }}>
+            ▶ Replay
+          </AppText>
+        </Pressable>
+      </View>
+      <Card style={[{ gap: 2, paddingHorizontal: Spacing.sm }, styles.podium]}>
+        {places.map((p) => (
+          <View
+            key={p.user_id}
+            accessible
+            accessibilityLabel={`${['Gold', 'Silver', 'Bronze'][p.medal]}: ${p.is_me ? 'you' : p.name}, ${p.xp} XP`}
+            style={[styles.row, p.is_me && styles.meRow]}>
+            <AppText style={[styles.rank, { fontSize: 22, lineHeight: 28 }]}>{MEDALS[p.medal]}</AppText>
+            <Avatar id={p.user_id} name={p.name} size={36} photoPath={avatar(p.user_id)} />
+            <AppText variant="heading" numberOfLines={1} style={{ flex: 1 }}>
+              {p.is_me ? `${p.name} (you)` : p.name}
+            </AppText>
+            <AppText variant="heading" color={Colors.xp} style={{ fontVariant: ['tabular-nums'] }}>
+              {p.xp} XP
+            </AppText>
+          </View>
+        ))}
+      </Card>
     </>
   );
 }
@@ -299,6 +448,17 @@ const styles = StyleSheet.create({
     borderRadius: Radius.sm,
   },
   meRow: { backgroundColor: Colors.flameSoft },
+  podium: { borderWidth: 1, borderColor: Colors.xpSoft },
+  earnHeader: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  earnRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
+  chips: { flexDirection: 'row', flexWrap: 'wrap', gap: Spacing.xs },
+  chip: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.xpSoft,
+  },
+  podiumHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', paddingRight: Spacing.xs },
   rank: { width: 28, textAlign: 'center', fontSize: 16, lineHeight: 22, fontWeight: '800', color: Colors.textSecondary },
   note: { marginHorizontal: Spacing.xs },
   squadHero: { alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.lg },

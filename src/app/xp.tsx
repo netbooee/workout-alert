@@ -5,7 +5,7 @@ import { LevelBar } from '@/components/level-bar';
 import { AppText, SectionLabel } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData } from '@/hooks/use-home-data';
-import { useXpTotal } from '@/hooks/use-social';
+import { useXpThisWeek, useXpTotal } from '@/hooks/use-social';
 import { levelFor, levelStart, TITLES } from '@/lib/levels';
 import { nextStepTier, STEP_TIERS, stepXp } from '@/lib/step-xp';
 import { XP_RULES } from '@/lib/xp-rules';
@@ -13,6 +13,7 @@ import { XP_RULES } from '@/lib/xp-rules';
 /** "How XP works": opened by tapping the level bar. */
 export default function XpScreen() {
   const { data: xp } = useXpTotal();
+  const { data: weekXp } = useXpThisWeek();
   const total = xp ?? 0;
   const mine = levelFor(total);
 
@@ -30,7 +31,9 @@ export default function XpScreen() {
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.card}>
           <LevelBar xp={total} pressable={false} />
-          <AppText variant="caption">{total.toLocaleString()} XP total</AppText>
+          <AppText variant="caption">
+            {total.toLocaleString()} XP total{weekXp ? ` · +${weekXp.toLocaleString()} this week` : ''}
+          </AppText>
         </View>
 
         <SectionLabel>Earn XP</SectionLabel>

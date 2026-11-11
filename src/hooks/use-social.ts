@@ -195,16 +195,43 @@ export function useUnseenNudges() {
   });
 }
 
-export function useXpTotal() {
+/** Your XP: all time, and since Sunday (the league week). One query feeds both hooks below. */
+function useXpSummary<T>(select: (d: { total: number; week: number; weekByKind: Record<string, number> }) => T) {
   const userId = useAuth().session?.user.id;
   return useQuery({
     queryKey: ['social', 'xp', userId],
     enabled: !!userId,
     queryFn: async () => {
-      const rows = unwrap(await supabase.from('xp_events').select('amount').eq('user_id', userId!));
-      return rows.reduce((sum, r) => sum + r.amount, 0);
+      const rows = unwrap(await supabase.from('xp_events').select('amount, created_at, kind').eq('user_id', userId!));
+      const weekStart = startOfWeek(new Date()).getTime();
+      let total = 0;
+      let week = 0;
+      const weekByKind: Record<string, number> = {};
+      for (const r of rows) {
+        total += r.amount;
+        if (new Date(r.created_at).getTime() >= weekStart) {
+          week += r.amount;
+          weekByKind[r.kind] = (weekByKind[r.kind] ?? 0) + r.amount;
+        }
+      }
+      return { total, week, weekByKind };
     },
+    select,
   });
+}
+
+export function useXpTotal() {
+  return useXpSummary((d) => d.total);
+}
+
+/** XP earned since Sunday, matching the weekly league. */
+export function useXpThisWeek() {
+  return useXpSummary((d) => d.week);
+}
+
+/** This week's XP split by what earned it (workouts, steps, photos...). */
+export function useXpThisWeekByKind() {
+  return useXpSummary((d) => d.weekByKind);
 }
 
 function useSocialMutation<TArgs, TResult>(fn: (args: TArgs) => Promise<TResult>) {

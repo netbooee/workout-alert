@@ -14,7 +14,7 @@ import { WeekDots } from '@/components/week-dots';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useHomeData } from '@/hooks/use-home-data';
 import { useLeagueSettings } from '@/hooks/use-league';
-import { useXpTotal } from '@/hooks/use-social';
+import { useXpThisWeek, useXpTotal } from '@/hooks/use-social';
 import { useProfile } from '@/lib/auth';
 import { buddyLine, celebrationMood, celebrationTitle } from '@/lib/celebration-copy';
 import type { Streak } from '@/lib/database.types';
@@ -52,6 +52,7 @@ export default function CelebrateScreen() {
   const loggedId = params.workoutId || null;
   const uncounted = params.uncounted === '1';
   const { data: total } = useXpTotal();
+  const { data: weekXp } = useXpThisWeek();
   const { data: home } = useHomeData();
   const shown = useCountUp(earned);
   const league = useLeagueSettings();
@@ -109,7 +110,7 @@ export default function CelebrateScreen() {
           </AppText>
           {uncounted && (
             <AppText variant="caption" style={{ textAlign: 'center', maxWidth: 300 }}>
-              This one is under your What counts bar, so it won’t fill a day this week. The XP is still yours.
+              This one is under your What counts bar, so it won’t fill a day this week or earn XP. It’s still saved in your history.
             </AppText>
           )}
         </Animated.View>
@@ -125,6 +126,14 @@ export default function CelebrateScreen() {
             <AppText variant="heading" color={Colors.flame}>
               🔥 {home.streak.current_weeks} week streak
             </AppText>
+          </Animated.View>
+        )}
+
+        {/* Progress you can see even on days the level number doesn't move. Skipped when
+            this is the week's first XP, since it would just repeat the number above. */}
+        {weekXp != null && weekXp > earned && (
+          <Animated.View entering={FadeInDown.delay(400)} style={[styles.pill, { backgroundColor: Colors.xpSoft }]}>
+            <AppText variant="heading">⚡ +{weekXp.toLocaleString()} XP this week</AppText>
           </Animated.View>
         )}
 

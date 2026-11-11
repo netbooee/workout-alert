@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { levelFor, levelStart } from './levels';
+import { levelFor, levelLabel, levelStart, toNextLevel } from './levels';
 
 describe('levels', () => {
   it('uses a growing curve', () => {
@@ -27,5 +27,13 @@ describe('levels', () => {
     expect(levelStart(info.level)).toBeLessThanOrEqual(1_000_000);
     expect(levelStart(info.level + 1)).toBeGreaterThan(1_000_000);
     expect(info.title).toBe('Legend');
+  });
+
+  it('labels the level with its number and title, and what is left', () => {
+    const info = levelFor(3243); // 443 XP into level 8 (2,800 to 3,600)
+    expect(levelLabel(info)).toBe('Level 8 · Iron');
+    expect(toNextLevel(info)).toBe('357 XP to level 9');
+    expect(toNextLevel(levelFor(0))).toBe('100 XP to level 2');
+    expect(toNextLevel(levelFor(10_000))).toBe('500 XP to level 15');
   });
 });

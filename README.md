@@ -64,8 +64,14 @@ they're consistent across devices and can't be edited by the client.
   with a "+N" badge, or the workout's icon), three single lines (who and what; duration,
   heart rate and when; the note or where it was recorded), then Cheer and Verify. Tapping the
   thumbnail opens the photos full screen (swipe, pinch to zoom, save).
-- **Partners tab** order: requests, workouts to cheer, partner cards, partner activity, then
-  the league (only with 2+ partners) and the incentive intro. Tapping a partner card opens
+- **Partners tab** order: requests, workouts to cheer, your partners, partner activity, then
+  the league (only with 2+ partners) and the incentive intro. **Your partners** are one "This
+  week" card (`PartnerList` in `src/components/partner-card.tsx`): a grid of buddies, three
+  across, each inside a ring that fills with their week (green once the goal is hit), with
+  "1/3 · 🔥 2" (days, friend streak), Challenge, and Nudge while it can help, then a dashed **Add**
+  tile. Whoever needs a nudge comes first, then partners already nudged, resting, and done
+  (`orderPartners` in `src/lib/partner-order.ts`), so nobody who needs you is out of view.
+  Challenges with each partner are listed under the row. Tapping a partner's buddy opens
   their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,
   Incentive, anything going on between you, and their recent workouts.
 - **Delete** a hand-logged workout from its detail screen (its photos, reactions, and XP go
@@ -75,7 +81,7 @@ they're consistent across devices and can't be edited by the client.
   your partners; the workout owner sees them all and can reply. Long-press a comment to delete
   it (your own, or any on your workout).
 - **Nudge** a partner who hasn't hit their week yet (once per 12 hours).
-- Long-press a partner card to remove them.
+- Long-press a partner's buddy to remove them.
 
 ## Progress
 
@@ -122,8 +128,8 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
 - An active incentive shows as a **quest card** (like Duolingo's Friends Quest,
   `src/components/quest-progress.tsx`): the count, one pip per day or workout (a bar for
   minutes), what's left and the days remaining, with the next action on the card: **Log a
-  workout** for the recipient on Home, **Nudge** for the giver. The giver's partner card shows
-  the same progress. The nudge banner also has **Log a workout**.
+  workout** for the recipient on Home, **Nudge** for the giver. The challenge row under the
+  giver's partner list shows the same progress. The nudge banner also has **Log a workout**.
 - **Do it together** (shared quests; the **Do it together** switch on the challenge screen) work like Duolingo's Friends
   Quest: both partners' workouts count toward one goal ("8 workout days between us this week →
   🍕 Pizza night together"). Workout days, workouts or minutes, with targets up to twice as high;
@@ -156,7 +162,7 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   same six moods with the same signature on the face (sunglasses, ^ ^ eyes, sweatband,
   sweat drop, gritted teeth, sleep bubble); ears and arms stand in for Lotl's gills. Each
   has its own voice mixed into the shared greeting lines.
-- **Partners see your buddy** on your partner card, in a mood that matches your week
+- **Partners see your buddy** in your partners' list, in a mood that matches your week
   (never fired up; asleep in rest mode, which is only shared once you're partners).
 - Drawings live in `src/components/mascots/` (shared face and motion, one file per animal).
 
@@ -260,6 +266,23 @@ buddy** in the mood that matches your week.
   - To keep it fair, hand-logged workouts without a photo count half in public leagues.
   - Anyone in your group can be reported. Reports land in `league_reports`.
   - Groups close hourly once the week is over everywhere (`close_league_weeks`, via pg_cron).
+- **Private groups** (up to 20 people, 3 groups each): a weekly XP leaderboard and a squad
+  streak (`20261102000000_groups.sql`). **Weekly podium**: on Sunday at 9am in each member's
+  time zone, groups of 2+ send everyone last week's 🥇🥈🥉 by XP (`send_group_podiums`, hourly
+  via pg_cron). Only people who earned XP place; ties share a medal and the next amount takes
+  the next one. Medalists get "🥈 You took silver in …"; everyone else gets the podium plus their
+  own place, and nobody is named for coming last. Groups of 2 get a head-to-head line, and a
+  group where nobody earned XP gets nothing. No bonus XP. The group screen shows a "Last week's
+  podium" card on Sunday and Monday (`podium()` in `src/lib/groups.ts`, same rule).
+  **Medal ceremony** (`src/app/group/podium/[id].tsx`): the first time you open a group after
+  the week ends, last week's podium plays out bronze → silver → gold, each buddy dropping onto its
+  step as the medal swings in, with confetti for gold and your own line at the end. Once per group
+  and week (stored on the device, `src/lib/podium-seen.ts`); ▶ Replay on the podium card plays it
+  again. `?preview=1` shows sample results in development builds.
+  **How to earn XP** (under the leaderboard): your XP this week by source (🏃 Workouts 120 ·
+  👟 Steps 45 …, `xpBreakdown` in `src/lib/xp-rules.ts`), where you stand ("50 XP to pass Sam",
+  `climbLine` in `src/lib/groups.ts`), and, tapped open, every way to earn XP plus a note that it's
+  the same personal XP in every group and the league.
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
 - A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo),
@@ -269,7 +292,7 @@ buddy** in the mood that matches your week.
 - Tapping the streak card on Home opens the **streak screen**. **Personal**: next milestone,
   freezes banked and how they're earned, and week-by-week history linking to each week.
   **Friends**: a friend streak row per partner ("🔥 12 weeks together"), open "Invite a friend"
-  slots, and **Edit** to remove a partner. The "wk together" badge on a partner card opens it.
+  slots, and **Edit** to remove a partner. The "🔥 2" friend streak under a partner's buddy opens it.
 - **Verifying** doesn't change streaks: every 15+ minute workout counts, verified or not. It
   earns XP on both sides, and "verified only" incentives count hand-logged workouts only once a
   partner verifies them. Removing a ✅ takes its XP back.
@@ -290,7 +313,7 @@ src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
   onboarding.tsx         Buddy, name (if missing), goal, Apple Health, notifications, invite a partner
   (tabs)/index.tsx       Home: streak + week dots, rings, 8-week trend, recent workouts
-  (tabs)/partners.tsx    League, partner cards, requests, partner activity feed
+  (tabs)/partners.tsx    League, your partners, requests, partner activity feed
   league.tsx             Public leagues (join, group table, results) and the partner league
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code
   week/[start].tsx       One week from the progress chart: totals and workouts by day
@@ -397,14 +420,21 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
 
 ### Next: after TestFlight testing (required before the App Store)
 
-- ~~**App icon.**~~ Lotl (blazing, in sunglasses) on flame orange, rendered from
-  `website/img/lotl-blazing.svg`; the splash is happy Lotl (`assets/images/`).
+- ~~**App icon.**~~ Lotl's head (blazing, in sunglasses) on near-black with a flame-orange
+  glow; the source is `assets/icon-src/icon.svg` (built from `website/img/lotl-blazing.svg`).
+  v1.0 used the whole Lotl on flame orange, which was hard to make out at home-screen size.
+  The splash is happy Lotl (`assets/images/`).
 - ~~**In-app account deletion**~~ (App Store guideline 5.1.1(v)): "Delete account" on the Me
   tab removes the user's files from storage, then `delete_my_account()` deletes the auth user and
   cascades their data. Still to do: revoke the Sign in with Apple token on deletion (Apple asks
   for this; it needs a server-side call with the app's client secret), and update
   `website/privacy/` and `website/support/`, which say "email us" and "coming soon", once a
   build with deletion is out.
+- ~~**Make level progress easier to read.**~~ The level bar says "Level 8 · Iron" and
+  "357 XP to level 9" (`levelLabel` / `toNextLevel` in `src/lib/levels.ts`) instead of a title
+  and "443 / 800 XP", since a title spans several levels and the badge number moves slowly.
+- ~~**This week's XP on the celebration screen**~~ ("⚡ +180 XP this week", shown once it's
+  more than what you just earned) and on How XP works. It counts from Sunday, like the league.
 
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~

@@ -11,7 +11,7 @@ import { GroupsCard } from '@/components/groups-card';
 import { IncentiveIntro } from '@/components/incentive-intro';
 import { LeagueCard } from '@/components/league-card';
 import { LeagueEntry } from '@/components/league-entry';
-import { PartnerCard } from '@/components/partner-card';
+import { PartnerList } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
 import { ActionPill, AppText, Button, Card, SectionLabel } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
@@ -80,28 +80,7 @@ export default function PartnersScreen() {
 
         {accepted.length > 0 && <CheerCard max={10} />}
 
-        {accepted.map((p) => (
-          <PartnerCard key={p.partnership_id} partner={p} />
-        ))}
-
-        {accepted.length > 0 && (
-          <Link href="/add-partner" asChild>
-            <Pressable accessibilityRole="button" style={styles.addMore}>
-              <SymbolView name="person.badge.plus" size={22} tintColor={Colors.flame} />
-              <View style={{ flex: 1 }}>
-                <AppText variant="heading" color={Colors.flame}>
-                  Add {accepted.length === 1 ? 'a partner' : 'another partner'}
-                </AppText>
-                <AppText variant="caption">
-                  {accepted.length === 1
-                    ? 'Two or more partners unlock your weekly league · 🎁 +100 XP each for new friends'
-                    : '🎁 +100 XP for you both when a new friend joins and works out'}
-                </AppText>
-              </View>
-              <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />
-            </Pressable>
-          </Link>
-        )}
+        {accepted.length > 0 && <PartnerList partners={accepted} />}
 
         {partners.isSuccess && <LeagueEntry />}
         <GroupsCard />

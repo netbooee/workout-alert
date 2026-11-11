@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, View } from 'react-native';
 
 import { AppText } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
-import { levelFor } from '@/lib/levels';
+import { levelFor, levelLabel, toNextLevel } from '@/lib/levels';
 
 /** Duolingo-style level badge with an XP progress bar. Tap it for "How XP works". */
 export function LevelBar({ xp, pressable = true }: { xp: number; pressable?: boolean }) {
@@ -14,7 +14,7 @@ export function LevelBar({ xp, pressable = true }: { xp: number; pressable?: boo
       disabled={!pressable}
       onPress={() => router.push('/xp')}
       accessibilityRole={pressable ? 'button' : undefined}
-      accessibilityLabel={`Level ${info.level}, ${info.title}, ${info.into} of ${info.span} XP`}
+      accessibilityLabel={`${levelLabel(info)}, ${toNextLevel(info)}`}
       accessibilityHint={pressable ? 'Shows how XP works' : undefined}
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}>
       <View style={styles.badge}>
@@ -26,11 +26,9 @@ export function LevelBar({ xp, pressable = true }: { xp: number; pressable?: boo
       <View style={{ flex: 1, gap: 4 }}>
         <View style={styles.labels}>
           <AppText variant="caption" color={Colors.text}>
-            {info.title}
+            {levelLabel(info)}
           </AppText>
-          <AppText variant="caption">
-            {info.into} / {info.span} XP
-          </AppText>
+          <AppText variant="caption">{toNextLevel(info)}</AppText>
         </View>
         <View style={styles.track}>
           <View style={[styles.fill, { width: `${Math.max(info.progress * 100, 3)}%` }]} />

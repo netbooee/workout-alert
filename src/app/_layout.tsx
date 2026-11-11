@@ -147,6 +147,24 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="activity"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.flame,
+            headerTitleStyle: { color: Colors.text },
+          }}
+        />
+        <Stack.Screen
+          name="progress"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.flame,
+            headerTitleStyle: { color: Colors.text },
+          }}
+        />
+        <Stack.Screen
           name="streak"
           options={{
             headerShown: true,

@@ -33,12 +33,15 @@ export function ReactionBar({
   ownerId,
   reactions,
   compact = false,
+  round = false,
 }: {
   workoutId: string;
   ownerId: string;
   reactions: { kind: ReactionKind; user_id: string }[];
   /** Smaller buttons, for lists. */
   compact?: boolean;
+  /** Two round icon buttons side by side, for one-line rows. */
+  round?: boolean;
 }) {
   const me = useAuth().session?.user.id;
   const toggle = useToggleReaction();
@@ -121,6 +124,39 @@ export function ReactionBar({
     ...(verified ? ['✅ Verified'] : []),
   ].join('  ');
 
+  if (round && !isOwner) {
+    return (
+      <View style={styles.row}>
+        <CheerPicker
+          visible={picking}
+          title="Cheer with"
+          onPick={(kind) => cheer(kind)}
+          onClose={() => setPicking(false)}
+        />
+        <Pressable
+          onPress={() => cheer(myCheerKind ?? 'clap')}
+          onLongPress={() => setPicking(true)}
+          disabled={toggle.isPending || setCheer.isPending}
+          hitSlop={2}
+          accessibilityRole="button"
+          accessibilityLabel={myCheerKind ? 'Cheered' : 'Cheer'}
+          accessibilityHint="Hold to pick a different emoji"
+          style={[styles.round, myCheerKind ? styles.buttonOn : styles.roundCheer]}>
+          <AppText style={styles.roundText}>{emojiOf(myCheerKind ?? 'clap')}</AppText>
+        </Pressable>
+        <Pressable
+          onPress={verify}
+          disabled={toggle.isPending}
+          hitSlop={2}
+          accessibilityRole="button"
+          accessibilityLabel={iVerified ? 'Verified' : 'Verify'}
+          style={[styles.round, iVerified && styles.verifiedOn]}>
+          <AppText style={[styles.roundText, !iVerified && { opacity: 0.55 }]}>✅</AppText>
+        </Pressable>
+      </View>
+    );
+  }
+
   if (isOwner) {
     return (
       <AppText variant="caption" color={summary ? Colors.text : Colors.textMuted}>
@@ -179,6 +215,16 @@ const styles = StyleSheet.create({
   },
   compact: { minHeight: 36 },
   compactText: { fontSize: 15 },
+  round: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.cardRaised,
+  },
+  roundCheer: { backgroundColor: Colors.flame },
+  roundText: { fontSize: 18, lineHeight: 22 },
   buttonOn: { backgroundColor: Colors.flameSoft, borderWidth: 1, borderColor: Colors.flame },
   verifiedOn: { backgroundColor: 'rgba(52, 211, 153, 0.14)', borderWidth: 1, borderColor: Colors.success },
 });

@@ -4,21 +4,15 @@ import { useState } from 'react';
 import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { ActivityRings } from '@/components/activity-rings';
 import { CheerBanner } from '@/components/cheer-banner';
 import { CheerCard } from '@/components/cheer-card';
-import { CrewCard } from '@/components/crew-card';
-import { EmptyState } from '@/components/empty-state';
-import { GroupsCard } from '@/components/groups-card';
 import { IncentiveCard } from '@/components/incentive-card';
 import { Mascot } from '@/components/mascots';
 import { NudgeBanner } from '@/components/nudge-banner';
 import { PepTalkBanner } from '@/components/pep-talk-banner';
-import { ProgressMini } from '@/components/progress-mini';
-import { StreakHero } from '@/components/streak-hero';
-import { ActionPill, AppText, Button, Card, SectionLabel } from '@/components/ui';
-import { WeekDots } from '@/components/week-dots';
-import { WorkoutRow } from '@/components/workout-row';
+import { HomeSummary, TodayCard } from '@/components/home-summary';
+import { ActionPill, AppText, Card, SectionLabel } from '@/components/ui';
+import { WeekTogetherCard } from '@/components/week-together-card';
 import { Colors, Spacing } from '@/constants/theme';
 import { useHealthSync } from '@/hooks/use-health-sync';
 import { useMyIncentives } from '@/hooks/use-incentives';
@@ -30,7 +24,6 @@ import { useProfile } from '@/lib/auth';
 import { friendlyError } from '@/lib/errors';
 import { tierInfo } from '@/lib/leagues';
 import { MASCOTS, mascotKind } from '@/lib/mascots';
-import { shouldOfferLog } from '@/lib/today-line';
 import { buildWeek, weekState } from '@/lib/week';
 
 export default function HomeScreen() {
@@ -53,9 +46,6 @@ export default function HomeScreen() {
   const days = buildWeek(data?.weekWorkouts ?? [], profile.min_workout_minutes);
   const activeDays = days.filter((d) => d.active).length;
   const state = weekState(activeDays, profile.weekly_goal);
-  const workedOutToday = days.some((d) => d.isToday && d.active);
-  const resting = !!profile.resting_since;
-  const offerLog = shouldOfferLog({ state, weeks: 0, freezes: 0, workedOutToday, resting });
   const firstName = profile.display_name?.split(' ')[0];
   const leagueSettings = useLeagueSettings();
   const inLeague = !!leagueSettings.data?.opted_in;
@@ -82,7 +72,7 @@ export default function HomeScreen() {
         <View style={styles.titleRow}>
           <Link href="/greeting" asChild>
             <Pressable accessibilityLabel={`Talk to ${MASCOTS[mascotKind(profile.mascot)].name}`} hitSlop={8}>
-              <Mascot kind={mascotKind(profile.mascot)} mood={lotl?.mood ?? 'ready'} size={52} />
+              <Mascot kind={mascotKind(profile.mascot)} mood={lotl?.mood ?? 'ready'} size={44} />
               {/* Hints that your buddy has something to say. */}
               <View style={styles.talkBadge}>
                 <SymbolView name="ellipsis.bubble.fill" size={13} tintColor="#fff" />
@@ -98,8 +88,7 @@ export default function HomeScreen() {
             )}
           </View>
           <Link href="/log" asChild>
-            {/* Quiet while the streak card has its own Log button, so one orange button leads. */}
-            <ActionPill icon="plus" label="Log" accessibilityLabel="Log a workout" quiet={offerLog} />
+            <ActionPill icon="plus" label="Log" accessibilityLabel="Log a workout" />
           </Link>
         </View>
 
@@ -114,35 +103,20 @@ export default function HomeScreen() {
         <PepTalkBanner />
         <CheerBanner />
 
-        {/* Your streak and this week come first; everything else supports them. */}
+        {/* Your week with your crew first; everything else is one row each under it. */}
         {isPending ? (
           <ActivityIndicator color={Colors.flame} style={{ marginVertical: Spacing.xl }} />
         ) : (
-          <Link href="/streak" asChild>
-            <Pressable accessibilityRole="button" accessibilityHint="Opens your streak and freezes">
-              <StreakHero
-                streak={data?.streak ?? null}
-                state={state}
-                resting={resting}
-                workedOutToday={workedOutToday}
-                action={
-                  offerLog && (
-                    <Link href="/log" asChild>
-                      <Button title="+ Log a workout" />
-                    </Link>
-                  )
-                }
-                league={league}
-                xp={xp}
-                showChevron>
-                <WeekDots days={days} goal={profile.weekly_goal} embedded />
-              </StreakHero>
-            </Pressable>
-          </Link>
+          <WeekTogetherCard
+            streak={data?.streak ?? null}
+            state={state}
+            xp={xp}
+            league={league}
+            myDays={days}
+            myWorkouts={data?.weekWorkouts ?? []}
+          />
         )}
 
-        <CrewCard myDays={days} myWorkouts={data?.weekWorkouts ?? []} />
-        <GroupsCard compact />
         <NudgeBanner />
         <CheerCard />
         {incentives.length > 0 && <SectionLabel>Challenges</SectionLabel>}
@@ -152,43 +126,11 @@ export default function HomeScreen() {
 
         {!isPending && (
           <>
-            <Card>
-              <AppText variant="label">Recent workouts</AppText>
-              {data?.recentWorkouts.length ? (
-                <>
-                  {data.recentWorkouts.slice(0, RECENT_COUNT).map((w) => (
-                    <Link key={w.id} href={{ pathname: '/workout/[id]', params: { id: w.id } }} asChild>
-                      <Pressable>
-                        <WorkoutRow workout={w} showXp verified={!!data.verifiedIds?.includes(w.id)} />
-                      </Pressable>
-                    </Link>
-                  ))}
-                  {data.recentWorkouts.length > RECENT_COUNT && (
-                    <Link href={{ pathname: '/me', params: { section: 'progress' } }} asChild>
-                      <Pressable hitSlop={8} style={styles.more}>
-                        <AppText variant="caption" color={Colors.flame}>
-                          See older workouts by week
-                        </AppText>
-                      </Pressable>
-                    </Link>
-                  )}
-                </>
-              ) : (
-                <EmptyState
-                  title="Your first workout starts the streak!"
-                  body="Workouts from Apple Watch, Fitness, Strava and other apps show up here on their own. Pull down to refresh, or log one yourself."
-                  action={
-                    <Link href="/log" asChild>
-                      <Button title="+ Log a workout" variant="secondary" />
-                    </Link>
-                  }
-                />
-              )}
-            </Card>
-
-            <SectionLabel>Today’s activity</SectionLabel>
-            <ActivityRings today={data?.today ?? null} />
-            <ProgressMini />
+            <TodayCard today={data?.today ?? null} />
+            <HomeSummary
+              latest={data?.recentWorkouts[0]}
+              verified={!!data?.recentWorkouts[0] && !!data.verifiedIds?.includes(data.recentWorkouts[0].id)}
+            />
           </>
         )}
       </ScrollView>
@@ -197,9 +139,6 @@ export default function HomeScreen() {
 }
 
 const EARNED_ON_HOME_MS = 3 * 24 * 3600 * 1000;
-
-/** Older workouts are a tap away in the Progress chart's week view. */
-const RECENT_COUNT = 5;
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: Colors.background },
@@ -218,5 +157,4 @@ const styles = StyleSheet.create({
     borderWidth: 2,
     borderColor: Colors.background,
   },
-  more: { alignItems: 'center', paddingTop: Spacing.xs },
 });

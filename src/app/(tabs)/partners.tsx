@@ -3,34 +3,30 @@ import { SymbolView } from 'expo-symbols';
 import { Alert, Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
+import { ActivityCard } from '@/components/activity-card';
 import { Avatar } from '@/components/avatar';
-import { CheerCard } from '@/components/cheer-card';
-import { EmptyState } from '@/components/empty-state';
-import { FeedCard } from '@/components/feed-card';
-import { GroupsCard } from '@/components/groups-card';
+import { CompeteCard } from '@/components/compete-card';
 import { IncentiveIntro } from '@/components/incentive-intro';
-import { LeagueCard } from '@/components/league-card';
-import { LeagueEntry } from '@/components/league-entry';
 import { PartnerList } from '@/components/partner-card';
 import { PushPrompt } from '@/components/push-prompt';
-import { ActionPill, AppText, Button, Card, SectionLabel } from '@/components/ui';
+import { ActionPill, AppText, Button, Card } from '@/components/ui';
 import { Colors, Radius, Spacing } from '@/constants/theme';
 import { useSafetyMenu } from '@/hooks/use-safety';
-import { useLeague, useNames, usePartnerFeed, usePartners, useRemovePartner, useRespondToPartner } from '@/hooks/use-social';
+import { useMyGroups } from '@/hooks/use-groups';
+import { usePartnerFeed, usePartners, useRemovePartner, useRespondToPartner } from '@/hooks/use-social';
 import type { Partner } from '@/lib/database.types';
 import { friendlyError } from '@/lib/errors';
 
 export default function PartnersScreen() {
   const partners = usePartners();
-  const league = useLeague();
+  const groups = useMyGroups();
   const feed = usePartnerFeed();
-  const nameOf = useNames();
 
   const all = partners.data ?? [];
   const accepted = all.filter((p) => p.status === 'accepted');
   const incoming = all.filter((p) => p.status === 'pending' && p.incoming);
   const outgoing = all.filter((p) => p.status === 'pending' && !p.incoming);
-  const refreshing = partners.isRefetching || feed.isRefetching || league.isRefetching;
+  const refreshing = partners.isRefetching || feed.isRefetching || groups.isRefetching;
 
   return (
     <SafeAreaView edges={['top']} style={styles.container}>
@@ -43,16 +39,13 @@ export default function PartnersScreen() {
             onRefresh={() => {
               partners.refetch();
               feed.refetch();
-              league.refetch();
+              groups.refetch();
             }}
           />
         }>
         <View style={styles.titleRow}>
           <AppText variant="title">Partners</AppText>
           <View style={styles.titleActions}>
-            <Link href="/league" asChild>
-              <ActionPill icon="trophy.fill" label="Leagues" quiet />
-            </Link>
             <Link href="/add-partner" asChild>
               <ActionPill icon="plus" label="Add" accessibilityLabel="Add a partner" />
             </Link>
@@ -78,14 +71,7 @@ export default function PartnersScreen() {
           </Card>
         )}
 
-        {accepted.length > 0 && <CheerCard max={10} />}
-
         {accepted.length > 0 && <PartnerList partners={accepted} />}
-
-        {partners.isSuccess && <LeagueEntry />}
-        <GroupsCard />
-
-        {accepted.length > 0 && <PushPrompt />}
 
         {outgoing.length > 0 && (
           <Card>
@@ -102,25 +88,12 @@ export default function PartnersScreen() {
           </Card>
         )}
 
-        {accepted.length > 0 && (
-          <>
-            <SectionLabel>Partner activity</SectionLabel>
-            {feed.data?.length ? (
-              feed.data.map((item) => (
-                <FeedCard key={item.workout.id} item={item} name={nameOf(item.workout.user_id)} />
-              ))
-            ) : (
-              <EmptyState
-                title="No partner workouts yet"
-                body="When your partners work out, it shows up here so you can cheer them on."
-              />
-            )}
-          </>
-        )}
+        {partners.isSuccess && <CompeteCard />}
 
-        {/* A league needs at least two partners to be more than a two-row table. */}
-        {accepted.length > 1 && league.data && <LeagueCard rows={league.data} />}
+        {/* Two or more groups make the card above a row taller, so one fewer workout keeps it on one screen. */}
+        {accepted.length > 0 && <ActivityCard count={(groups.data?.length ?? 0) >= 2 ? 2 : 3} />}
 
+        {accepted.length > 0 && <PushPrompt />}
         <IncentiveIntro partners={accepted} />
       </ScrollView>
     </SafeAreaView>

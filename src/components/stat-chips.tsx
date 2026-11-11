@@ -4,6 +4,7 @@ import { Pressable, StyleSheet } from 'react-native';
 import { AppText } from '@/components/ui';
 import { Colors, Radius } from '@/constants/theme';
 import { levelFor } from '@/lib/levels';
+import { treats } from '@/lib/treats';
 
 /** Your public league this week, or `joined: false` for an invitation. */
 export type LeagueSummary = { joined: boolean; emoji: string; name: string; rank?: number; size?: number };
@@ -37,11 +38,11 @@ export function XpChip({ xp, compact = false }: { xp: number; compact?: boolean 
       onPress={() => router.push('/xp')}
       hitSlop={8}
       accessibilityRole="button"
-      accessibilityLabel={`${xp} XP, level ${info.level}, ${info.title}`}
-      accessibilityHint="Shows how XP works"
+      accessibilityLabel={`${treats(xp)}, level ${info.level}, ${info.title}`}
+      accessibilityHint="Shows how treats work"
       style={({ pressed }) => [styles.chip, styles.xpChip, pressed && { opacity: 0.7 }]}>
       <AppText variant="caption" color={Colors.text} style={styles.chipText}>
-        {compact ? `⚡ Level ${info.level}` : `⚡ ${xp.toLocaleString()} XP · Level ${info.level}`}
+        {compact ? `⚡ Level ${info.level}` : `⚡ ${treats(xp)} · Level ${info.level}`}
       </AppText>
     </Pressable>
   );

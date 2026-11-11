@@ -12,6 +12,7 @@ import { whenLabel } from '@/lib/cheers';
 import { useEvidenceUrls } from '@/lib/evidence';
 import { formatDuration, workoutIcon, workoutLabel } from '@/lib/workout-types';
 import { isVerified, workoutXp } from '@/lib/workout-xp';
+import { treats } from '@/lib/treats';
 
 /**
  * Partners' newest workouts on the Partners tab, one row each with Cheer and
@@ -84,7 +85,7 @@ function FeedRow({ item, name }: { item: FeedItem; name: string }) {
     formatDuration(w.duration_s),
     whenLabel(w.started_at).split(' ')[0],
     w.photo_paths.length ? `${w.photo_paths.length} photo${w.photo_paths.length === 1 ? '' : 's'}` : null,
-    xp > 0 ? `${xp} XP` : null,
+    xp > 0 ? treats(xp) : null,
   ]
     .filter(Boolean)
     .join(' · ');

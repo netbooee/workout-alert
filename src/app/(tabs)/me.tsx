@@ -48,6 +48,7 @@ import {
   type WalkChoice,
 } from '@/lib/what-counts';
 import { supabase } from '@/lib/supabase';
+import { treats } from '@/lib/treats';
 
 export default function MeScreen() {
   // You (goal, buddy, what counts), Progress (stats and history), Settings. Home links to Progress.
@@ -237,7 +238,7 @@ export default function MeScreen() {
             <Card>
               <LevelBar xp={xp ?? 0} />
               <AppText variant="caption">
-                {xp ?? 0} XP total · Tap the bar to see how XP works.
+                {treats(xp ?? 0)} total · Tap the bar to see how treats work.
               </AppText>
             </Card>
 
@@ -388,7 +389,7 @@ function WhatCountsCard() {
       </View>
       <AppText variant="caption">
         {rulesSummary(profile)} Shorter ones stay in your history but don’t count toward your
-        streak, XP or incentives, and your partners aren’t notified.
+        streak, treats or incentives, and your partners aren’t notified.
       </AppText>
     </Card>
   );
@@ -479,8 +480,8 @@ function LeaguePrivacyCard() {
             <AppText variant="body">Public leagues</AppText>
             <AppText variant="caption">
               {on
-                ? `Shown as ${data?.nickname || 'your first name'}, with your buddy and weekly XP`
-                : 'Off. Only your partners see your XP'}
+                ? `Shown as ${data?.nickname || 'your first name'}, with your buddy and weekly treats`
+                : 'Off. Only your partners see your treats'}
             </AppText>
           </View>
           <AppText variant="body" color={on ? Colors.success : Colors.textSecondary}>
@@ -573,7 +574,7 @@ function StatTiles({ weeks, xp }: { weeks: number; xp: number | undefined }) {
           color={weeks > 0 ? Colors.flame : Colors.textMuted}
           href="/streak"
         />
-        <StatTile emoji="⚡" value={xp != null ? xp.toLocaleString() : '–'} label="total XP" color={Colors.xp} href="/xp" />
+        <StatTile emoji="⚡" value={xp != null ? xp.toLocaleString() : '–'} label="total treats" color={Colors.xp} href="/xp" />
         <StatTile
           emoji={joined ? tier.emoji : '🏆'}
           value={isSuccess ? (joined ? tier.name : 'Join') : '–'}

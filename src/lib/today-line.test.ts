@@ -32,8 +32,8 @@ describe('todayLine', () => {
     expect(line).toMatch(/Today’s the day/);
   });
 
-  it('calls extra workouts bonus XP once the goal is hit', () => {
-    expect(todayLine({ ...base, state: { kind: 'done' }, workedOutToday: true })).toMatch(/bonus XP/);
+  it('calls extra workouts bonus treats once the goal is hit', () => {
+    expect(todayLine({ ...base, state: { kind: 'done' }, workedOutToday: true })).toMatch(/bonus treats/);
     expect(todayLine({ ...base, state: { kind: 'done' } })).toMatch(/streak is safe/);
   });
 

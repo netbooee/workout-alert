@@ -48,7 +48,7 @@ export default function AddPartnerScreen() {
           <AppText style={{ fontSize: 20, lineHeight: 24 }}>🎁</AppText>
           <AppText variant="caption" color={Colors.text} style={{ flex: 1 }}>
             <AppText variant="caption" color={Colors.text} style={{ fontWeight: '800' }}>
-              +100 XP for you both
+              +100 treats for you both
             </AppText>{' '}
             when a friend joins with your invite and logs their first workout.
           </AppText>

@@ -2,7 +2,7 @@
 // Keep in sync with the amounts in supabase/migrations (workout_xp, xp_events kinds).
 
 export const XP_RULES: { emoji: string; what: string; xp: string }[] = [
-  { emoji: '🏃', what: 'A workout over your What counts bar (set in Me; 30 min = 25 XP)', xp: '10–40' },
+  { emoji: '🏃', what: 'A workout over your What counts bar (set in Me; 30 min = 25 treats)', xp: '10–40' },
   { emoji: '📸', what: 'Add a photo to a workout', xp: '+25' },
   { emoji: '👟', what: 'Daily steps: +5 at 5k, +10 at 8k, +10 at 12k', xp: '5–25' },
   { emoji: '🔥', what: 'Hit your weekly goal', xp: '+50' },

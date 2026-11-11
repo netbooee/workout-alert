@@ -18,7 +18,7 @@ from Apple Health, and a **weekly streak** grows every week you hit your goal.
   (overlapping by at least half of the shorter one) count once: the richest copy stays (heart
   rate, then longest), the others are folded into it (`workouts.duplicate_of`) and show as
   "Also recorded by …". A workout only one device caught still counts. Folded copies earn no
-  XP, don't count toward incentives, and don't trigger a second partner notification;
+  treats, don't count toward incentives, and don't trigger a second partner notification;
   reactions, comments, and photos on them move to the copy that counts.
 - Changing your goal applies to the current week and to the **weeks from before you joined**
   (your imported history), so picking a realistic goal on day one counts your past. Weeks since
@@ -52,6 +52,7 @@ they're consistent across devices and can't be edited by the client.
   (`src/lib/notification-actions.ts`). The buttons open the app because that's the reliable
   way on iOS for the app to save the reaction; reacting without opening it would need a
   native notification extension.
+- **Treats** are what the app calls points (XP) on screen: "+18 treats", "How treats work", "93 treats this week" (`treats()` in `src/lib/treats.ts` handles "1 treat"). Code, tables and columns keep the `xp` name.
 - **Home** fits on one screen. The **This week** card has your streak, level and league chips,
   and a row of week dots each for you and the (up to 3) partners who most need you, with the
   crew's total and a **Nudge** for whoever is behind. Today's activity (rings and the next
@@ -73,7 +74,7 @@ they're consistent across devices and can't be edited by the client.
   (`PartnerList` in `src/components/partner-card.tsx`): a row per partner with their buddy in
   a ring that fills with their week (green once the goal is hit), "0 of 4 days · 3 weeks
   together", and round 🎯 Challenge and 👋 Nudge buttons (Nudge only while it can help), then
-  **Add a partner · 🎁 +100 XP**. Whoever needs a nudge comes first, then partners already
+  **Add a partner · 🎁 +100 treats**. Whoever needs a nudge comes first, then partners already
   nudged, resting, and done (`orderPartners` in `src/lib/partner-order.ts`). Challenges with
   each partner are listed under the rows; hold a row to remove the partner. Tapping a partner
   opens their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,
@@ -83,7 +84,7 @@ they're consistent across devices and can't be edited by the client.
   **Activity** (`src/components/activity-card.tsx`): the newest partner workouts (3, or 2 with
   two or more groups) as rows with round 👏 Cheer and ✅ Verify, and **See all** for the full
   feed (`src/app/activity.tsx`). The partner league is on the Leagues screen.
-- **Delete** a hand-logged workout from its detail screen (its photos, reactions, and XP go
+- **Delete** a hand-logged workout from its detail screen (its photos, reactions, and treats go
   with it). Apple Health workouts are deleted in the Health app and disappear on the next sync.
 - **Comments and voice messages** on any workout you can see: type encouragement or tap the mic
   for a voice note (up to 30 seconds, recorded in the app). You see comments from yourself and
@@ -105,7 +106,7 @@ status, and workouts by day. The math is in `src/lib/progress.ts` (unit-tested).
 15) and a separate bar for walks (same, 20, 30 or 45 minutes, or never), because phone apps
 save lots of short auto-detected walks to Apple Health. A workout under the bar is still
 stored and shown faded with "Didn't count" in your own lists, but it doesn't count toward the
-streak, XP, incentives or quests, doesn't notify partners, and stays out of their feed.
+streak, treats, incentives or quests, doesn't notify partners, and stays out of their feed.
 `workouts.counted` holds the answer (set on write by `public.workout_counts()`, refreshed for
 all of your workouts when you change the rules) so the database and the app agree; the client
 mirror is `src/lib/what-counts.ts`. Logic: `supabase/migrations/20261022000000_what_counts.sql`
@@ -132,7 +133,7 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   `src/lib/incentives.ts`.
 - **Verified only** (off by default) counts only Apple Health workouts or ones a partner verified.
 - The recipient accepts or passes. Progress updates automatically from workouts (computed in
-  Postgres). Hitting the goal earns it: **+100 XP**, a celebration, and pushes to both people.
+  Postgres). Hitting the goal earns it: **+100 treats**, a celebration, and pushes to both people.
   The giver marks it **delivered**; it lands on the recipient's **reward shelf** (Me tab).
 - An active incentive shows as a **quest card** (like Duolingo's Friends Quest,
   `src/components/quest-progress.tsx`): the count, one pip per day or workout (a bar for
@@ -143,7 +144,7 @@ A partner can reward you for extra effort: **"Hit 5 workout days this week → �
   Quest: both partners' workouts count toward one goal ("8 workout days between us this week →
   🍕 Pizza night together"). Workout days, workouts or minutes, with targets up to twice as high;
   not streak weeks. The quest card splits the pips by person (yours, then theirs). Finishing it
-  gives **both** people +100 XP, and either of them can mark the reward done. Logic:
+  gives **both** people +100 treats, and either of them can mark the reward done. Logic:
   `supabase/migrations/20261021000000_shared_quests.sql` (pgTAP in
   `supabase/tests/shared_quests.test.sql`).
 - One open incentive per giver → recipient. Unmet ones expire at the deadline (hourly sweep) with
@@ -188,13 +189,13 @@ shared as `https://sigamos.cloud/invite/CODE`, which opens the app or offers the
 ## Welcome tour
 
 The first time someone opens the app (after onboarding) they get a six-page swipeable tour:
-what Sigamos is, how the weekly streak works, partners, incentives, XP and levels, and picking
+what Sigamos is, how the weekly streak works, partners, incentives, treats and levels, and picking
 a buddy plus the widget. **Skip** works on every page before the last, and it takes the place of that day's
 greeting so two pop-ups never stack. Reopen it any time from **Me → Help → Show the welcome
 tour** (`src/app/welcome.tsx`; seen-state is per account in AsyncStorage).
 
-Tapping the level bar (Home, Me) opens **How XP works** (`src/app/xp.tsx`): what earns XP,
-what resets (XP never does; the league restarts every Sunday), and the level titles. The
+Tapping the level bar (Home, Me) opens **How treats work** (`src/app/xp.tsx`): what earns treats,
+what resets (treats never do; the league restarts every Sunday), and the level titles. The
 rules live in `src/lib/xp-rules.ts` and must match the amounts in the migrations.
 
 ## Rest mode
@@ -253,48 +254,48 @@ buddy** in the mood that matches your week.
 - How it works: database triggers write to `notifications` and send to the recipient's
   devices through Expo's push service using `pg_net`. No separate server is needed.
 
-## XP, levels, and the league (Duolingo-style)
+## treats, levels, and the league (Duolingo-style)
 
-| Earn | XP |
+| Earn | treats |
 | --- | --- |
 | Workout (5+ min) | 10 + 1 per 2 min, up to 40 |
 | Check-in photo on a workout (once per workout) | +25 |
-| Daily steps: 5,000 / 8,000 / 12,000 (up to 25 a day; XP only, never streaks or challenges) | +5 / +10 / +10 |
+| Daily steps: 5,000 / 8,000 / 12,000 (up to 25 a day; treats only, never streaks or challenges) | +5 / +10 / +10 |
 | Hitting your weekly goal | +50 |
 | A friend joins with your invite (new account) and logs their first workout; they get it too | +100 |
 | Earning a partner's incentive | +100 |
 | A partner verifies your workout (✅), once per workout | +5 |
 | Verifying a partner's workout (up to 3 a day) | +2 |
 
-- **Levels** get progressively longer: L2 at 100 XP, L3 at 300, L5 at 1,000, L10 at 4,500.
-- **Weekly league**: you and your partners ranked by XP earned this week (Sun–Sat).
+- **Levels** get progressively longer: L2 at 100 treats, L3 at 300, L5 at 1,000, L10 at 4,500.
+- **Weekly league**: you and your partners ranked by treats earned this week (Sun–Sat).
 - **Public leagues** (opt in from Partners → Public leagues, or Me → Settings → Privacy):
-  - Each week your first XP puts you in a group of up to 20 people at your tier, matched by time zone band so the week ends at about the same time for everyone.
-  - Tiers: ✨ Spark → 🔸 Ember → 🔥 Flame → ☄️ Blaze → 🌋 Inferno. At the end of the week the top quarter (up to 5) move up. The bottom 15% (up to 3) move down, along with anyone with no XP; nobody drops out of Spark.
-  - Strangers see only a first name or nickname, your buddy, your weekly XP and your tier. Never workouts, photos, streaks or partners.
+  - Each week your first treats puts you in a group of up to 20 people at your tier, matched by time zone band so the week ends at about the same time for everyone.
+  - Tiers: ✨ Spark → 🔸 Ember → 🔥 Flame → ☄️ Blaze → 🌋 Inferno. At the end of the week the top quarter (up to 5) move up. The bottom 15% (up to 3) move down, along with anyone with no treats; nobody drops out of Spark.
+  - Strangers see only a first name or nickname, your buddy, your weekly treats and your tier. Never workouts, photos, streaks or partners.
   - To keep it fair, hand-logged workouts without a photo count half in public leagues.
   - Anyone in your group can be reported. Reports land in `league_reports`.
   - Groups close hourly once the week is over everywhere (`close_league_weeks`, via pg_cron).
-- **Private groups** (up to 20 people, 3 groups each): a weekly XP leaderboard and a squad
+- **Private groups** (up to 20 people, 3 groups each): a weekly treats leaderboard and a squad
   streak (`20261102000000_groups.sql`). **Weekly podium**: on Sunday at 9am in each member's
-  time zone, groups of 2+ send everyone last week's 🥇🥈🥉 by XP (`send_group_podiums`, hourly
-  via pg_cron). Only people who earned XP place; ties share a medal and the next amount takes
+  time zone, groups of 2+ send everyone last week's 🥇🥈🥉 by treats (`send_group_podiums`, hourly
+  via pg_cron). Only people who earned treats place; ties share a medal and the next amount takes
   the next one. Medalists get "🥈 You took silver in …"; everyone else gets the podium plus their
   own place, and nobody is named for coming last. Groups of 2 get a head-to-head line, and a
-  group where nobody earned XP gets nothing. No bonus XP. The group screen shows a "Last week's
+  group where nobody earned treats gets nothing. No bonus treats. The group screen shows a "Last week's
   podium" card on Sunday and Monday (`podium()` in `src/lib/groups.ts`, same rule).
   **Medal ceremony** (`src/app/group/podium/[id].tsx`): the first time you open a group after
   the week ends, last week's podium plays out bronze → silver → gold, each buddy dropping onto its
   step as the medal swings in, with confetti for gold and your own line at the end. Once per group
   and week (stored on the device, `src/lib/podium-seen.ts`); ▶ Replay on the podium card plays it
   again. `?preview=1` shows sample results in development builds.
-  **How to earn XP** (under the leaderboard): your XP this week by source (🏃 Workouts 120 ·
-  👟 Steps 45 …, `xpBreakdown` in `src/lib/xp-rules.ts`), where you stand ("50 XP to pass Sam",
-  `climbLine` in `src/lib/groups.ts`), and, tapped open, every way to earn XP plus a note that it's
-  the same personal XP in every group and the league.
+  **How to earn treats** (under the leaderboard): your treats this week by source (🏃 Workouts 120 ·
+  👟 Steps 45 …, `xpBreakdown` in `src/lib/xp-rules.ts`), where you stand ("50 treats to pass Sam",
+  `climbLine` in `src/lib/groups.ts`), and, tapped open, every way to earn treats plus a note that it's
+  the same personal treats in every group and the league.
 - **Friend streak**: with each partner, the number of consecutive weeks you *both* hit
   your goals since becoming partners.
-- A **celebration screen** pops up when new XP lands (after a sync, a manual log, or a photo),
+- A **celebration screen** pops up when new treats lands (after a sync, a manual log, or a photo),
   including a new account's first workout. New workouts get a second step with the streak, the
   week's dots and what's next, plus a callout for a milestone (2, 4, 8, 12, 26, 52, 104 weeks)
   or a freeze earned that week.
@@ -303,8 +304,8 @@ buddy** in the mood that matches your week.
   **Friends**: a friend streak row per partner ("🔥 12 weeks together"), open "Invite a friend"
   slots, and **Edit** to remove a partner. The "🔥 2" friend streak under a partner's buddy opens it.
 - **Verifying** doesn't change streaks: every 15+ minute workout counts, verified or not. It
-  earns XP on both sides, and "verified only" incentives count hand-logged workouts only once a
-  partner verifies them. Removing a ✅ takes its XP back.
+  earns treats on both sides, and "verified only" incentives count hand-logged workouts only once a
+  partner verifies them. Removing a ✅ takes its treats back.
 
 ## Stack
 
@@ -332,13 +333,13 @@ src/app/                 Screens (Expo Router)
   log.tsx                Log a workout by hand with a check-in photo
   add-partner.tsx        Share your code / enter someone else's
   invite/[code].tsx      Deep link handler for invites
-  celebrate.tsx          "+XP" celebration, then the streak step
+  celebrate.tsx          "+treats" celebration, then the streak step
   streak.tsx             Streak detail: milestone, freezes, week-by-week history
 src/components/          UI pieces
 src/lib/health/          HealthKit queries, mapping to rows, sync to Supabase
 src/lib/week.ts          Week math shared by the UI
 supabase/migrations/     Schema, streak engine, RLS
-supabase/tests/          pgTAP tests: streak engine, partners, XP, RLS
+supabase/tests/          pgTAP tests: streak engine, partners, treats, RLS
 ```
 
 ## Setup
@@ -441,16 +442,16 @@ npm run test:db     # pgTAP: streak engine + RLS (needs `npx supabase start`, Do
   `website/privacy/` and `website/support/`, which say "email us" and "coming soon", once a
   build with deletion is out.
 - ~~**Make level progress easier to read.**~~ The level bar says "Level 8 · Iron" and
-  "357 XP to level 9" (`levelLabel` / `toNextLevel` in `src/lib/levels.ts`) instead of a title
-  and "443 / 800 XP", since a title spans several levels and the badge number moves slowly.
-- ~~**This week's XP on the celebration screen**~~ ("⚡ +180 XP this week", shown once it's
-  more than what you just earned) and on How XP works. It counts from Sunday, like the league.
+  "357 treats to level 9" (`levelLabel` / `toNextLevel` in `src/lib/levels.ts`) instead of a title
+  and "443 / 800 treats", since a title spans several levels and the badge number moves slowly.
+- ~~**This week's treats on the celebration screen**~~ ("⚡ +180 treats this week", shown once it's
+  more than what you just earned) and on How treats work. It counts from Sunday, like the league.
 
 1. ~~Scaffold, auth, schema~~
 2. ~~HealthKit sync (workouts, steps, energy, exercise minutes, heart rate)~~
 3. ~~Weekly streak engine + Home screen~~
 4. ~~Accountability partners, check-in photos, reactions, nudges~~
-5. ~~XP, levels, weekly league, friend streaks, celebrations~~
+5. ~~treats, levels, weekly league, friend streaks, celebrations~~
 6. ~~Push notifications for nudges and partner workouts~~
 7. ~~Pushes for partner requests, verified workouts, and streak-at-risk reminders~~
 8. Achievements/badges, self-set rewards, challenges

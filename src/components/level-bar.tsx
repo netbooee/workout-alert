@@ -15,7 +15,7 @@ export function LevelBar({ xp, pressable = true }: { xp: number; pressable?: boo
       onPress={() => router.push('/xp')}
       accessibilityRole={pressable ? 'button' : undefined}
       accessibilityLabel={`${levelLabel(info)}, ${toNextLevel(info)}`}
-      accessibilityHint={pressable ? 'Shows how XP works' : undefined}
+      accessibilityHint={pressable ? 'Shows how treats work' : undefined}
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.6 }]}>
       <View style={styles.badge}>
         <SymbolView name="bolt.fill" size={14} tintColor="#000" />

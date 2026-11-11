@@ -79,7 +79,7 @@ describe('lotlMessage', () => {
       weekDays: 2,
       league: { rank: 2, size: 3, gapToNext: 44, aheadName: 'Sam' },
     });
-    expect(msg.facts[1]).toEqual({ emoji: '🥈', text: '2nd in the league, 44 XP behind Sam' });
+    expect(msg.facts[1]).toEqual({ emoji: '🥈', text: '2nd in the league, 44 treats behind Sam' });
   });
 
   it('mentions partners who already worked out today', () => {

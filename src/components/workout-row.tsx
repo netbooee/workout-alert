@@ -9,6 +9,7 @@ import { useEvidenceUrls } from '@/lib/evidence';
 import { evidenceBadges } from '@/lib/evidence-badges';
 import { formatDuration, workoutIcon, workoutLabel } from '@/lib/workout-types';
 import { workoutXp } from '@/lib/workout-xp';
+import { treats } from '@/lib/treats';
 
 /**
  * One of your workouts. With `showXp` (Home), it also shows the XP it earned
@@ -82,11 +83,11 @@ export function WorkoutRow({
           <View
             style={styles.xpCol}
             accessible
-            accessibilityLabel={`Earned ${xp.earned} XP${more ? `, up to ${xp.potential}` : ''}`}>
+            accessibilityLabel={`Earned ${treats(xp.earned)}${more ? `, up to ${xp.potential}` : ''}`}>
             <View style={styles.xp}>
               <SymbolView name="bolt.fill" size={14} tintColor={Colors.xp} />
               <AppText style={styles.xpText}>{xp.earned}</AppText>
-              <AppText style={styles.xpUnit}>XP</AppText>
+              <AppText style={styles.xpUnit}>{xp.earned === 1 ? 'treat' : 'treats'}</AppText>
             </View>
             {more ? (
               <AppText variant="caption" style={styles.more}>

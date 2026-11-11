@@ -15,6 +15,7 @@ import { useEvidenceUrls } from '@/lib/evidence';
 import { evidenceBadges } from '@/lib/evidence-badges';
 import { formatDuration, workoutIcon, workoutLabel } from '@/lib/workout-types';
 import { isVerified, workoutXp } from '@/lib/workout-xp';
+import { treats } from '@/lib/treats';
 
 const THUMB = 72;
 
@@ -71,9 +72,9 @@ export function FeedCard({ item, name }: { item: FeedItem; name: string }) {
                 {name.split(' ')[0]} · {workoutLabel(w.activity_type)}
               </AppText>
               {xp > 0 && (
-                <View style={styles.xp} accessibilityLabel={`Earned ${xp} XP`}>
+                <View style={styles.xp} accessibilityLabel={`Earned ${treats(xp)}`}>
                   <AppText variant="caption" color={Colors.text} style={styles.xpText}>
-                    ⚡ {xp} XP
+                    ⚡ {treats(xp)}
                   </AppText>
                 </View>
               )}

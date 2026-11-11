@@ -9,8 +9,9 @@ import { useXpThisWeek, useXpTotal } from '@/hooks/use-social';
 import { levelFor, levelStart, TITLES } from '@/lib/levels';
 import { nextStepTier, STEP_TIERS, stepXp } from '@/lib/step-xp';
 import { XP_RULES } from '@/lib/xp-rules';
+import { treats } from '@/lib/treats';
 
-/** "How XP works": opened by tapping the level bar. */
+/** "How treats work": opened by tapping the level bar. */
 export default function XpScreen() {
   const { data: xp } = useXpTotal();
   const { data: weekXp } = useXpThisWeek();
@@ -20,7 +21,7 @@ export default function XpScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.header}>
-        <AppText variant="heading">How XP works</AppText>
+        <AppText variant="heading">How treats work</AppText>
         <Pressable onPress={() => router.back()} hitSlop={12} accessibilityRole="button">
           <AppText variant="heading" color={Colors.flame}>
             Done
@@ -32,11 +33,11 @@ export default function XpScreen() {
         <View style={styles.card}>
           <LevelBar xp={total} pressable={false} />
           <AppText variant="caption">
-            {total.toLocaleString()} XP total{weekXp ? ` · +${weekXp.toLocaleString()} this week` : ''}
+            {treats(total)} total{weekXp ? ` · +${weekXp.toLocaleString()} this week` : ''}
           </AppText>
         </View>
 
-        <SectionLabel>Earn XP</SectionLabel>
+        <SectionLabel>Earn treats</SectionLabel>
         <View style={styles.card}>
           {XP_RULES.map((r) => (
             <View key={r.what} style={styles.row}>
@@ -57,22 +58,22 @@ export default function XpScreen() {
         <View style={styles.card}>
           <AppText variant="body">
             <AppText variant="body" style={styles.bold}>
-              Your XP and level never reset.
+              Your treats and level never reset.
             </AppText>{' '}
-            XP is only taken back if what earned it is undone, like deleting a workout.
+            Treats are only taken back if what earned it is undone, like deleting a workout.
           </AppText>
           <AppText variant="body">
             <AppText variant="body" style={styles.bold}>
               Leagues start over every Sunday
             </AppText>{' '}
-            at midnight, counting only XP earned that week. In public leagues, hand-logged
+            at midnight, counting only treats earned that week. In public leagues, hand-logged
             workouts without a photo count half.
           </AppText>
           <AppText variant="body">
             <AppText variant="body" style={styles.bold}>
               Streaks are separate:
             </AppText>{' '}
-            a missed week (with no freeze) resets your streak, never your XP.
+            a missed week (with no freeze) resets your streak, never your treats.
           </AppText>
         </View>
 
@@ -88,7 +89,7 @@ export default function XpScreen() {
                 </AppText>
                 <AppText variant="caption">
                   {next ? `Levels ${minLevel}–${next - 1}` : `Level ${minLevel}+`} ·{' '}
-                  {levelStart(minLevel).toLocaleString()} XP
+                  {treats(levelStart(minLevel))}
                 </AppText>
               </View>
             );
@@ -123,11 +124,11 @@ function StepBonus() {
           );
         })}
         <AppText variant="caption">
-          Today: {steps.toLocaleString()} steps · +{stepXp(steps)} XP
+          Today: {steps.toLocaleString()} steps · +{treats(stepXp(steps))}
           {next ? ` · ${(next.steps - steps).toLocaleString()} more for +${next.xp}` : ' · every bonus earned 🎉'}
         </AppText>
         <AppText variant="caption">
-          Up to 25 XP a day from Apple Health’s step count. Steps earn XP only; they don’t count
+          Up to 25 treats a day from Apple Health’s step count. Steps earn treats only; they don’t count
           toward your streak or challenges.
         </AppText>
       </View>

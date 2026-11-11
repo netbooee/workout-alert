@@ -47,7 +47,7 @@ export function IncentiveIntro({ partners }: { partners: PartnerState[] }) {
           <AppText variant="heading">Challenge a partner</AppText>
           <AppText variant="caption">
             Reward a stretch goal (“4 workouts this week → coffee on me”) or do one together
-            (“8 workout days between us → pizza night”). Sigamos tracks it, worth +100 XP.
+            (“8 workout days between us → pizza night”). Sigamos tracks it, worth +100 treats.
           </AppText>
         </View>
       </View>

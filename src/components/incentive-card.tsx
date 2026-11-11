@@ -197,9 +197,9 @@ export function IncentiveCard({
         <View style={{ gap: Spacing.sm }}>
           <AppText variant="body" color={Colors.success}>
             {i.shared
-              ? `🎉 You and ${other} did it! +100 XP each. Enjoy it together.`
+              ? `🎉 You and ${other} did it! +100 treats each. Enjoy it together.`
               : received
-                ? `🎉 You earned it! +100 XP. ${other} owes you this one.`
+                ? `🎉 You earned it! +100 treats. ${other} owes you this one.`
                 : `🎉 ${other} earned it!`}
           </AppText>
           {(!received || i.shared) && (

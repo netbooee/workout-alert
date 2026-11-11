@@ -200,14 +200,14 @@ function AddRow() {
       onPress={() => router.push('/add-partner')}
       accessibilityRole="button"
       accessibilityLabel="Add a partner"
-      accessibilityHint="Plus 100 XP for you both when a new friend joins and works out"
+      accessibilityHint="Plus 100 treats for you both when a new friend joins and works out"
       style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}>
       <View style={styles.addRing}>
         <SymbolView name="plus" size={18} weight="semibold" tintColor={Colors.flame} />
       </View>
       <AppText style={[styles.name, { flex: 1, color: Colors.flame }]}>Add a partner</AppText>
       <View style={styles.bonus}>
-        <AppText style={styles.bonusText}>🎁 +100 XP</AppText>
+        <AppText style={styles.bonusText}>🎁 +100 treats</AppText>
       </View>
     </Pressable>
   );

@@ -34,7 +34,7 @@ export function celebrationTitle(c: CelebrationFacts): string {
 /** The buddy's speech bubble: the biggest thing that just happened. */
 export function buddyLine(c: CelebrationFacts): string {
   if (c.invite === 'inviter') return 'Your invite paid off! Your friend just worked out 🎁';
-  if (c.invite === 'welcome') return 'Welcome to the crew! +100 XP for joining with an invite 🎁';
+  if (c.invite === 'welcome') return 'Welcome to the crew! +100 treats for joining with an invite 🎁';
   if (c.incentive) return 'You finished the challenge! Go claim that reward 🎁';
   if (c.weekGoal) return 'Week goal smashed! Your streak is safe 🔥';
   if (c.newLevel) return `Level ${c.newLevel}! Look at you go ⭐`;

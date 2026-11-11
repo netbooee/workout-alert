@@ -103,7 +103,7 @@ describe('medal ceremony', () => {
     expect(myPodiumLine(as('Blair'))).toBe('You won gold! 🥇');
     expect(myPodiumLine(as('Casey'))).toBe('You took silver! 🥈');
     expect(myPodiumLine(as('Drew'))).toBe('You took bronze! 🥉');
-    expect(myPodiumLine(as('Fay'))).toBe('You were 4th with 50 XP. Fresh week, let’s go 💪');
+    expect(myPodiumLine(as('Fay'))).toBe('You were 4th with 50 treats. Fresh week, let’s go 💪');
     expect(myPodiumLine(as('Eli'))).toBe('Fresh week, fresh start. Let’s go 💪');
   });
 
@@ -121,11 +121,11 @@ describe('climbLine', () => {
   const row = (name: string, xp: number, is_me = false) => ({ name, xp, is_me });
 
   it('shows the gap to the next person up', () => {
-    expect(climbLine([row('Maria', 300), row('Sam', 200), row('Alex', 150, true)])).toBe('50 XP to pass Sam');
+    expect(climbLine([row('Maria', 300), row('Sam', 200), row('Alex', 150, true)])).toBe('50 treats to pass Sam');
   });
 
   it('celebrates the lead and calls a tie', () => {
-    expect(climbLine([row('Alex', 300, true), row('Maria', 215)])).toBe('You’re in the lead by 85 XP 🥇');
+    expect(climbLine([row('Alex', 300, true), row('Maria', 215)])).toBe('You’re in the lead by 85 treats 🥇');
     expect(climbLine([row('Alex', 300, true), row('Maria', 300)])).toBe('You’re tied for first. One more workout breaks it.');
   });
 

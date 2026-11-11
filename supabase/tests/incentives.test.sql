@@ -109,7 +109,7 @@ select is((select amount from public.xp_events where kind = 'incentive'), 100, '
 select bag_eq(
   $$select user_id, title, body from public.notifications where kind = 'incentive'$$,
   $$values
-    ('00000000-0000-0000-0000-00000000000b'::uuid, 'You completed Sam’s challenge! 🎉'::text, '☕ Coffee on me · +100 XP'::text),
+    ('00000000-0000-0000-0000-00000000000b'::uuid, 'You completed Sam’s challenge! 🎉'::text, '☕ Coffee on me · +100 treats'::text),
     ('00000000-0000-0000-0000-00000000000a'::uuid, 'Jo completed your challenge 🎉'::text, 'Time to deliver: ☕ Coffee on me'::text)$$,
   'both people are notified when it is earned');
 

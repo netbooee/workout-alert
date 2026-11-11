@@ -9,6 +9,7 @@ import { useMyGroups } from '@/hooks/use-groups';
 import { useLeagueResult, useLeagueSettings, usePublicLeague } from '@/hooks/use-league';
 import { MAX_GROUPS, squadLine } from '@/lib/groups';
 import { resultLine, tierInfo } from '@/lib/leagues';
+import { treats } from '@/lib/treats';
 
 /**
  * Where you compete, one row each: your public league (where you stand this
@@ -29,8 +30,8 @@ export function CompeteCard() {
     : result
       ? resultLine(result.result, result.tier)
       : me
-        ? `#${me.rank} of ${me.group_size} · ${me.xp} XP this week`
-        : 'Earn XP to join this week’s group';
+        ? `#${me.rank} of ${me.group_size} · ${treats(me.xp)} this week`
+        : 'Earn treats to join this week’s group';
   const myGroups = groups.data ?? [];
 
   return (

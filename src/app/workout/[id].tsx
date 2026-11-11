@@ -160,7 +160,7 @@ function RewardPrompt({ partnerId, name }: { partnerId: string; name: string }) 
         <AppText variant="heading" style={{ fontSize: 15 }}>
           Challenge {name.split(' ')[0]}
         </AppText>
-        <AppText variant="caption">Reward a stretch goal, or take one on together. +100 XP.</AppText>
+        <AppText variant="caption">Reward a stretch goal, or take one on together. +100 treats.</AppText>
       </View>
       <SymbolView name="chevron.right" size={14} tintColor={Colors.textMuted} />
     </Pressable>
@@ -185,7 +185,7 @@ function DeleteWorkout({ workout }: { workout: Workout }) {
   const confirm = () =>
     Alert.alert(
       'Delete this workout?',
-      'Its photos, reactions, and XP are removed too, and your streak is updated.',
+      'Its photos, reactions, and treats are removed too, and your streak is updated.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -292,7 +292,7 @@ function Photos({ workout, editable }: { workout: Workout; editable: boolean }) 
                 Add photo
               </AppText>
               <AppText variant="caption" style={{ fontSize: 12, fontWeight: '700' }}>
-                ⚡ +25 XP
+                ⚡ +25 treats
               </AppText>
             </>
           )}

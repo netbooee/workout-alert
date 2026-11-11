@@ -20,6 +20,7 @@ import { mascotKind } from '@/lib/mascots';
 import { cardHeadline, shareCaption, type ShareCard } from '@/lib/share-card';
 import { workoutLabel } from '@/lib/workout-types';
 import { isVerified, workoutXp } from '@/lib/workout-xp';
+import { treats } from '@/lib/treats';
 
 /** Story-shaped, exported at 1080 × 1920. */
 const RATIO = 16 / 9;
@@ -165,7 +166,7 @@ function CardArt({
           <View style={{ gap: 10 * s }}>
             <Text style={t(26)}>{card.minutes} min</Text>
             <View style={[styles.chips, { gap: 8 * s }]}>
-              {card.xp > 0 && <Chip s={s} text={`⚡ ${card.xp} XP`} />}
+              {card.xp > 0 && <Chip s={s} text={`⚡ ${treats(card.xp)}`} />}
               {card.streakWeeks > 0 && <Chip s={s} text={`🔥 ${card.streakWeeks}-week streak`} />}
             </View>
           </View>

@@ -4,6 +4,7 @@
 
 import type { GroupMemberRow, MyGroup } from './database.types';
 import { addDays, dayKey, startOfWeek } from './week';
+import { treats } from '@/lib/treats';
 
 export const MAX_GROUPS = 3;
 export const MAX_GROUP_SIZE = 20;
@@ -108,7 +109,7 @@ export function myPodiumLine(rows: readonly Pick<GroupMemberRow, 'last_week_xp' 
   const place = amounts.indexOf(me.last_week_xp);
   if (place === 0) return 'You won gold! 🥇';
   if (place < 3) return `You took ${MEDAL_NAMES[place]}! ${place === 1 ? '🥈' : '🥉'}`;
-  return `You were ${ordinal(place + 1)} with ${me.last_week_xp} XP. Fresh week, let’s go 💪`;
+  return `You were ${ordinal(place + 1)} with ${treats(me.last_week_xp)}. Fresh week, let’s go 💪`;
 }
 
 function ordinal(n: number): string {
@@ -139,9 +140,9 @@ export function climbLine(rows: readonly Pick<GroupMemberRow, 'name' | 'xp' | 'i
   const others = rows.filter((r) => !r.is_me);
   const best = Math.max(...others.map((r) => r.xp));
   if (me.xp === 0 && best === 0) return 'Nobody’s on the board yet. Your first workout takes the lead.';
-  if (me.xp > best) return `You’re in the lead by ${me.xp - best} XP 🥇`;
+  if (me.xp > best) return `You’re in the lead by ${treats(me.xp - best)} 🥇`;
   if (me.xp === best) return 'You’re tied for first. One more workout breaks it.';
   // The closest person ahead of you.
   const ahead = others.filter((r) => r.xp > me.xp).sort((a, b) => a.xp - b.xp || a.name.localeCompare(b.name))[0]!;
-  return `${ahead.xp - me.xp} XP to pass ${ahead.name}`;
+  return `${treats(ahead.xp - me.xp)} to pass ${ahead.name}`;
 }

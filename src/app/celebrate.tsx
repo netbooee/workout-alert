@@ -23,6 +23,7 @@ import { mascotKind } from '@/lib/mascots';
 import { playSound } from '@/lib/sounds';
 import { earnedFreezeAt, isMilestone, milestoneLabel } from '@/lib/streak';
 import { buildWeek, weekState, type WeekState, type WorkoutLike } from '@/lib/week';
+import { treats } from '@/lib/treats';
 
 /**
  * The Duolingo-style "lesson complete" moment after new activity earns XP:
@@ -106,11 +107,11 @@ export default function CelebrateScreen() {
             {celebrationTitle(facts)}
           </AppText>
           <AppText variant="display" color={Colors.xp}>
-            +{shown} XP
+            +{treats(shown)}
           </AppText>
           {uncounted && (
             <AppText variant="caption" style={{ textAlign: 'center', maxWidth: 300 }}>
-              This one is under your What counts bar, so it won’t fill a day this week or earn XP. It’s still saved in your history.
+              This one is under your What counts bar, so it won’t fill a day this week or earn treats. It’s still saved in your history.
             </AppText>
           )}
         </Animated.View>
@@ -133,7 +134,7 @@ export default function CelebrateScreen() {
             this is the week's first XP, since it would just repeat the number above. */}
         {weekXp != null && weekXp > earned && (
           <Animated.View entering={FadeInDown.delay(400)} style={[styles.pill, { backgroundColor: Colors.xpSoft }]}>
-            <AppText variant="heading">⚡ +{weekXp.toLocaleString()} XP this week</AppText>
+            <AppText variant="heading">⚡ +{treats(weekXp)} this week</AppText>
           </Animated.View>
         )}
 
@@ -254,7 +255,7 @@ function nextStepLine(state: WeekState, streak: Streak, weekGoal: boolean): stri
     case 'done':
       return weekGoal
         ? `Goal hit. Week ${weeks} is in the books 🔥`
-        : 'Goal already hit this week. Extra days still earn XP.';
+        : 'Goal already hit this week. Extra days still earn treats.';
     case 'on-track':
     case 'at-risk':
       return weeks > 0

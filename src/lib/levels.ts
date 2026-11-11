@@ -1,6 +1,8 @@
 // Levels grow like Duolingo's: early ones come fast, later ones take longer.
 // Level n starts at 50·n·(n−1) XP → L2 at 100, L3 at 300, L5 at 1,000, L10 at 4,500.
 
+import { treats } from '@/lib/treats';
+
 export function levelStart(level: number): number {
   return 50 * level * (level - 1);
 }
@@ -49,5 +51,5 @@ export function levelLabel(info: Pick<LevelInfo, 'level' | 'title'>): string {
 
 /** What's left until the next level, e.g. "357 XP to level 9". */
 export function toNextLevel(info: Pick<LevelInfo, 'level' | 'into' | 'span'>): string {
-  return `${(info.span - info.into).toLocaleString('en-US')} XP to level ${info.level + 1}`;
+  return `${treats(info.span - info.into)} to level ${info.level + 1}`;
 }

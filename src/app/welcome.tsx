@@ -44,16 +44,16 @@ const PAGES: Page[] = [
     title: 'Challenges',
     body: 'Challenge a partner to a stretch goal with a real reward, like “4 workouts this week → coffee on me,” or take one on together.',
     points: [
-      'Sigamos tracks it, and finishing is worth +100 XP',
-      'XP from every workout moves you up the weekly league',
+      'Sigamos tracks it, and finishing is worth +100 treats',
+      'Treats from every workout move you up the weekly league',
     ],
   },
   {
     emoji: '⚡',
-    title: 'Earn XP, level up',
-    body: 'Everything you do earns XP. It never resets, so your level only goes up: Rookie, Regular, Grinder, Iron, Machine, Legend.',
+    title: 'Earn treats, level up',
+    body: 'Everything you do earns treats. They never reset, so your level only goes up: Rookie, Regular, Grinder, Iron, Machine, Legend.',
     points: [
-      'Workouts earn 10–40 XP; add a photo for +25',
+      'Workouts earn 10–40 treats; add a photo for +25',
       'Hit your weekly goal: +50',
       'Partner verifies your workout: +5; you verify theirs: +2',
       'Finish a challenge: +100',

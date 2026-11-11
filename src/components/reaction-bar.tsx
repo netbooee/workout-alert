@@ -105,7 +105,7 @@ export function ReactionBar({
     if (explained) return save();
     Alert.alert(
       'Verify this workout?',
-      'Verify means you saw them do it, or you trust the photo. It counts toward "verified only" challenges, and you both get a little XP.',
+      'Verify means you saw them do it, or you trust the photo. It counts toward "verified only" challenges, and you both get a few treats.',
       [
         { text: 'Cancel', style: 'cancel' },
         {

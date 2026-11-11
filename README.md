@@ -40,8 +40,8 @@ they're consistent across devices and can't be edited by the client.
 - Partners **Cheer** a workout (👏, or hold for 🔥 or 💪; tap again to take it back) or
   **Verify** it (you saw them do it; explained the first time; you can't verify your own).
 - **Cheer on your partners**: partner workouts from the last 3 days you haven't cheered or
-  verified show on Home (up to 3) and at the top of the Partners tab, with Cheer and Verify
-  on each row. A row stays after a cheer so you can still verify; it leaves when you verify,
+  verified show on Home (up to 3), with Cheer and Verify on each row; on the Partners tab the
+  Activity card counts them ("2 to cheer"). A row stays after a cheer so you can still verify; it leaves when you verify,
   when you dismiss it with ✕ (remembered on the phone), or next time you open the app if you
   only cheered. The Partners tab icon counts workouts you haven't touched, plus partner
   requests (`src/lib/cheers.ts`, `src/lib/cheer-list-store.ts`, `src/components/cheer-card.tsx`).
@@ -69,16 +69,20 @@ they're consistent across devices and can't be edited by the client.
   with a "+N" badge, or the workout's icon), three single lines (who and what; duration,
   heart rate and when; the note or where it was recorded), then Cheer and Verify. Tapping the
   thumbnail opens the photos full screen (swipe, pinch to zoom, save).
-- **Partners tab** order: requests, workouts to cheer, your partners, partner activity, then
-  the league (only with 2+ partners) and the incentive intro. **Your partners** are one "This
-  week" card (`PartnerList` in `src/components/partner-card.tsx`): a grid of buddies, three
-  across, each inside a ring that fills with their week (green once the goal is hit), with
-  "1/3 · 🔥 2" (days, friend streak), Challenge, and Nudge while it can help, then a dashed **Add**
-  tile. Whoever needs a nudge comes first, then partners already nudged, resting, and done
-  (`orderPartners` in `src/lib/partner-order.ts`), so nobody who needs you is out of view.
-  Challenges with each partner are listed under the row. Tapping a partner's buddy opens
-  their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,
+- **Partners tab** fits on one screen: requests (when waiting), then **Your partners**
+  (`PartnerList` in `src/components/partner-card.tsx`): a row per partner with their buddy in
+  a ring that fills with their week (green once the goal is hit), "0 of 4 days · 3 weeks
+  together", and round 🎯 Challenge and 👋 Nudge buttons (Nudge only while it can help), then
+  **Add a partner · 🎁 +100 XP**. Whoever needs a nudge comes first, then partners already
+  nudged, resting, and done (`orderPartners` in `src/lib/partner-order.ts`). Challenges with
+  each partner are listed under the rows; hold a row to remove the partner. Tapping a partner
+  opens their page (`src/app/partner/[id].tsx`): streak, this week, weeks together, Nudge,
   Incentive, anything going on between you, and their recent workouts.
+  Under it, **Compete** (`src/components/compete-card.tsx`): your public league, a row per group
+  (up to 3) with its squad streak, and "New or join a group" while there's room. Then
+  **Activity** (`src/components/activity-card.tsx`): the newest partner workouts (3, or 2 with
+  two or more groups) as rows with round 👏 Cheer and ✅ Verify, and **See all** for the full
+  feed (`src/app/activity.tsx`). The partner league is on the Leagues screen.
 - **Delete** a hand-logged workout from its detail screen (its photos, reactions, and XP go
   with it). Apple Health workouts are deleted in the Health app and disappear on the next sync.
 - **Comments and voice messages** on any workout you can see: type encouragement or tap the mic
@@ -318,7 +322,8 @@ src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
   onboarding.tsx         Buddy, name (if missing), goal, Apple Health, notifications, invite a partner
   (tabs)/index.tsx       Home: This week card (you + crew), summary rows
-  (tabs)/partners.tsx    League, your partners, requests, partner activity feed
+  (tabs)/partners.tsx    Requests, your partners, league + groups, latest partner activity
+  activity.tsx           All partner activity (Partners › See all)
   league.tsx             Public leagues (join, group table, results) and the partner league
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code
   week/[start].tsx       One week from the progress chart: totals and workouts by day

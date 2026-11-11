@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import { useState, type ReactNode } from 'react';
-import { Alert, LayoutAnimation, Pressable, StyleSheet, useWindowDimensions, View } from 'react-native';
+import { Alert, LayoutAnimation, Pressable, StyleSheet, View } from 'react-native';
 import Svg, { Circle } from 'react-native-svg';
 
 import { Mascot } from '@/components/mascots';
@@ -18,17 +18,14 @@ import { partnerMood } from '@/lib/lotl';
 import { MASCOTS, mascotKind } from '@/lib/mascots';
 import { orderPartners } from '@/lib/partner-order';
 
-/** Three tiles across; the screen and the card each have Spacing.md padding on both sides. */
-const COLUMNS = 3;
-const TILE_GAP = 10;
-const RING = 84;
-const RING_STROKE = 6;
+const RING = 46;
+const RING_STROKE = 4;
 
 /**
- * Your partners as a grid of buddies, three across, each inside a ring that
- * fills with their week, with Nudge and Challenge under it, then an Add tile.
- * Whoever needs a nudge comes first, so nobody who needs you is hidden.
- * Challenges between you and a partner are listed under the grid.
+ * Your partners, one row each: their buddy inside a ring that fills with their
+ * week, their days and friend streak, and round Challenge and Nudge buttons.
+ * Whoever needs a nudge comes first. An Add row ends the list, and challenges
+ * between you and a partner are listed under it.
  */
 export function PartnerList({ partners }: { partners: PartnerState[] }) {
   // Every challenge between you and each partner that's still going, or earned and waiting to be delivered.
@@ -39,18 +36,16 @@ export function PartnerList({ partners }: { partners: PartnerState[] }) {
     );
   const canChallenge = (p: PartnerState) => !given.some((i) => i.to_id === p.partner_id && isOpen(i));
   const ordered = orderPartners(partners);
-  const { width } = useWindowDimensions();
-  const tileWidth = Math.floor((width - Spacing.md * 4 - TILE_GAP * (COLUMNS - 1)) / COLUMNS);
 
   return (
-    <Card style={{ gap: Spacing.md }}>
-      <AppText variant="label">This week</AppText>
-      <View style={styles.grid}>
-        {ordered.map((p) => (
-          <PartnerTile key={p.partnership_id} partner={p} canChallenge={canChallenge(p)} width={tileWidth} />
-        ))}
-        <AddTile width={tileWidth} />
-      </View>
+    <Card style={styles.card}>
+      {ordered.map((p) => (
+        <View key={p.partnership_id}>
+          <PartnerRow partner={p} canChallenge={canChallenge(p)} />
+          <View style={styles.divider} />
+        </View>
+      ))}
+      <AddRow />
       {ordered.map((p) => {
         const challenges = challengesWith(p);
         const firstName = p.display_name?.split(' ')[0] ?? '';
@@ -62,15 +57,7 @@ export function PartnerList({ partners }: { partners: PartnerState[] }) {
   );
 }
 
-function PartnerTile({
-  partner,
-  canChallenge,
-  width,
-}: {
-  partner: PartnerState;
-  canChallenge: boolean;
-  width: number;
-}) {
+function PartnerRow({ partner, canChallenge }: { partner: PartnerState; canChallenge: boolean }) {
   const nudge = useNudge();
   const remove = useRemovePartner();
   const done = partner.this_week_days >= partner.this_week_goal;
@@ -88,7 +75,13 @@ function PartnerTile({
     now,
   );
   const progress = partner.resting ? 0 : Math.min(partner.this_week_days / Math.max(partner.this_week_goal, 1), 1);
-  const week = partner.resting ? 'Resting' : `${partner.this_week_days}/${partner.this_week_goal}`;
+  const week = partner.resting
+    ? 'Resting this week'
+    : `${partner.this_week_days} of ${partner.this_week_goal} days`;
+  const together = partner.friend_streak
+    ? ` · ${partner.friend_streak} week${partner.friend_streak === 1 ? '' : 's'} together`
+    : '';
+  const canNudge = !done && !partner.resting;
 
   const confirmRemove = () =>
     Alert.alert(`Remove ${partner.display_name ?? 'partner'}?`, 'You will stop seeing each other’s workouts.', [
@@ -97,81 +90,79 @@ function PartnerTile({
     ]);
 
   return (
-    <View style={[styles.tile, { width }]}>
+    <View style={styles.row}>
       <Pressable
         onPress={() => router.push({ pathname: '/partner/[id]', params: { id: partner.partner_id } })}
         onLongPress={confirmRemove}
         accessibilityRole="button"
-        accessibilityLabel={`${firstName}, ${
-          partner.resting ? 'resting this week' : `${partner.this_week_days} of ${partner.this_week_goal} days this week`
-        }, buddy ${MASCOTS[mascotKind(partner.mascot)].name}`}
-        accessibilityHint={`Opens ${firstName}’s workouts`}
-        style={({ pressed }) => [styles.tileTop, pressed && { opacity: 0.7 }]}>
+        accessibilityLabel={`${firstName}, ${week}${together}, buddy ${MASCOTS[mascotKind(partner.mascot)].name}`}
+        accessibilityHint={`Opens ${firstName}’s workouts. Hold to remove.`}
+        style={({ pressed }) => [styles.who, pressed && { opacity: 0.7 }]}>
         <WeekRing progress={progress} done={done && !partner.resting}>
-          <Mascot kind={mascotKind(partner.mascot)} mood={mood} size={50} />
+          <Mascot kind={mascotKind(partner.mascot)} mood={mood} size={30} />
         </WeekRing>
-        <AppText variant="heading" numberOfLines={1} style={{ fontSize: 15 }}>
-          {firstName}
-        </AppText>
-      </Pressable>
-      <Pressable
-        onPress={() => router.push({ pathname: '/streak', params: { tab: 'friends' } })}
-        hitSlop={8}
-        accessibilityRole="button"
-        accessibilityLabel={`Friend streak with ${firstName}: ${partner.friend_streak} weeks`}>
-        <AppText variant="caption">
-          {week} ·{' '}
-          <AppText variant="caption" color={partner.friend_streak ? Colors.xp : Colors.textMuted}>
-            🔥 {partner.friend_streak}
+        <View style={{ flex: 1, gap: 1 }}>
+          <AppText style={styles.name} numberOfLines={1}>
+            {firstName}
           </AppText>
-        </AppText>
+          <AppText variant="caption" numberOfLines={1} style={{ fontSize: 12 }}>
+            {week}
+            {together}
+          </AppText>
+        </View>
       </Pressable>
-      <View style={styles.tileActions}>
-        {canChallenge ? (
-          <Pressable
-            onPress={() => {
-              Haptics.selectionAsync();
-              router.push({ pathname: '/incentive/new', params: { to: partner.partner_id } });
-            }}
-            hitSlop={4}
-            accessibilityRole="button"
-            accessibilityLabel={`Challenge ${firstName}`}
-            style={[styles.mini, styles.offer]}>
-            <AppText
-              variant="heading"
-              color={Colors.flame}
-              style={styles.miniText}
-              numberOfLines={1}
-              adjustsFontSizeToFit
-              minimumFontScale={0.8}>
-              🎯 Challenge
-            </AppText>
-          </Pressable>
-        ) : (
-          // An open challenge already exists: keep the space so the tiles in a row line up.
-          <View style={styles.mini} />
-        )}
-        {/* Nudge only when it can help; it sits under Challenge so Challenge lines up across a row. */}
-        {!done && !partner.resting && (
-          <Pressable
-            disabled={recentlyNudged || nudge.isPending}
-            onPress={() => {
-              Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-              nudge.mutate(partner.partner_id, {
-                onError: (e) => Alert.alert('Couldn’t nudge', friendlyError(e)),
-              });
-            }}
-            hitSlop={4}
-            accessibilityRole="button"
-            accessibilityLabel={recentlyNudged ? `Nudged ${firstName}` : `Nudge ${firstName}`}
-            style={[styles.mini, styles.miniFilled, recentlyNudged && { opacity: 0.5 }]}>
-            <AppText variant="heading" style={styles.miniText} numberOfLines={1}>
-              {recentlyNudged ? 'Nudged 👋' : '👋 Nudge'}
-            </AppText>
-          </Pressable>
-        )}
-      </View>
+      {canChallenge && (
+        <RoundButton
+          label={`Challenge ${firstName}`}
+          emoji="🎯"
+          onPress={() => {
+            Haptics.selectionAsync();
+            router.push({ pathname: '/incentive/new', params: { to: partner.partner_id } });
+          }}
+        />
+      )}
+      {canNudge && (
+        <RoundButton
+          label={recentlyNudged ? `Nudged ${firstName}` : `Nudge ${firstName}`}
+          emoji="👋"
+          muted={recentlyNudged}
+          disabled={recentlyNudged || nudge.isPending}
+          onPress={() => {
+            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+            nudge.mutate(partner.partner_id, {
+              onError: (e) => Alert.alert('Couldn’t nudge', friendlyError(e)),
+            });
+          }}
+        />
+      )}
     </View>
+  );
+}
+
+function RoundButton({
+  label,
+  emoji,
+  onPress,
+  muted = false,
+  disabled = false,
+}: {
+  label: string;
+  emoji: string;
+  onPress: () => void;
+  muted?: boolean;
+  disabled?: boolean;
+}) {
+  return (
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      hitSlop={2}
+      accessibilityRole="button"
+      accessibilityLabel={label}
+      accessibilityState={{ disabled }}
+      style={({ pressed }) => [styles.round, muted && styles.roundMuted, pressed && { opacity: 0.7 }]}>
+      <AppText style={[styles.roundText, muted && { opacity: 0.45 }]}>{emoji}</AppText>
+    </Pressable>
   );
 }
 
@@ -197,27 +188,27 @@ function WeekRing({ progress, done, children }: { progress: number; done: boolea
           />
         )}
       </Svg>
-      <View style={{ paddingTop: 6 }}>{children}</View>
+      <View style={{ paddingTop: 3 }}>{children}</View>
     </View>
   );
 }
 
-/** The last tile: a dashed ring that adds a partner. */
-function AddTile({ width }: { width: number }) {
+/** The last row: a dashed circle that adds a partner. */
+function AddRow() {
   return (
     <Pressable
       onPress={() => router.push('/add-partner')}
       accessibilityRole="button"
       accessibilityLabel="Add a partner"
       accessibilityHint="Plus 100 XP for you both when a new friend joins and works out"
-      style={({ pressed }) => [styles.tile, { width }, pressed && { opacity: 0.7 }]}>
+      style={({ pressed }) => [styles.row, pressed && { opacity: 0.7 }]}>
       <View style={styles.addRing}>
-        <SymbolView name="plus" size={26} weight="semibold" tintColor={Colors.flame} />
+        <SymbolView name="plus" size={18} weight="semibold" tintColor={Colors.flame} />
       </View>
-      <AppText variant="heading" color={Colors.flame} style={{ fontSize: 15 }}>
-        Add
-      </AppText>
-      <AppText variant="caption">🎁 +100 XP</AppText>
+      <AppText style={[styles.name, { flex: 1, color: Colors.flame }]}>Add a partner</AppText>
+      <View style={styles.bonus}>
+        <AppText style={styles.bonusText}>🎁 +100 XP</AppText>
+      </View>
     </Pressable>
   );
 }
@@ -301,27 +292,35 @@ function ChallengeRow({ incentive: i, firstName, nested = false }: { incentive: 
 }
 
 const styles = StyleSheet.create({
-  grid: { flexDirection: 'row', flexWrap: 'wrap', columnGap: TILE_GAP, rowGap: Spacing.md },
-  tile: { alignItems: 'center', gap: 2 },
-  tileTop: { alignItems: 'center', gap: 2 },
+  card: { paddingVertical: Spacing.xs, gap: 0 },
+  divider: { height: StyleSheet.hairlineWidth, backgroundColor: Colors.border, marginLeft: RING + Spacing.sm },
+  row: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, minHeight: 62 },
+  who: { flex: 1, flexDirection: 'row', alignItems: 'center', gap: Spacing.sm, minHeight: 56 },
+  name: { fontSize: 15, lineHeight: 20, fontWeight: '700', color: Colors.text },
   ring: { width: RING, height: RING, alignItems: 'center', justifyContent: 'center' },
   addRing: {
-    width: RING - 8,
-    height: RING - 8,
-    margin: 4,
+    width: RING - 6,
+    height: RING - 6,
+    margin: 3,
     borderRadius: RING,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: Colors.textMuted,
+    borderColor: Colors.flame,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  tileActions: { alignSelf: 'stretch', gap: 6, marginTop: Spacing.xs },
-  // 36pt tall plus a 4pt hit slop on each side reaches Apple's 44pt minimum.
-  mini: { minHeight: 36, borderRadius: Radius.pill, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 6 },
-  miniFilled: { backgroundColor: Colors.cardRaised },
-  miniText: { fontSize: 13 },
-  offer: { backgroundColor: Colors.flameSoft },
+  bonus: { paddingHorizontal: 8, paddingVertical: 3, borderRadius: Radius.pill, backgroundColor: Colors.xpSoft },
+  bonusText: { fontSize: 12, lineHeight: 16, fontWeight: '700', color: Colors.text },
+  round: {
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: Colors.flameSoft,
+  },
+  roundMuted: { backgroundColor: Colors.cardRaised },
+  roundText: { fontSize: 18, lineHeight: 22 },
   challenges: { gap: 6 },
   challengeRow: {
     flexDirection: 'row',

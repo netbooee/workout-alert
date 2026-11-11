@@ -25,7 +25,7 @@ import { ProgressChart } from '@/components/progress-chart';
 import { PushPrompt } from '@/components/push-prompt';
 import { RewardShelf } from '@/components/reward-shelf';
 import { StreakHistory } from '@/components/streak-history';
-import { AppText, Button, Card, Segmented } from '@/components/ui';
+import { AppText, Button, Card, Segmented, Tabs } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
 import { useHomeData, useStreakHistory } from '@/hooks/use-home-data';
 import { useLeagueSettings } from '@/hooks/use-league';
@@ -183,15 +183,14 @@ export default function MeScreen() {
           </View>
           <StatTiles weeks={home?.streak?.current_weeks ?? 0} xp={xp} />
         </Card>
-        <Segmented
+        <Tabs
           options={[
-            { key: 'you', label: 'You' },
-            { key: 'progress', label: 'Progress' },
-            { key: 'settings', label: 'Settings' },
+            { key: 'you', label: 'You', icon: 'person' },
+            { key: 'progress', label: 'Progress', icon: 'chart.bar' },
+            { key: 'settings', label: 'Settings', icon: 'gearshape' },
           ]}
           value={section}
           onChange={setSection}
-          size="large"
         />
 
         {section === 'you' && (

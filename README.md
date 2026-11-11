@@ -52,9 +52,14 @@ they're consistent across devices and can't be edited by the client.
   (`src/lib/notification-actions.ts`). The buttons open the app because that's the reliable
   way on iOS for the app to save the reaction; reacting without opening it would need a
   native notification extension.
-- **Home** order: your streak and this week first, then nudges, partners to cheer, active
-  challenges and recent workouts; today's activity rings and the trend are at the bottom. The
-  header has a small level chip (tap for How XP works) and a labeled **+ Log** button.
+- **Home** fits on one screen. The **This week** card has your streak, level and league chips,
+  and a row of week dots each for you and the (up to 3) partners who most need you, with the
+  crew's total and a **Nudge** for whoever is behind. Today's activity (rings and the next
+  step bonus) sits in its own card under it, then one row each opens the full story: your
+  groups, your latest workout (its week) and the 12-week trend (the **Progress** screen:
+  chart and streak history). Nudges, cheers and active challenges appear under the This week
+  card only when something is waiting.
+  The header has a labeled **+ Log** button.
 - **Me** has three sections: **You** (goal, What counts, buddy, rest mode, invite code),
   **Progress** (level, streak stats, history, chart, reward shelf) and **Settings**
   (appearance, notifications, Apple Health, help, sign out, delete account).
@@ -312,7 +317,7 @@ buddy** in the mood that matches your week.
 src/app/                 Screens (Expo Router)
   sign-in.tsx            Apple / Google / email-code sign in
   onboarding.tsx         Buddy, name (if missing), goal, Apple Health, notifications, invite a partner
-  (tabs)/index.tsx       Home: streak + week dots, rings, 8-week trend, recent workouts
+  (tabs)/index.tsx       Home: This week card (you + crew), summary rows
   (tabs)/partners.tsx    League, your partners, requests, partner activity feed
   league.tsx             Public leagues (join, group table, results) and the partner league
   (tabs)/me.tsx          Level, stats, 12-week history, progress chart, goal, invite code

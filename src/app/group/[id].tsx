@@ -1,16 +1,19 @@
 import * as Haptics from 'expo-haptics';
 import { router, Stack, useLocalSearchParams } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
 import { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Pressable, ScrollView, Share, StyleSheet, View } from 'react-native';
 
-import { Avatar } from '@/components/avatar';
+import { AvatarWithBuddy } from '@/components/buddy-avatar';
 import { AppText, Button, Card, Segmented, SectionLabel } from '@/components/ui';
 import { Colors, Font, Radius, Spacing } from '@/constants/theme';
+import { useMyChats, useSetChatMuted } from '@/hooks/use-chat';
 import { useSafetyMenu } from '@/hooks/use-safety';
 import { useXpThisWeekByKind } from '@/hooks/use-social';
 import { useAuth } from '@/lib/auth';
 import { useGroupBoard, useLeaveGroup, useMyGroups, useRemoveGroupMember, useUpdateGroup } from '@/hooks/use-groups';
 import type { GroupMemberRow, MyGroup } from '@/lib/database.types';
+import { previewLine } from '@/lib/chat';
 import { friendlyError } from '@/lib/errors';
 import { climbLine, crownHolder, groupInviteMessage, madeIt, podium, podiumWeek, showPodium, squadLine } from '@/lib/groups';
 import { markPodiumSeen, podiumSeen } from '@/lib/podium-seen';
@@ -30,6 +33,7 @@ export default function GroupScreen() {
   const { data: groups, isPending } = useMyGroups();
   const group = groups?.find((g) => g.id === id);
   const { data: rows } = useGroupBoard(id);
+  const chat = useMyChats().data?.find((c) => c.group_id === id);
   const [tab, setTab] = useState<Tab>(startTab === 'squad' ? 'squad' : 'board');
   useMedalCeremony(id, rows);
 
@@ -49,6 +53,7 @@ export default function GroupScreen() {
   }
 
   const invite = () => Share.share({ message: groupInviteMessage(group) });
+  const openChat = () => router.push({ pathname: '/group/chat/[id]', params: { id: group.id } });
   const alone = group.member_count < 2;
 
   return (
@@ -73,6 +78,7 @@ export default function GroupScreen() {
             onPress={invite}
           />
           {group.role === 'owner' && <EditButton group={group} />}
+          <MuteButton groupId={group.id} muted={!!chat?.muted} />
         </View>
         {alone && (
           <AppText variant="caption" style={{ textAlign: 'center' }}>
@@ -81,15 +87,29 @@ export default function GroupScreen() {
         )}
       </Card>
 
-      <Segmented
+      <Segmented<Tab | 'chat'>
         options={[
           { key: 'board', label: 'Leaderboard' },
           { key: 'squad', label: `Squad 🔥 ${group.squad_streak}` },
+          { key: 'chat', label: chat?.unread ? `Chat · ${chat.unread > 99 ? '99+' : chat.unread}` : 'Chat' },
         ]}
         value={tab}
-        onChange={setTab}
+        onChange={(k) => (k === 'chat' ? openChat() : setTab(k))}
         size="large"
       />
+
+      {chat?.last_kind && (
+        <Pressable
+          onPress={openChat}
+          accessibilityRole="button"
+          accessibilityLabel={`Open the chat. ${previewLine(chat)}`}
+          style={({ pressed }) => [styles.chatPreview, pressed && { opacity: 0.7 }]}>
+          <AppText variant="body" numberOfLines={1} style={{ flex: 1, fontSize: 15, fontWeight: chat.unread ? '700' : '400' }}>
+            {previewLine(chat)}
+          </AppText>
+          <SymbolView name="paperplane.fill" size={16} tintColor={Colors.flame} />
+        </Pressable>
+      )}
 
       {!rows ? (
         <ActivityIndicator color={Colors.flame} />
@@ -149,7 +169,7 @@ function Leaderboard({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }
             accessibilityLabel={`${i + 1}. ${r.name}${r.is_me ? ' (you)' : ''}, ${treats(r.xp)}${r.user_id === crown ? ', last week’s winner' : ''}`}
             style={[styles.row, r.is_me && styles.meRow]}>
             <AppText style={styles.rank}>{r.xp > 0 && MEDALS[i] ? MEDALS[i] : i + 1}</AppText>
-            <Avatar id={r.user_id} name={r.name} size={36} photoPath={r.avatar_url} />
+            <AvatarWithBuddy id={r.user_id} name={r.name} size={36} photoPath={r.avatar_url} mascot={r.mascot} />
             <AppText variant="heading" numberOfLines={1} style={{ flex: 1 }}>
               {r.is_me ? `${r.name} (you)` : r.name}
               {r.user_id === crown ? ' 👑' : ''}
@@ -275,7 +295,7 @@ function useMedalCeremony(groupId: string, rows: GroupMemberRow[] | undefined) {
 function LastWeekPodium({ groupId, rows }: { groupId: string; rows: GroupMemberRow[] }) {
   const places = podium(rows);
   if (rows.length < 2 || places.length === 0) return null;
-  const avatar = (id: string) => rows.find((r) => r.user_id === id)?.avatar_url ?? null;
+  const member = (id: string) => rows.find((r) => r.user_id === id);
   return (
     <>
       <View style={styles.podiumHeader}>
@@ -299,7 +319,13 @@ function LastWeekPodium({ groupId, rows }: { groupId: string; rows: GroupMemberR
             accessibilityLabel={`${['Gold', 'Silver', 'Bronze'][p.medal]}: ${p.is_me ? 'you' : p.name}, ${treats(p.xp)}`}
             style={[styles.row, p.is_me && styles.meRow]}>
             <AppText style={[styles.rank, { fontSize: 22, lineHeight: 28 }]}>{MEDALS[p.medal]}</AppText>
-            <Avatar id={p.user_id} name={p.name} size={36} photoPath={avatar(p.user_id)} />
+            <AvatarWithBuddy
+              id={p.user_id}
+              name={p.name}
+              size={36}
+              photoPath={member(p.user_id)?.avatar_url ?? null}
+              mascot={member(p.user_id)?.mascot}
+            />
             <AppText variant="heading" numberOfLines={1} style={{ flex: 1 }}>
               {p.is_me ? `${p.name} (you)` : p.name}
             </AppText>
@@ -346,7 +372,7 @@ function Squad({ group, rows }: { group: MyGroup; rows: GroupMemberRow[] }) {
             const made = madeIt(r);
             return (
               <View key={r.user_id} style={[styles.row, r.is_me && styles.meRow]}>
-                <Avatar id={r.user_id} name={r.name} size={36} photoPath={r.avatar_url} />
+                <AvatarWithBuddy id={r.user_id} name={r.name} size={36} photoPath={r.avatar_url} mascot={r.mascot} />
                 <AppText variant="heading" numberOfLines={1} style={{ flex: 1 }}>
                   {r.is_me ? `${r.name} (you)` : r.name}
                 </AppText>
@@ -390,6 +416,23 @@ function EditButton({ group }: { group: MyGroup }) {
         )
       }
     />
+  );
+}
+
+function MuteButton({ groupId, muted }: { groupId: string; muted: boolean }) {
+  const setMuted = useSetChatMuted(groupId);
+  return (
+    <Pressable
+      onPress={() => {
+        Haptics.selectionAsync();
+        setMuted.mutate(!muted, { onError: (e) => Alert.alert('Couldn’t change that', friendlyError(e)) });
+      }}
+      accessibilityRole="switch"
+      accessibilityState={{ checked: !muted }}
+      accessibilityLabel="Chat notifications"
+      style={({ pressed }) => [styles.mute, pressed && { opacity: 0.7 }]}>
+      <SymbolView name={muted ? 'bell.slash.fill' : 'bell.fill'} size={18} tintColor={muted ? Colors.textMuted : Colors.text} />
+    </Pressable>
   );
 }
 
@@ -474,4 +517,21 @@ const styles = StyleSheet.create({
   },
   barFill: { height: '100%', borderRadius: 6, backgroundColor: Colors.flame },
   leave: { alignSelf: 'center', paddingVertical: Spacing.md },
+  mute: {
+    width: 48,
+    minHeight: 48,
+    borderRadius: Radius.pill,
+    backgroundColor: Colors.cardRaised,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chatPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    minHeight: 48,
+    paddingHorizontal: Spacing.md,
+    borderRadius: Radius.md,
+    backgroundColor: Colors.flameSoft,
+  },
 });

@@ -146,3 +146,37 @@ export function climbLine(rows: readonly Pick<GroupMemberRow, 'name' | 'xp' | 'i
   const ahead = others.filter((r) => r.xp > me.xp).sort((a, b) => a.xp - b.xp || a.name.localeCompare(b.name))[0]!;
   return `${treats(ahead.xp - me.xp)} to pass ${ahead.name}`;
 }
+
+export interface RacePlace {
+  user_id: string;
+  /** Distance from the start of the track to the dot's left edge, in points. */
+  x: number;
+  /** Which row of the track: 0 is the main line; people close together stack above it. */
+  lane: number;
+}
+
+/**
+ * Where everyone sits on the week's race track: the leader at the finish,
+ * everyone else along the way by treats. Dots that would overlap move up a
+ * lane (up to `maxLanes`, then they overlap in the top lane), so big groups
+ * stay readable.
+ */
+export function raceTrack(
+  rows: readonly Pick<GroupMemberRow, 'user_id' | 'xp'>[],
+  width: number,
+  dot: number,
+  maxLanes = 3,
+): RacePlace[] {
+  const best = Math.max(0, ...rows.map((r) => r.xp));
+  const span = Math.max(width - dot, 0);
+  const lastX: number[] = [];
+  return [...rows]
+    .sort((a, b) => a.xp - b.xp || a.user_id.localeCompare(b.user_id))
+    .map((r) => {
+      const x = best > 0 ? Math.round((r.xp / best) * span) : 0;
+      let lane = lastX.findIndex((end) => x >= end + dot + 2);
+      if (lane === -1) lane = lastX.length < maxLanes ? lastX.length : maxLanes - 1;
+      lastX[lane] = x;
+      return { user_id: r.user_id, x, lane };
+    });
+}

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 
 import {
   climbLine,
+  raceTrack,
   crownHolder,
   groupCodeFromUrl,
   groupInviteMessage,
@@ -134,5 +135,31 @@ describe('climbLine', () => {
       'Nobody’s on the board yet. Your first workout takes the lead.',
     );
     expect(climbLine([row('Alex', 40, true)])).toBeNull();
+  });
+});
+
+describe('raceTrack', () => {
+  it('puts the leader at the finish and others by treats', () => {
+    const places = raceTrack(
+      [
+        { user_id: 'a', xp: 100 },
+        { user_id: 'b', xp: 50 },
+        { user_id: 'c', xp: 0 },
+      ],
+      330,
+      30,
+    );
+    expect(places.find((p) => p.user_id === 'a')).toEqual({ user_id: 'a', x: 300, lane: 0 });
+    expect(places.find((p) => p.user_id === 'b')).toEqual({ user_id: 'b', x: 150, lane: 0 });
+    expect(places.find((p) => p.user_id === 'c')).toEqual({ user_id: 'c', x: 0, lane: 0 });
+  });
+
+  it('stacks people who are close together, up to three lanes', () => {
+    const rows = ['a', 'b', 'c', 'd'].map((id) => ({ user_id: id, xp: 0 }));
+    expect(raceTrack(rows, 330, 30).map((p) => p.lane)).toEqual([0, 1, 2, 2]);
+  });
+
+  it('starts everyone at the line before anyone has treats', () => {
+    expect(raceTrack([{ user_id: 'a', xp: 0 }], 330, 30)).toEqual([{ user_id: 'a', x: 0, lane: 0 }]);
   });
 });

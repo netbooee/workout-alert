@@ -1,53 +1,34 @@
-import { Link, router } from "expo-router";
-import { SymbolView } from "expo-symbols";
-import {
-  Pressable,
-  RefreshControl,
-  ScrollView,
-  StyleSheet,
-  View,
-} from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { Link, router } from 'expo-router';
+import { SymbolView } from 'expo-symbols';
+import { Pressable, RefreshControl, ScrollView, StyleSheet, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { AppText, Button, Card } from "@/components/ui";
-import { Colors, Radius, Spacing } from "@/constants/theme";
-import { useMyChats } from "@/hooks/use-chat";
-import { chatTime, previewLine } from "@/lib/chat";
-import type { ChatSummary } from "@/lib/database.types";
+import { AppText, Button, Card } from '@/components/ui';
+import { Colors, Radius, Spacing } from '@/constants/theme';
+import { useMyChats } from '@/hooks/use-chat';
+import { chatTime, previewLine } from '@/lib/chat';
+import type { ChatSummary } from '@/lib/database.types';
 
 export default function ChatsScreen() {
   const chats = useMyChats();
   const list = chats.data ?? [];
 
   return (
-    <SafeAreaView edges={["top"]} style={styles.container}>
+    <SafeAreaView edges={['top']} style={styles.container}>
       <ScrollView
         contentContainerStyle={styles.content}
         refreshControl={
-          <RefreshControl
-            refreshing={chats.isRefetching}
-            tintColor={Colors.flame}
-            onRefresh={() => chats.refetch()}
-          />
-        }
-      >
+          <RefreshControl refreshing={chats.isRefetching} tintColor={Colors.flame} onRefresh={() => chats.refetch()} />
+        }>
         <AppText variant="title">Chats</AppText>
 
         {chats.isSuccess && list.length === 0 && (
           <Card style={styles.empty}>
-            <AppText
-              variant="title"
-              style={{ fontSize: 22, textAlign: "center" }}
-            >
+            <AppText variant="title" style={{ fontSize: 22, textAlign: 'center' }}>
               Chat with your crew 💬
             </AppText>
-            <AppText
-              variant="body"
-              color={Colors.textSecondary}
-              style={{ textAlign: "center" }}
-            >
-              Every group gets its own chat. Start one with family, friends or
-              coworkers, or join with a code.
+            <AppText variant="body" color={Colors.textSecondary} style={{ textAlign: 'center' }}>
+              Every group gets its own chat. Start one with family, friends or coworkers, or join with a code.
             </AppText>
             <Link href="/group/new" asChild>
               <Button title="Start a group" />
@@ -58,19 +39,14 @@ export default function ChatsScreen() {
         {list.length > 0 && (
           <Card style={styles.list}>
             {list.map((c, i) => (
-              <ChatListRow
-                key={c.group_id}
-                chat={c}
-                last={i === list.length - 1}
-              />
+              <ChatListRow key={c.group_id} chat={c} last={i === list.length - 1} />
             ))}
           </Card>
         )}
 
         {list.length > 0 && (
           <AppText variant="caption" style={styles.note}>
-            Weekly goals and squad wins show up in your group chats too, so
-            there’s always something to cheer.
+            Weekly goals and squad wins show up in your group chats too, so there’s always something to cheer.
           </AppText>
         )}
       </ScrollView>
@@ -85,36 +61,26 @@ function ChatListRow({ chat: c, last }: { chat: ChatSummary; last: boolean }) {
     <Pressable
       onPress={() =>
         router.push({
-          pathname: "/group/chat/[id]",
+          pathname: '/group/chat/[id]',
           params: { id: c.group_id },
         })
       }
       accessibilityRole="button"
-      accessibilityLabel={`${c.name}. ${preview}.${unread ? ` ${c.unread} new.` : ""}${c.muted ? " Muted." : ""}`}
-      style={({ pressed }) => [
-        styles.row,
-        !last && styles.divider,
-        pressed && { opacity: 0.7 },
-      ]}
-    >
+      accessibilityLabel={`${c.name}. ${preview}.${unread ? ` ${c.unread} new.` : ''}${c.muted ? ' Muted.' : ''}`}
+      style={({ pressed }) => [styles.row, !last && styles.divider, pressed && { opacity: 0.7 }]}>
       <View style={styles.emoji}>
         <AppText style={{ fontSize: 24 }}>{c.emoji}</AppText>
       </View>
       <View style={styles.body}>
         <View style={styles.line}>
-          <AppText
-            variant="heading"
-            numberOfLines={1}
-            style={{ flex: 1, fontWeight: unread ? "800" : "600" }}
-          >
+          <AppText variant="heading" numberOfLines={1} style={{ flex: 1, fontWeight: unread ? '800' : '600' }}>
             {c.name}
           </AppText>
           {c.last_at && (
             <AppText
               variant="caption"
               color={unread && !c.muted ? Colors.flame : Colors.textSecondary}
-              style={{ fontSize: 12, fontWeight: unread ? "700" : "400" }}
-            >
+              style={{ fontSize: 12, fontWeight: unread ? '700' : '400' }}>
               {chatTime(new Date(c.last_at))}
             </AppText>
           )}
@@ -127,30 +93,15 @@ function ChatListRow({ chat: c, last }: { chat: ChatSummary; last: boolean }) {
             style={{
               flex: 1,
               fontSize: 15,
-              fontWeight: unread ? "600" : "400",
-            }}
-          >
+              fontWeight: unread ? '600' : '400',
+            }}>
             {preview}
           </AppText>
-          {c.muted && (
-            <SymbolView
-              name="bell.slash.fill"
-              size={14}
-              tintColor={Colors.textMuted}
-            />
-          )}
+          {c.muted && <SymbolView name="bell.slash.fill" size={14} tintColor={Colors.textMuted} />}
           {unread && (
-            <View
-              style={[
-                styles.count,
-                c.muted && { backgroundColor: Colors.cardRaised },
-              ]}
-            >
-              <AppText
-                style={styles.countText}
-                color={c.muted ? Colors.textSecondary : "#000"}
-              >
-                {c.unread > 99 ? "99+" : c.unread}
+            <View style={[styles.count, c.muted && { backgroundColor: Colors.cardRaised }]}>
+              <AppText style={styles.countText} color={c.muted ? Colors.textSecondary : '#000'}>
+                {c.unread > 99 ? '99+' : c.unread}
               </AppText>
             </View>
           )}
@@ -167,12 +118,12 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
     paddingBottom: Spacing.xl * 2,
   },
-  empty: { alignItems: "center", gap: Spacing.sm, paddingVertical: Spacing.lg },
+  empty: { alignItems: 'center', gap: Spacing.sm, paddingVertical: Spacing.lg },
   list: { paddingVertical: 2, paddingHorizontal: Spacing.sm + 4 },
   row: {
     minHeight: 72,
-    flexDirection: "row",
-    alignItems: "center",
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.sm + 4,
     paddingVertical: Spacing.sm,
   },
@@ -185,20 +136,20 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 14,
     backgroundColor: Colors.flameSoft,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   body: { flex: 1, gap: 3 },
-  line: { flexDirection: "row", alignItems: "center", gap: Spacing.sm },
+  line: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
   count: {
     minWidth: 22,
     height: 22,
     paddingHorizontal: 6,
     borderRadius: Radius.pill,
     backgroundColor: Colors.flame,
-    alignItems: "center",
-    justifyContent: "center",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  countText: { fontSize: 12, fontWeight: "800" },
+  countText: { fontSize: 12, fontWeight: '800' },
   note: { marginHorizontal: Spacing.xs },
 });

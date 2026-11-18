@@ -6,6 +6,7 @@ import Constants from 'expo-constants';
 import * as Device from 'expo-device';
 import * as Notifications from 'expo-notifications';
 
+import { isOpenChatPush } from '@/lib/chat-focus';
 import { CHEER_KINDS } from '@/lib/cheers';
 import type { ReactionKind } from '@/lib/database.types';
 import { PARTNER_WORKOUT_ACTIONS, PARTNER_WORKOUT_CATEGORY } from '@/lib/notification-actions';
@@ -14,13 +15,12 @@ import { supabase } from '@/lib/supabase';
 const TOKEN_KEY = 'push:token';
 
 // Show banners even while the app is open; partners' activity is the point.
+// Except a chat message for the chat you're reading: it's already on screen.
 Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
+  handleNotification: async (notification) => {
+    const show = !isOpenChatPush(notification.request.content.data);
+    return { shouldShowBanner: show, shouldShowList: show, shouldPlaySound: show, shouldSetBadge: false };
+  },
 });
 
 export type PushStatus = 'granted' | 'denied' | 'undetermined' | 'unsupported';

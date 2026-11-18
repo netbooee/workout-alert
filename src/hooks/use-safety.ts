@@ -52,18 +52,18 @@ export function useUnblock() {
 }
 
 /**
- * Report or block someone, from a "•••" button or a long press: an action
- * sheet with Report (then a reason) and Block, each confirmed. Blocking ends
- * the partnership and stops requests, nudges and pep talks both ways.
+ * Report (then pick a reason) and Block, each confirmed, for screens with
+ * their own menu. Blocking ends the partnership, stops requests, nudges and
+ * pep talks both ways, and hides each other's group chat messages.
  */
-export function useSafetyMenu() {
+export function useSafetyActions() {
   const queryClient = useQueryClient();
   const refresh = () => queryClient.invalidateQueries();
 
   const block = (t: SafetyTarget) =>
     Alert.alert(
       `Block ${t.name}?`,
-      'You’ll stop being partners, and neither of you can send the other partner requests, nudges or pep talks. They won’t be told. You can unblock in Me → Settings → Privacy.',
+      'You’ll stop being partners, neither of you can send the other partner requests, nudges or pep talks, and you won’t see each other’s group chat messages. They won’t be told. You can unblock in Me → Settings → Privacy.',
       [
         { text: 'Cancel', style: 'cancel' },
         {
@@ -107,8 +107,24 @@ export function useSafetyMenu() {
     );
   };
 
+  return { report, block };
+}
+
+const WHAT: Record<Exclude<ReportKind, 'user'>, string> = {
+  comment: 'this comment',
+  pep_talk: 'this pep talk',
+  workout: 'this workout',
+  group_message: 'this message',
+};
+
+/**
+ * Report or block someone, from a "•••" button or a long press: an action
+ * sheet with Report (then a reason) and Block, each confirmed.
+ */
+export function useSafetyMenu() {
+  const { report, block } = useSafetyActions();
   return (t: SafetyTarget) => {
-    const what = t.kind === 'user' ? t.name : t.kind === 'comment' ? 'this comment' : t.kind === 'pep_talk' ? 'this pep talk' : 'this workout';
+    const what = t.kind === 'user' ? t.name : WHAT[t.kind];
     const offset = t.extra ? 1 : 0;
     const options = [...(t.extra ? [t.extra.label] : []), `Report ${what}`, `Block ${t.name}`, 'Cancel'];
     ActionSheetIOS.showActionSheetWithOptions(

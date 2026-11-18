@@ -1,6 +1,7 @@
 import { NativeTabs } from 'expo-router/unstable-native-tabs';
 
 import { Colors } from '@/constants/theme';
+import { useChatBadge, useChatRealtime } from '@/hooks/use-chat';
 import { useLeagueResultPopup } from '@/hooks/use-league';
 import { useDailyGreeting } from '@/hooks/use-lotl';
 import { usePushLifecycle } from '@/hooks/use-push';
@@ -26,6 +27,9 @@ function Tabs() {
   const cheers = useCheerBadgeCount();
   const requests = (usePartners().data ?? []).filter((p) => p.status === 'pending' && p.incoming).length;
   const badge = cheers + requests;
+  // Groups with new chat messages (not muted ones), kept live while the app is open.
+  const chats = useChatBadge();
+  useChatRealtime();
 
   return (
     <NativeTabs tintColor={Colors.flame}>
@@ -38,6 +42,11 @@ function Tabs() {
         <NativeTabs.Trigger.Icon sf={{ default: 'person.2', selected: 'person.2.fill' }} />
         {/* expo-router ignores `hidden` when the badge has text, so give it none at 0. */}
         <NativeTabs.Trigger.Badge hidden={badge === 0}>{badge ? String(badge) : undefined}</NativeTabs.Trigger.Badge>
+      </NativeTabs.Trigger>
+      <NativeTabs.Trigger name="chats">
+        <NativeTabs.Trigger.Label>Chats</NativeTabs.Trigger.Label>
+        <NativeTabs.Trigger.Icon sf={{ default: 'paperplane', selected: 'paperplane.fill' }} />
+        <NativeTabs.Trigger.Badge hidden={chats === 0}>{chats ? String(chats) : undefined}</NativeTabs.Trigger.Badge>
       </NativeTabs.Trigger>
       <NativeTabs.Trigger name="me">
         <NativeTabs.Trigger.Label>Me</NativeTabs.Trigger.Label>

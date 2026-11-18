@@ -147,6 +147,15 @@ function RootNavigator() {
           }}
         />
         <Stack.Screen
+          name="group/chat/[id]"
+          options={{
+            headerShown: true,
+            headerBackTitle: 'Back',
+            headerTintColor: Colors.flame,
+            headerTitleStyle: { color: Colors.text },
+          }}
+        />
+        <Stack.Screen
           name="activity"
           options={{
             headerShown: true,

@@ -3,7 +3,9 @@
 //   npx supabase gen types typescript --linked > src/lib/database.types.ts
 
 export type ReactionKind = 'fire' | 'strong' | 'clap' | 'verified';
-export type ReportKind = 'user' | 'comment' | 'pep_talk' | 'workout';
+export type ReportKind = 'user' | 'comment' | 'pep_talk' | 'workout' | 'group_message';
+export type ChatReaction = 'heart' | 'fire' | 'strong' | 'laugh' | 'treat';
+export type ChatMessageKind = 'text' | 'goal_hit' | 'joined' | 'squad_done';
 export type ReportReason = 'spam' | 'inappropriate' | 'harassment' | 'other';
 export type IncentiveGoalKind = 'workout_days' | 'active_minutes' | 'workouts' | 'streak_weeks';
 export type IncentiveStatus =
@@ -330,6 +332,26 @@ export type Database = {
         Update: never;
         Relationships: [];
       };
+      group_messages: {
+        Row: {
+          id: string;
+          group_id: string;
+          user_id: string | null;
+          kind: ChatMessageKind;
+          body: string | null;
+          week_start: string | null;
+          created_at: string;
+        };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
+      group_message_reactions: {
+        Row: { message_id: string; user_id: string; reaction: ChatReaction; group_id: string; created_at: string };
+        Insert: never;
+        Update: never;
+        Relationships: [];
+      };
       push_tokens: {
         Row: { token: string; user_id: string; updated_at: string };
         Insert: never;
@@ -340,7 +362,7 @@ export type Database = {
         Row: {
           id: string;
           user_id: string;
-          kind: 'nudge' | 'partner_workout' | 'partner_request' | 'partner_accepted' | 'verified' | 'streak_risk' | 'comment' | 'incentive';
+          kind: 'nudge' | 'partner_workout' | 'partner_request' | 'partner_accepted' | 'verified' | 'streak_risk' | 'comment' | 'incentive' | 'pep_talk' | 'group' | 'group_chat';
           title: string;
           body: string;
           url: string | null;
@@ -483,6 +505,57 @@ export type Database = {
           is_me: boolean;
         }[];
       };
+      group_chat: {
+        Args: { p_group: string; p_before?: string | null; p_limit?: number };
+        Returns: {
+          id: string;
+          user_id: string | null;
+          kind: ChatMessageKind;
+          body: string | null;
+          created_at: string;
+          name: string;
+          mascot: string | null;
+          avatar_url: string | null;
+          is_me: boolean;
+          reactions: { reaction: ChatReaction; count: number; mine: boolean }[];
+        }[];
+      };
+      my_chats: {
+        Args: Record<PropertyKey, never>;
+        Returns: {
+          group_id: string;
+          name: string;
+          emoji: string;
+          member_count: number;
+          muted: boolean;
+          last_kind: ChatMessageKind | null;
+          last_body: string | null;
+          last_name: string;
+          last_is_me: boolean;
+          last_at: string | null;
+          unread: number;
+        }[];
+      };
+      send_group_message: {
+        Args: { p_group: string; p_body: string };
+        Returns: Database['public']['Tables']['group_messages']['Row'];
+      };
+      delete_group_message: {
+        Args: { p_message: string };
+        Returns: undefined;
+      };
+      toggle_group_reaction: {
+        Args: { p_message: string; p_reaction: ChatReaction };
+        Returns: boolean;
+      };
+      mark_group_read: {
+        Args: { p_group: string };
+        Returns: undefined;
+      };
+      set_group_chat_muted: {
+        Args: { p_group: string; p_muted: boolean };
+        Returns: undefined;
+      };
       send_pep_talk: {
         Args: { p_partner: string; p_kind: 'photo' | 'video'; p_path: string; p_message?: string | null };
         Returns: Database['public']['Tables']['pep_talks']['Row'];
@@ -587,6 +660,8 @@ export type Nudge = PublicTables['nudges']['Row'];
 export type PepTalk = PublicTables['pep_talks']['Row'];
 export type MyGroup = Database['public']['Functions']['my_groups']['Returns'][number];
 export type GroupMemberRow = Database['public']['Functions']['group_board']['Returns'][number];
+export type ChatMessage = Database['public']['Functions']['group_chat']['Returns'][number];
+export type ChatSummary = Database['public']['Functions']['my_chats']['Returns'][number];
 export type XpEvent = PublicTables['xp_events']['Row'];
 export type Partner = Database['public']['Functions']['my_partners']['Returns'][number];
 export type LeagueRow = Database['public']['Functions']['weekly_league']['Returns'][number];
